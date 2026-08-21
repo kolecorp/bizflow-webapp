@@ -1,0 +1,52 @@
+{
+	"/(app)": [
+		"src/routes/+layout.ts"
+	],
+	"/": [
+		"src/routes/+layout.ts",
+		"src/routes/+layout.ts"
+	],
+	"/(app)/ai-tracking": [
+		"src/routes/+layout.ts"
+	],
+	"/(app)/computers": [
+		"src/routes/+layout.ts"
+	],
+	"/(app)/dashboard": [
+		"src/routes/+layout.ts"
+	],
+	"/features": [
+		"src/routes/+layout.ts"
+	],
+	"/(app)/inventory": [
+		"src/routes/+layout.ts"
+	],
+	"/login": [
+		"src/routes/+layout.ts"
+	],
+	"/(app)/overview": [
+		"src/routes/(app)/overview/+page.ts",
+		"src/routes/+layout.ts"
+	],
+	"/(app)/printing": [
+		"src/routes/+layout.ts"
+	],
+	"/(app)/printing/settings": [
+		"src/routes/+layout.ts"
+	],
+	"/(app)/reports": [
+		"src/routes/+layout.ts"
+	],
+	"/(app)/services": [
+		"src/routes/+layout.ts"
+	],
+	"/solutions": [
+		"src/routes/+layout.ts"
+	],
+	"/(app)/support": [
+		"src/routes/+layout.ts"
+	],
+	"/(app)/transactions": [
+		"src/routes/+layout.ts"
+	]
+}
