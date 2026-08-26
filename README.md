@@ -1,3 +1,4 @@
+<img width="1536" height="1024" alt="cafe-logo" src="https://github.com/user-attachments/assets/59153a49-2355-4d21-8f1e-c5c88c3f9e65" />
 # Café Management System
 
 A portable business management system for small service-based businesses such as printing, photocopying, typing, graphics design, and computer services.
