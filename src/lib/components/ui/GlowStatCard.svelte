@@ -1,8 +1,13 @@
 <script lang="ts">
   import type { Component } from "svelte";
-  import NoiseOverlay from "$lib/components/landing/NoiseOverlay.svelte";
 
-  type GlowVariant = "emerald" | "blue" | "amber" | "violet" | "rose" | "primary";
+  type GlowVariant =
+    | "emerald"
+    | "blue"
+    | "amber"
+    | "violet"
+    | "rose"
+    | "primary";
 
   let {
     label,
@@ -40,20 +45,27 @@
 </script>
 
 <div class="glow-stat-card {glowMap[variant]} {className}">
-  <div class="glow-stat-card__inner relative overflow-hidden p-5">
-    <NoiseOverlay intensity="light" class="rounded-[inherit]" />
+  <div
+    class="glow-stat-card__inner relative overflow-hidden p-5 transition-colors duration-200 hover:border-primary/30"
+  >
     <div class="relative z-10">
       <div class="flex items-start justify-between gap-3">
-        <p class="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+        <p
+          class="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground"
+        >
           {label}
         </p>
         {#if Icon}
-          <div class="rounded-lg bg-background/60 p-2 ring-1 ring-border/40 backdrop-blur-sm">
+          <div
+            class="rounded-lg bg-background/60 p-2 ring-1 ring-border/40 backdrop-blur-sm"
+          >
             <Icon class="h-4 w-4 {iconColorMap[variant]}" />
           </div>
         {/if}
       </div>
-      <p class="mt-2 font-heading text-3xl font-black tracking-[-0.06em] text-foreground">
+      <p
+        class="mt-2 font-heading text-3xl font-black tracking-[-0.06em] text-foreground"
+      >
         {value}
       </p>
       {#if subtext}

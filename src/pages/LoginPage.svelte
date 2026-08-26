@@ -6,10 +6,14 @@
     BarChart3,
     Sparkles,
     ArrowRight,
+    ArrowLeft,
   } from "@lucide/svelte";
   import { mode, toggleMode } from "mode-watcher";
   import { signIn } from "$lib/stores/auth";
   import { Motion } from "svelte-motion";
+  import { Input } from "$lib/components/ui/input";
+  import { Label } from "$lib/components/ui/label";
+  import { Button } from "$lib/components/ui/button";
 
   const featureTags = [
     "Live orders",
@@ -36,8 +40,20 @@
 </script>
 
 <div
-  class="relative min-h-screen overflow-hidden bg-background text-foreground"
+  class="relative min-h-screen overflow-hidden bg-background bg-grid text-foreground"
 >
+  <div class="hero-ambient" aria-hidden="true">
+    <span class="hero-orb hero-orb-1 opacity-50"></span>
+  </div>
+  <div class="login-mascot-glow" aria-hidden="true"></div>
+  <img src="login-bizzy.png" alt="" aria-hidden="true" class="login-mascot" />
+  <a
+    href="/"
+    class="absolute left-4 top-4 z-20 inline-flex items-center gap-2 rounded-lg border border-border bg-background/80 px-3 py-2 text-sm font-medium text-muted-foreground backdrop-blur-md transition hover:bg-muted hover:text-foreground"
+  >
+    <ArrowLeft class="h-4 w-4" />
+    Back to home
+  </a>
   <button
     type="button"
     aria-label="Toggle theme"
@@ -55,7 +71,7 @@
     class="mx-auto flex min-h-screen w-full max-w-[75%] items-center justify-center px-4 py-6 sm:px-6 lg:px-8"
   >
     <div
-      class="grid w-full overflow-hidden rounded-2xl border border-border/60 bg-card shadow-[0_24px_80px_rgba(0,82,204,0.12)] lg:grid-cols-2"
+      class="grid w-full overflow-hidden rounded-2xl glow-panel lg:grid-cols-2 relative z-10"
     >
       <div
         class="flex flex-col justify-between border-b border-border/60 bg-muted/40 p-6 sm:p-8 lg:border-b-0 lg:border-r w-full"
@@ -92,9 +108,9 @@
               Designed for service
             </p>
             <h1
-              class="max-w-md font-heading text-4xl font-black leading-tight tracking-tighter text-foreground sm:text-5xl"
+              class="max-w-md font-heading text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl lg:text-[3.5rem] lg:leading-[1.1]"
             >
-              Run your <span class="text-blue-600">Business</span> with clarity.
+              Run your <span class="text-primary">Business</span> with clarity.
             </h1>
             <p class="max-w-sm text-sm leading-relaxed text-muted-foreground">
               Smarter operations, better service, and a clearer view of the day.
@@ -155,7 +171,7 @@
               Manager portal
             </p>
             <h2
-              class="font-heading text-3xl font-black tracking-[-0.04em] text-foreground sm:text-4xl"
+              class="font-heading text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl"
             >
               Sign in
             </h2>
@@ -163,53 +179,61 @@
 
           <form class="space-y-5" on:submit|preventDefault={handleSubmit}>
             <div class="space-y-2">
-              <label for="email" class="text-sm font-medium text-foreground"
-                >Email address</label
-              >
-              <input
+              <Label for="email">Email address</Label>
+              <Input
                 id="email"
                 bind:value={email}
                 type="email"
                 autocomplete="email"
-                class="w-full rounded-lg border border-input bg-background px-3.5 py-2.75 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/20"
                 placeholder="manager@cafe.io"
               />
             </div>
 
             <div class="space-y-2">
               <div class="flex items-center justify-between">
-                <label
-                  for="password"
-                  class="text-sm font-medium text-foreground">Password</label
-                >
+                <Label for="password">Password</Label>
                 <a
                   href="/login"
                   class="text-xs font-medium text-foreground/70 transition hover:text-foreground"
                   >Forgot?</a
                 >
               </div>
-              <input
+              <Input
                 id="password"
                 bind:value={password}
                 type="password"
                 autocomplete="current-password"
-                class="w-full rounded-lg border border-input bg-background px-3.5 py-2.75 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/20"
                 placeholder="••••••••"
               />
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              class="btn-app-primary mt-2 w-full py-3 disabled:cursor-not-allowed disabled:opacity-60"
-            >
+            <Button type="submit" disabled={loading} class="mt-2 w-full py-3">
               {loading ? "Signing in..." : "Sign in"}
-            </button>
+              <ArrowRight
+                class="size-4 transition-transform duration-200 group-hover/button:translate-x-1"
+              />
+            </Button>
           </form>
 
-          <div
-            class="mt-6 surface-muted p-4 text-xs text-muted-foreground"
-          >
+          <div class="mt-6 flex flex-col gap-3">
+            <div class="flex items-center gap-3 text-xs text-muted-foreground">
+              <span class="h-px flex-1 bg-border"></span><span
+                >or continue with</span
+              ><span class="h-px flex-1 bg-border"></span>
+            </div>
+            <Button
+              variant="outline"
+              class="w-full sm:justify-center"
+              onclick={() => {}}>Continue with Google</Button
+            >
+            <Button
+              variant="outline"
+              class="w-full sm:justify-center"
+              onclick={() => {}}>Continue with Apple</Button
+            >
+          </div>
+
+          <div class="mt-6 surface-muted p-4 text-xs text-muted-foreground">
             <p class="mb-2 font-semibold text-foreground">Demo access</p>
             <div class="space-y-1 font-mono">
               <p>manager@cafe.io</p>

@@ -3,14 +3,13 @@ import type { Component } from "svelte";
 import {
   LayoutGrid,
   ShoppingBag,
-  Printer,
-  Settings2,
   Package,
-  Monitor,
   BriefcaseBusiness,
   TerminalSquare,
   BarChart3,
-  MessageSquare,
+  Puzzle,
+  Settings,
+  UsersRound,
 } from "@lucide/svelte";
 
 export type NavItem = {
@@ -22,6 +21,7 @@ export type NavItem = {
   section?: string;
 };
 
+/** Core navigation — always visible regardless of extensions */
 export const appNavItems: NavItem[] = [
   {
     label: "Overview",
@@ -38,46 +38,18 @@ export const appNavItems: NavItem[] = [
     section: "Workspace",
   },
   {
-    label: "Printing",
-    path: "/printing",
-    icon: Printer,
-    permission: "printing.view",
-    section: "Operations",
-  },
-  {
-    label: "Print Settings",
-    path: "/printing/settings",
-    icon: Settings2,
-    permission: "printing.settings",
-    section: "Operations",
-  },
-  {
-    label: "Stock Taking",
+    label: "Stock & Inventory",
     path: "/inventory",
     icon: Package,
     permission: "inventory.view",
-    section: "Operations",
-  },
-  {
-    label: "Computers",
-    path: "/computers",
-    icon: Monitor,
-    permission: "computers.view",
-    section: "Operations",
-  },
-  {
-    label: "Support & Chat",
-    path: "/support",
-    icon: MessageSquare,
-    permission: "support.view",
-    section: "Operations",
+    section: "Workspace",
   },
   {
     label: "Services",
     path: "/services",
     icon: BriefcaseBusiness,
     permission: "services.view",
-    section: "Operations",
+    section: "Workspace",
   },
   {
     label: "Daily Sales",
@@ -94,6 +66,27 @@ export const appNavItems: NavItem[] = [
     badge: "Dev",
     section: "System",
   },
+  {
+    label: "Extensions",
+    path: "/extensions",
+    icon: Puzzle,
+    permission: "dashboard.view",
+    section: "System",
+  },
+  {
+    label: "Settings",
+    path: "/settings",
+    icon: Settings,
+    permission: "dashboard.view",
+    section: "System",
+  },
+  {
+    label: "Team & staff",
+    path: "/team",
+    icon: UsersRound,
+    permission: "team.manage",
+    section: "System",
+  },
 ];
 
 export function isNavActive(path: string, currentPath: string): boolean {
@@ -102,6 +95,14 @@ export function isNavActive(path: string, currentPath: string): boolean {
   }
   if (path === "/printing") {
     return currentPath === "/printing";
+  }
+  if (path === "/extensions") {
+    return currentPath === "/extensions";
+  }
+  // Extension sub-pages are sibling destinations. A parent dashboard must
+  // not remain highlighted when the user opens its configuration page.
+  if (path.startsWith("/extensions/")) {
+    return currentPath === path;
   }
   return currentPath === path || currentPath.startsWith(path + "/");
 }

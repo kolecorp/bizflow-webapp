@@ -50,9 +50,18 @@
     "vite": "^8.2.0"
   },
   "dependencies": {
+    "@fontsource-variable/outfit": "^5.3.0",
+    "@fontsource-variable/plus-jakarta-sans": "^5.3.0",
+    "@fontsource-variable/sora": "^5.3.0",
+    "@fontsource-variable/space-grotesk": "^5.3.0",
+    "@fontsource/chakra-petch": "^5.3.0",
+    "@tiptap/core": "^3.30.3",
+    "@tiptap/pm": "^3.30.3",
+    "@tiptap/starter-kit": "^3.30.3",
     "chart.js": "^4.5.1",
     "firebase": "^12.17.1",
     "lucide-svelte": "^1.0.1",
+    "svelte-dnd-action": "^0.9.79",
     "zod": "^4.4.3"
   }
 }

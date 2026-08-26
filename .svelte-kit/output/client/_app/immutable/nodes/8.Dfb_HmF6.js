@@ -1,1 +1,0 @@
-import{t as e}from"../chunks/CEoa-xHZ.js";import{r as t}from"../chunks/Dt-HX3Vu.js";function n(e,n){throw new t(e,n.toString())}var r=e({load:()=>i});function i(){n(307,`/dashboard`)}export{r as universal};

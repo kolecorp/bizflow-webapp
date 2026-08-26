@@ -4,13 +4,8 @@
     ArrowRight,
     BarChart3,
     Bot,
-    CheckCircle2,
-    LayoutGrid,
     Monitor,
     Printer,
-    Sparkles,
-    TrendingUp,
-    Users,
     ShoppingBag,
     GraduationCap,
   } from "@lucide/svelte";
@@ -18,18 +13,17 @@
   import LandingLayout from "$lib/components/landing/LandingLayout.svelte";
   import NoiseOverlay from "$lib/components/landing/NoiseOverlay.svelte";
   import { Button } from "$lib/components/ui/button";
-  import { Badge } from "$lib/components/ui/badge";
   import * as Card from "$lib/components/ui/card";
 
   function handleGetStarted() {
-    goto("/login");
+    goto("/register");
   }
 
   const stats = [
-    { value: "5+", label: "Service types tracked" },
-    { value: "₦", label: "Naira-native pricing" },
-    { value: "Real-time", label: "Daily sales totals" },
-    { value: "1-click", label: "Transaction logging" },
+    { value: "01", label: "Workspace for your business" },
+    { value: "₦", label: "Pricing built for local trade" },
+    { value: "24/7", label: "A clearer view of operations" },
+    { value: "1-click", label: "Fast daily recording" },
   ];
 
   const featureHighlights = [
@@ -80,19 +74,19 @@
   const steps = [
     {
       step: "01",
-      title: "Sign in",
-      description: "Use your manager credentials to access your dashboard.",
+      title: "Create your workspace",
+      description: "Set up your owner account and business in a few minutes.",
     },
     {
       step: "02",
-      title: "Log services",
+      title: "Shape your day",
       description:
-        "Record each transaction — printing, typing, design, or training.",
+        "Configure services, pricing, and the workflow your team uses.",
     },
     {
       step: "03",
-      title: "Track growth",
-      description: "Watch daily totals climb and spot trends in your revenue.",
+      title: "Bring your team in",
+      description: "Let owners and staff sign in with the access they need.",
     },
   ];
 </script>
@@ -106,7 +100,7 @@
   >
     <section
       use:motion
-      class="relative overflow-hidden pt-20 pb-24 sm:pt-28 sm:pb-32"
+      class="relative overflow-hidden pt-16 pb-16 sm:pt-20 sm:pb-20 lg:pt-16 lg:pb-12 bg-background bg-grid"
     >
       <NoiseOverlay intensity="medium" />
       <div class="hero-ambient" aria-hidden="true">
@@ -116,29 +110,28 @@
       </div>
 
       <div class="relative z-10 mx-auto max-w-7xl px-6 sm:px-8">
-        <div class="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+        <div class="grid items-top gap-12 lg:grid-cols-2 lg:gap-16">
           <div>
-            <Badge
-              variant="outline"
-              class="mb-6 gap-2 border-primary/30 bg-primary/10 px-3 py-1 text-primary"
+            <div
+              class="mb-6 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.18em] text-primary"
             >
-              <Sparkles class="h-3.5 w-3.5" />
-              Built for African business centers
-            </Badge>
+              <span class="h-px w-8 bg-primary"></span>
+              One calm place to run the day
+            </div>
 
             <h1
-              class="font-heading text-4xl font-black tracking-[-0.06em] text-foreground sm:text-5xl lg:text-6xl"
+              class="font-heading text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl lg:text-[4rem] lg:leading-[1.1]"
             >
-              Run your business center
-              <span class="text-primary">like a pro</span>
+              Make every part of your business
+              <span class="text-primary">flow better.</span>
             </h1>
 
             <p
               class="mt-6 text-lg leading-relaxed text-muted-foreground sm:text-xl"
             >
-              Bizflow helps printing shops, cyber cafés, and training centers
-              track every service, every customer, and every naira — all from
-              one sleek dashboard.
+              Bizflow brings sales, services, customers, and your team into one
+              focused workspace, so you can spend less time catching up and more
+              time moving the business forward.
             </p>
 
             <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -147,7 +140,7 @@
                 size="lg"
                 class="h-12 px-8 text-sm font-semibold"
               >
-                Start for free
+                Create your workspace
                 <ArrowRight class="h-4 w-4" />
               </Button>
               <Button
@@ -156,96 +149,20 @@
                 class="h-12 px-8 text-sm font-semibold"
                 onclick={() => goto("/features")}
               >
-                Explore features
+                See how it works
               </Button>
-            </div>
-
-            <div class="mt-10 flex flex-wrap gap-x-6 gap-y-2">
-              {#each ["Printing", "Typing", "Graphics", "Training"] as tag}
-                <span
-                  class="flex items-center gap-1.5 text-sm text-muted-foreground"
-                >
-                  <CheckCircle2 class="h-4 w-4 text-primary" />
-                  {tag}
-                </span>
-              {/each}
             </div>
           </div>
 
-          <div class="relative">
-            <div
-              class="relative overflow-hidden rounded-2xl border border-border bg-card shadow-[0_24px_80px_rgba(0,82,204,0.12)]"
-            >
-              <NoiseOverlay intensity="light" class="rounded-2xl" />
-              <div class="relative z-10 p-5 sm:p-6">
-                <div class="mb-4 flex items-center justify-between">
-                  <div>
-                    <p
-                      class="text-[10px] uppercase tracking-[0.2em] text-muted-foreground"
-                    >
-                      Today's overview
-                    </p>
-                    <p
-                      class="font-heading text-2xl font-black tracking-[-0.04em] text-foreground"
-                    >
-                      ₦13,700
-                    </p>
-                  </div>
-                  <Badge
-                    class="bg-green-500/10 text-green-600 dark:text-green-400"
-                  >
-                    <TrendingUp class="h-3 w-3" />
-                    +18%
-                  </Badge>
-                </div>
-
-                <div class="grid grid-cols-3 gap-3 mb-5">
-                  {#each [{ label: "Transactions", value: "12", icon: ShoppingBag }, { label: "Services", value: "5", icon: LayoutGrid }, { label: "Customers", value: "8", icon: Users }] as stat}
-                    <div
-                      class="rounded-xl border border-border/60 bg-background/80 p-3"
-                    >
-                      <stat.icon class="h-4 w-4 text-primary mb-1.5" />
-                      <p
-                        class="font-heading text-lg font-black tracking-[-0.04em]"
-                      >
-                        {stat.value}
-                      </p>
-                      <p class="text-[10px] text-muted-foreground">
-                        {stat.label}
-                      </p>
-                    </div>
-                  {/each}
-                </div>
-
-                <div class="space-y-2">
-                  <p
-                    class="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-2"
-                  >
-                    Recent transactions
-                  </p>
-                  {#each [{ service: "Printing", customer: "Adebayo T.", amount: "₦5,500" }, { service: "Typing", customer: "Grace C.", amount: "₦8,200" }] as tx}
-                    <div
-                      class="flex items-center justify-between rounded-lg border border-border/50 bg-background/60 px-3 py-2.5"
-                    >
-                      <div>
-                        <p class="text-sm font-medium text-foreground">
-                          {tx.service}
-                        </p>
-                        <p class="text-xs text-muted-foreground">
-                          {tx.customer}
-                        </p>
-                      </div>
-                      <p class="text-sm font-semibold text-foreground">
-                        {tx.amount}
-                      </p>
-                    </div>
-                  {/each}
-                </div>
-              </div>
-            </div>
+          <div class="hero-mascot-wrap relative">
+            <img
+              src="/bizflow-mascot.png"
+              alt="Bizflow mascot holding business tools"
+              class="hero-mascot relative z-10 block h-auto w-full object-contain"
+            />
 
             <div
-              class="absolute -bottom-4 -left-4 rounded-xl border border-border bg-card px-4 py-3 shadow-lg"
+              class="hero-status absolute right-[10%] bottom-[10%] z-20 rounded-xl border border-white/20 bg-white/10 px-3 py-2 shadow-lg backdrop-blur-md dark:bg-black/20 sm:px-4 sm:py-3"
             >
               <div class="flex items-center gap-2">
                 <div
@@ -268,7 +185,7 @@
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.55, ease: "easeOut", delay: 0.08 }}
   >
-    <section use:motion class="border-y border-border/50 bg-card/50 py-10">
+    <section use:motion class="border-y border-border/40 bg-card/30 py-12">
       <div class="mx-auto max-w-7xl px-6 sm:px-8">
         <div class="grid grid-cols-2 gap-6 sm:grid-cols-4">
           {#each stats as stat}
@@ -368,7 +285,7 @@
   >
     <section
       use:motion
-      class="relative overflow-hidden border-t border-border/50 bg-muted/30 py-24"
+      class="relative overflow-hidden border-t border-border/40 bg-muted/20 py-24 bg-grid"
     >
       <NoiseOverlay intensity="light" />
       <div class="relative z-10 mx-auto max-w-7xl px-6 sm:px-8">
@@ -450,7 +367,7 @@
           <h2
             class="font-heading text-3xl font-black tracking-[-0.05em] text-foreground sm:text-4xl"
           >
-            Up and running in minutes
+            Start with a clear workspace
           </h2>
         </div>
 
@@ -496,21 +413,21 @@
   >
     <section
       use:motion
-      class="relative overflow-hidden border-t border-border/50 py-24"
+      class="relative overflow-hidden border-t border-border/40 py-28 bg-grid"
     >
       <NoiseOverlay intensity="medium" />
       <div
-        class="absolute inset-0 -z-10 bg-gradient-to-br from-primary/5 via-transparent to-cyan-400/5"
+        class="absolute inset-0 -z-10 bg-gradient-to-t from-primary/10 via-transparent to-transparent"
       ></div>
       <div class="relative z-10 mx-auto max-w-3xl px-6 text-center sm:px-8">
         <h2
           class="font-heading text-3xl font-black tracking-[-0.05em] text-foreground sm:text-4xl"
         >
-          Ready to modernize your business center?
+          Give your business a better operating rhythm.
         </h2>
         <p class="mt-4 text-lg text-muted-foreground">
-          Join business centers already using Bizflow to track services, grow
-          revenue, and run operations with clarity.
+          Create your business workspace today. Your team can sign in whenever
+          they need to keep the day moving.
         </p>
         <div
           class="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center"
@@ -529,7 +446,7 @@
             class="h-12 px-8 text-sm font-semibold"
             onclick={() => goto("/solutions")}
           >
-            Find your solution
+            Explore solutions
           </Button>
         </div>
       </div>

@@ -6,9 +6,11 @@
     Bot,
     CheckCircle2,
     LayoutGrid,
+    MessageCircle,
     Monitor,
     Package,
     Printer,
+    Smartphone,
     ShoppingBag,
     Sparkles,
     TrendingUp,
@@ -30,136 +32,95 @@
     goto("/login");
   }
 
-  const features = [
+  const whatsappFeatures = {
+    business: {
+      title: "WhatsApp for Business",
+      description:
+        "Manage your entire operation directly from your phone. Receive instant sales alerts, approve manager requests, and check your dashboard via WhatsApp without needing to log in.",
+      benefits: [
+        "Instant sales alerts",
+        "Daily summary reports",
+        "Manager approvals",
+        "Live dashboard access",
+      ],
+      icon: LayoutGrid,
+    },
+    customer: {
+      title: "WhatsApp for Customers",
+      description:
+        "Give your customers a premium experience. Automatically send digital receipts, order status updates, and provide a direct, familiar support channel.",
+      benefits: [
+        "Digital transaction receipts",
+        "Order status updates",
+        "Direct support channel",
+        "Service catalogs",
+      ],
+      icon: Smartphone,
+    },
+  };
+
+  const coreFeatures = [
     {
       icon: ShoppingBag,
-      title: "Transaction Logging",
+      title: "Lightning-fast Transaction Logging",
       description:
-        "Record every service sale in seconds. Select the service type, enter the customer name, amount in Naira, and optional notes.",
-      benefits: ["5 service categories", "Instant daily totals", "Delete & edit records"],
+        "Record every service sale in seconds. Complete with customer names, service types, and real-time daily totals.",
+      span: "lg:col-span-2",
       color: "text-primary bg-primary/10",
-      featured: true,
     },
     {
       icon: BarChart3,
-      title: "Sales Dashboard",
+      title: "Real-time Sales Dashboard",
       description:
-        "A real-time overview of your business health. See resolved issues, active automations, and system status at a glance.",
-      benefits: ["Live stats cards", "Activity stream", "Task tracking"],
-      color: "text-green-600 dark:text-green-400 bg-green-500/10",
-      featured: false,
-    },
-    {
-      icon: LayoutGrid,
-      title: "Unified Control Panel",
-      description:
-        "Navigate between dashboard, transactions, computers, services, and AI tracking from a consistent sidebar layout.",
-      benefits: ["Sidebar navigation", "Sticky headers", "Dark mode support"],
-      color: "text-purple-600 dark:text-purple-400 bg-purple-500/10",
-      featured: false,
-    },
-    {
-      icon: Monitor,
-      title: "Computer Management",
-      description:
-        "Track which computers are in use, session durations, and rental fees for your cyber café or business center.",
-      benefits: ["Session tracking", "Status overview", "Revenue per machine"],
-      color: "text-cyan-600 dark:text-cyan-400 bg-cyan-500/10",
-      featured: false,
+        "Your business health at a glance. See resolved issues, active automations, and total revenue across all branches instantly.",
+      span: "lg:col-span-1",
+      color: "text-blue-600 dark:text-blue-400 bg-blue-500/10",
     },
     {
       icon: Package,
-      title: "Inventory Tracking",
+      title: "Smart Inventory Tracking",
       description:
-        "Monitor paper stock, ink levels, and consumables. Get alerts before you run out during a busy day.",
-      benefits: ["Stock levels", "Low-stock alerts", "Usage history"],
+        "Monitor paper stock, ink levels, and consumables. Get automated alerts before you run out during a busy day.",
+      span: "lg:col-span-1",
       color: "text-orange-600 dark:text-orange-400 bg-orange-500/10",
-      featured: false,
-    },
-    {
-      icon: Users,
-      title: "Customer Records",
-      description:
-        "Keep a history of every customer interaction. Know who ordered what, how often they visit, and their total spend.",
-      benefits: ["Customer history", "Repeat visitor tracking", "Contact notes"],
-      color: "text-pink-600 dark:text-pink-400 bg-pink-500/10",
-      featured: false,
-    },
-    {
-      icon: Wallet,
-      title: "Expense Management",
-      description:
-        "Log business expenses alongside revenue. Track ink purchases, paper stock, maintenance, and utility costs.",
-      benefits: ["Expense categories", "Monthly summaries", "Profit calculation"],
-      color: "text-yellow-600 dark:text-yellow-400 bg-yellow-500/10",
-      featured: false,
-    },
-    {
-      icon: FileText,
-      title: "Reports & Analytics",
-      description:
-        "Generate sales reports, inventory summaries, and period comparisons to understand what's driving your revenue.",
-      benefits: ["Sales reports", "Inventory reports", "Export ready"],
-      color: "text-indigo-600 dark:text-indigo-400 bg-indigo-500/10",
-      featured: false,
-    },
-    {
-      icon: Bot,
-      title: "AI Task Tracking",
-      description:
-        "A dedicated tracker for features and improvements built with AI assistance. Transparent development progress for your team.",
-      benefits: ["Task board", "AI-authored tags", "Progress timeline"],
-      color: "text-blue-600 dark:text-blue-400 bg-blue-500/10",
-      featured: true,
     },
     {
       icon: Zap,
       title: "Workflow Automations",
       description:
-        "Set up automated workflows to reduce manual work. Trigger actions when transactions are logged or thresholds are hit.",
-      benefits: ["Rule builder", "Auto-notifications", "Time savings"],
+        "Set up automated workflows to reduce manual work. Trigger alerts and actions when specific thresholds are hit.",
+      span: "lg:col-span-2",
       color: "text-amber-600 dark:text-amber-400 bg-amber-500/10",
-      featured: false,
-    },
-    {
-      icon: Shield,
-      title: "Secure Access",
-      description:
-        "Manager-level authentication keeps your business data private. Sign in with credentials and sign out when done.",
-      benefits: ["Session persistence", "Route protection", "Sign-out control"],
-      color: "text-red-600 dark:text-red-400 bg-red-500/10",
-      featured: false,
-    },
-    {
-      icon: Clock,
-      title: "Real-time Updates",
-      description:
-        "Transactions appear instantly in your list and daily total updates the moment you save. No refresh needed.",
-      benefits: ["Instant feedback", "Live totals", "Time stamps"],
-      color: "text-teal-600 dark:text-teal-400 bg-teal-500/10",
-      featured: false,
     },
   ];
 
-  const serviceTypes = [
-    { icon: Printer, label: "Printing & Photocopy" },
-    { icon: FileText, label: "Typing & Data Entry" },
-    { icon: Sparkles, label: "Graphics Design" },
-    { icon: TrendingUp, label: "Training Sessions" },
-    { icon: ShoppingBag, label: "Other Services" },
+  const microFeatures = [
+    { icon: Monitor, label: "Computer Tracking" },
+    { icon: Users, label: "Customer CRM" },
+    { icon: Wallet, label: "Expense Management" },
+    { icon: FileText, label: "Exportable Reports" },
+    { icon: Bot, label: "AI Task Board" },
+    { icon: Shield, label: "Manager Auth" },
   ];
 </script>
 
 <LandingLayout active="/features">
-  <Motion let:motion initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: "easeOut" }}>
-    <section use:motion class="relative overflow-hidden pt-20 pb-16 sm:pt-28 sm:pb-20">
+  <!-- Hero Section -->
+  <Motion
+    let:motion
+    initial={{ opacity: 0, y: 24 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.7, ease: "easeOut" }}
+  >
+    <section
+      use:motion
+      class="relative overflow-hidden pt-24 pb-20 sm:pt-32 sm:pb-24 bg-background bg-grid"
+    >
       <NoiseOverlay intensity="medium" />
-      <div
-        class="absolute -top-24 left-1/2 -z-10 h-[30rem] w-[60rem] -translate-x-1/2 opacity-20 dark:opacity-10"
-      >
-        <div
-          class="absolute inset-0 rounded-[100%] bg-gradient-to-r from-primary to-blue-300 blur-3xl dark:to-blue-900"
-        ></div>
+      <div class="hero-ambient" aria-hidden="true">
+        <span class="hero-orb hero-orb-1"></span>
+        <span class="hero-orb hero-orb-2"></span>
+        <span class="hero-orb hero-orb-3"></span>
       </div>
 
       <div class="relative z-10 mx-auto max-w-7xl px-6 text-center sm:px-8">
@@ -168,96 +129,168 @@
           class="mb-6 gap-2 border-primary/30 bg-primary/10 px-3 py-1 text-primary"
         >
           <Sparkles class="h-3.5 w-3.5" />
-          Full feature set
+          The complete platform
         </Badge>
         <h1
-          class="font-heading text-4xl font-black tracking-[-0.06em] text-foreground sm:text-5xl lg:text-6xl"
+          class="font-heading text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl lg:text-[4rem] lg:leading-[1.1]"
         >
           Powerful tools for
           <span class="text-primary">every operation</span>
         </h1>
-        <p class="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
-          From logging a ₦500 print job to generating monthly revenue reports — Bizflow
-          covers every part of running a modern business center.
+        <p
+          class="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl"
+        >
+          From the dashboard on your desk to the WhatsApp alerts in your pocket — 
+          Bizflow is the central nervous system for your business.
         </p>
       </div>
     </section>
   </Motion>
 
-  <Motion let:motion initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, ease: "easeOut", delay: 0.08 }}>
-    <section use:motion class="border-y border-border/50 bg-card/50 py-8">
+  <!-- Dual WhatsApp Section -->
+  <Motion
+    let:motion
+    initial={{ opacity: 0, y: 18 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.6, ease: "easeOut", delay: 0.12 }}
+  >
+    <section use:motion class="py-24 bg-card/30 border-y border-border/50">
       <div class="mx-auto max-w-7xl px-6 sm:px-8">
-        <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-8">
-          {#each serviceTypes as service}
-            <div class="flex items-center gap-2 text-sm text-muted-foreground">
-              <service.icon class="h-4 w-4 text-primary" />
-              {service.label}
+        <div class="text-center mb-16">
+          <h2
+            class="font-heading text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl mb-4"
+          >
+            The Dual-WhatsApp Architecture
+          </h2>
+          <p class="text-lg text-muted-foreground max-w-2xl mx-auto">
+            We don't just give you a dashboard. We give you a direct pipeline to your business and your customers, powered entirely by WhatsApp.
+          </p>
+        </div>
+
+        <div class="grid gap-8 lg:grid-cols-2">
+          <!-- WhatsApp for Business -->
+          <div class="relative overflow-hidden rounded-3xl glow-panel bg-card/60 border border-border/60 p-8 sm:p-10">
+            <NoiseOverlay intensity="light" />
+            <div class="relative z-10">
+              <div class="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[#25D366]/10 text-[#25D366]">
+                <MessageCircle class="h-6 w-6" />
+              </div>
+              <h3 class="font-heading text-2xl font-bold text-foreground mb-3">
+                {whatsappFeatures.business.title}
+              </h3>
+              <p class="text-muted-foreground leading-relaxed mb-8">
+                {whatsappFeatures.business.description}
+              </p>
+              <div class="grid sm:grid-cols-2 gap-4">
+                {#each whatsappFeatures.business.benefits as benefit}
+                  <div class="flex items-center gap-2 text-sm font-medium text-foreground">
+                    <CheckCircle2 class="h-4 w-4 text-[#25D366]" />
+                    {benefit}
+                  </div>
+                {/each}
+              </div>
+            </div>
+          </div>
+
+          <!-- WhatsApp for Customers -->
+          <div class="relative overflow-hidden rounded-3xl glow-panel bg-card/60 border border-border/60 p-8 sm:p-10">
+            <NoiseOverlay intensity="light" />
+            <div class="relative z-10">
+              <div class="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
+                <Smartphone class="h-6 w-6" />
+              </div>
+              <h3 class="font-heading text-2xl font-bold text-foreground mb-3">
+                {whatsappFeatures.customer.title}
+              </h3>
+              <p class="text-muted-foreground leading-relaxed mb-8">
+                {whatsappFeatures.customer.description}
+              </p>
+              <div class="grid sm:grid-cols-2 gap-4">
+                {#each whatsappFeatures.customer.benefits as benefit}
+                  <div class="flex items-center gap-2 text-sm font-medium text-foreground">
+                    <CheckCircle2 class="h-4 w-4 text-blue-500" />
+                    {benefit}
+                  </div>
+                {/each}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </Motion>
+
+  <!-- Core Bento Grid -->
+  <Motion
+    let:motion
+    initial={{ opacity: 0, y: 18 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.6, ease: "easeOut", delay: 0.16 }}
+  >
+    <section use:motion class="py-24">
+      <div class="mx-auto max-w-7xl px-6 sm:px-8">
+        <div class="mb-12">
+          <h2
+            class="font-heading text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl"
+          >
+            Core Platform Features
+          </h2>
+          <p class="mt-3 text-lg text-muted-foreground">
+            Everything you need, built natively into the dashboard.
+          </p>
+        </div>
+
+        <div class="grid gap-6 lg:grid-cols-3">
+          {#each coreFeatures as feature}
+            <div class="{feature.span} relative overflow-hidden rounded-3xl surface-panel border-border/60 p-8 transition hover:border-primary/30">
+              <div class="relative z-10 h-full flex flex-col justify-between">
+                <div>
+                  <div class="mb-5 inline-flex h-10 w-10 items-center justify-center rounded-lg {feature.color}">
+                    <feature.icon class="h-5 w-5" />
+                  </div>
+                  <h3 class="font-heading text-xl font-bold tracking-tight text-foreground mb-2">
+                    {feature.title}
+                  </h3>
+                  <p class="text-sm leading-relaxed text-muted-foreground max-w-[85%]">
+                    {feature.description}
+                  </p>
+                </div>
+              </div>
             </div>
           {/each}
         </div>
-      </div>
-    </section>
-  </Motion>
 
-  <Motion let:motion initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: "easeOut", delay: 0.12 }}>
-    <section use:motion class="py-24">
-      <div class="mx-auto max-w-7xl px-6 sm:px-8">
-        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {#each features as feature, index}
-            <Motion let:motion initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, delay: 0.06 + index * 0.08, ease: "easeOut" }}>
-              <div use:motion>
-                <Card.Root
-                  class="h-full border-border/60 bg-card transition hover:shadow-md hover:border-primary/20 {feature.featured
-                    ? 'ring-1 ring-primary/20'
-                    : ''}"
-                >
-                  <Card.Header>
-                    {#if feature.featured}
-                      <Badge class="mb-3 bg-primary/10 text-primary text-[10px]">Popular</Badge>
-                    {/if}
-                    <div
-                      class="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg {feature.color}"
-                    >
-                      <feature.icon class="h-5 w-5" />
-                    </div>
-                    <Card.Title class="font-heading text-lg font-bold tracking-[-0.03em]">
-                      {feature.title}
-                    </Card.Title>
-                    <Card.Description class="text-sm leading-relaxed">
-                      {feature.description}
-                    </Card.Description>
-                  </Card.Header>
-                  <Card.Content>
-                    <ul class="space-y-2">
-                      {#each feature.benefits as benefit}
-                        <li class="flex items-center gap-2 text-sm text-muted-foreground">
-                          <CheckCircle2 class="h-3.5 w-3.5 shrink-0 text-primary" />
-                          {benefit}
-                        </li>
-                      {/each}
-                    </ul>
-                  </Card.Content>
-                </Card.Root>
-              </div>
-            </Motion>
+        <!-- Micro Features Footer -->
+        <div class="mt-12 flex flex-wrap justify-center gap-3 sm:gap-4">
+          {#each microFeatures as feature}
+            <Badge variant="secondary" class="px-4 py-2 text-xs font-medium border-border/40 gap-2 bg-card">
+              <feature.icon class="h-3.5 w-3.5 text-primary" />
+              {feature.label}
+            </Badge>
           {/each}
         </div>
       </div>
     </section>
   </Motion>
 
-  <Motion let:motion initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: "easeOut", delay: 0.16 }}>
-    <section use:motion class="relative overflow-hidden border-t border-border/50 py-20">
+  <!-- CTA -->
+  <Motion
+    let:motion
+    initial={{ opacity: 0, y: 18 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
+  >
+    <section use:motion class="relative overflow-hidden border-t border-border/50 py-24 bg-grid">
       <NoiseOverlay intensity="light" />
       <div class="relative z-10 mx-auto max-w-3xl px-6 text-center sm:px-8">
         <h2
-          class="font-heading text-3xl font-black tracking-[-0.05em] text-foreground sm:text-4xl"
+          class="font-heading text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl"
         >
           See it in action
         </h2>
         <p class="mt-4 text-lg text-muted-foreground">
           Sign in with demo credentials and explore the full dashboard, transaction
-          logging, and AI tracking — no setup required.
+          logging, and the WhatsApp integrations — no setup required.
         </p>
         <Button
           onclick={handleGetStarted}

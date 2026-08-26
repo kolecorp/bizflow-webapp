@@ -1,1 +1,0 @@
-import{l as e,u as t}from"./Cd6jACye.js";import"./xihTtKlq.js";import{t as n}from"./CJhOzM1-.js";var r=new Set([`$$slots`,`$$events`,`$$legacy`]);function i(i,a){let o=e(a,r),s=[[`path`,{d:`M16 7h6v6`}],[`path`,{d:`m22 7-8.5 8.5-5-5L2 17`}]];n(i,t({name:`trending-up`},()=>o,{get iconNode(){return s}}))}export{i as t};

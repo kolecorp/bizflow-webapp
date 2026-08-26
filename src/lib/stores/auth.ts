@@ -79,6 +79,30 @@ export async function signIn(input: { email: string; password: string }) {
   return nextState;
 }
 
+export async function signUp(input: {
+  name: string;
+  businessName: string;
+  email: string;
+  password: string;
+}) {
+  const nextUser: AuthUser = {
+    id: "demo-user-1",
+    name: input.name,
+    email: input.email,
+    role: "Business Owner",
+  };
+
+  const nextState: AuthState = {
+    isAuthenticated: true,
+    user: nextUser,
+  };
+
+  authStore.set(nextState);
+  persist(nextState);
+
+  return nextState;
+}
+
 export async function signOut() {
   authStore.set(initialState);
   persist(initialState);

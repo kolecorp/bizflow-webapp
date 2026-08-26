@@ -22,7 +22,8 @@ export type Permission =
   | "services.manage"
   | "ai-tracking.view"
   | "settings.view"
-  | "reports.view";
+  | "reports.view"
+  | "team.manage";
 
 export type RoleKey = "manager" | "staff" | "receptionist";
 

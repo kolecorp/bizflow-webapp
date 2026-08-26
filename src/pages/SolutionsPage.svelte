@@ -2,332 +2,765 @@
   import { goto } from "$app/navigation";
   import {
     ArrowRight,
-    CheckCircle2,
-    GraduationCap,
+    BarChart3,
+    Check,
+    ChevronRight,
+    Globe2,
+    Layers3,
+    MessageCircle,
     Monitor,
     Printer,
+    ShieldCheck,
     Sparkles,
-    Building2,
-    Users,
-    TrendingUp,
-    Clock,
-    Wallet,
-    FileText,
-    ShoppingBag,
+    UsersRound,
+    WalletCards,
+    Zap,
   } from "@lucide/svelte";
   import { Motion } from "svelte-motion";
   import LandingLayout from "$lib/components/landing/LandingLayout.svelte";
   import NoiseOverlay from "$lib/components/landing/NoiseOverlay.svelte";
   import { Button } from "$lib/components/ui/button";
-  import { Badge } from "$lib/components/ui/badge";
-  import * as Card from "$lib/components/ui/card";
 
-  function handleGetStarted() {
-    goto("/login");
-  }
-
-  const solutions = [
+  const pillars = [
     {
-      icon: Printer,
-      title: "Printing & Photocopy Shops",
-      tagline: "Never lose track of a print job again",
-      description:
-        "Dedicated printing shops handle dozens of jobs daily — color prints, black & white copies, laminations, and bindings. Bizflow lets you log each job with the customer name, page count, and amount in Naira.",
-      features: [
-        "Log print jobs by type and quantity",
-        "Track daily printing revenue",
-        "Customer name on every record",
-        "See today's total at a glance",
-      ],
-      stats: { label: "Avg. jobs per day", value: "40+" },
-      color: "from-blue-500/10 to-primary/10",
-      iconColor: "text-primary bg-primary/10",
+      icon: Globe2,
+      number: "01",
+      title: "Reach customers",
+      detail:
+        "Meet customers where they already are with WhatsApp, SMS, USSD, and digital journeys.",
+      items: ["Business alerts", "Customer receipts", "Marketing campaigns"],
+    },
+    {
+      icon: WalletCards,
+      number: "02",
+      title: "Move money",
+      detail:
+        "Keep everyday sales and new revenue lines visible from the same workspace.",
+      items: ["Transactions", "Wallet and payments", "VTU services"],
     },
     {
       icon: Monitor,
-      title: "Cyber Cafés & Business Centers",
-      tagline: "One system for every service you offer",
-      description:
-        "Business centers combine printing, computer rentals, internet access, typing, and graphics into one operation. Bizflow supports all service types in a single transaction log, so nothing falls through the cracks.",
-      features: [
-        "5 service categories built-in",
-        "Computer session tracking",
-        "Multi-service daily totals",
-        "Sidebar navigation for all modules",
-      ],
-      stats: { label: "Service types", value: "5+" },
-      color: "from-cyan-500/10 to-blue-500/10",
-      iconColor: "text-cyan-600 dark:text-cyan-400 bg-cyan-500/10",
+      number: "03",
+      title: "Run operations",
+      detail:
+        "Give the team a shared operating picture for the work happening at the counter.",
+      items: ["Computer sessions", "Printing workflows", "Team permissions"],
     },
     {
-      icon: GraduationCap,
-      title: "Training & Education Centers",
-      tagline: "Manage enrollments and session fees",
-      description:
-        "Training centers need to track course enrollments, session payments, and student records alongside their other services. Bizflow's flexible service logging handles training fees just like any other transaction.",
-      features: [
-        "Log training session payments",
-        "Track student customers",
-        "Combine with other services",
-        "Monthly revenue summaries",
-      ],
-      stats: { label: "Students tracked", value: "100+" },
-      color: "from-purple-500/10 to-pink-500/10",
-      iconColor: "text-purple-600 dark:text-purple-400 bg-purple-500/10",
-    },
-    {
-      icon: Sparkles,
-      title: "Graphics & Design Studios",
-      tagline: "Track creative work and client payments",
-      description:
-        "Graphics designers handle logos, banners, flyers, and custom artwork with varying prices. Log each project with the client name, description, and agreed amount — keeping your creative business financially organized.",
-      features: [
-        "Project-based transaction logging",
-        "Client name and description fields",
-        "Flexible pricing per project",
-        "Portfolio of completed work via records",
-      ],
-      stats: { label: "Projects per month", value: "25+" },
-      color: "from-pink-500/10 to-orange-500/10",
-      iconColor: "text-pink-600 dark:text-pink-400 bg-pink-500/10",
-    },
-    {
-      icon: Building2,
-      title: "Multi-Service Hubs",
-      tagline: "Scale across locations and teams",
-      description:
-        "Growing business centers with multiple staff members need a shared system everyone can use. Bizflow's manager authentication and consistent interface make it easy for any team member to log transactions.",
-      features: [
-        "Manager-level access control",
-        "Consistent UI across modules",
-        "Shared transaction history",
-        "Activity stream for team visibility",
-      ],
-      stats: { label: "Team members", value: "3–10" },
-      color: "from-green-500/10 to-teal-500/10",
-      iconColor: "text-green-600 dark:text-green-400 bg-green-500/10",
-    },
-    {
-      icon: Users,
-      title: "Freelance & Solo Operators",
-      tagline: "Professional tools without the overhead",
-      description:
-        "Running a one-person business center? Bizflow gives you the same professional transaction tracking and revenue visibility as larger operations — without complexity or high costs.",
-      features: [
-        "Free to start",
-        "No setup required",
-        "Demo credentials available",
-        "Works on any device",
-      ],
-      stats: { label: "Setup time", value: "< 5 min" },
-      color: "from-amber-500/10 to-yellow-500/10",
-      iconColor: "text-amber-600 dark:text-amber-400 bg-amber-500/10",
+      icon: Zap,
+      number: "04",
+      title: "Work smarter",
+      detail:
+        "Use automation and AI to reduce repetitive work and make faster decisions.",
+      items: ["Workflow automation", "AI tracking", "Activity insights"],
     },
   ];
 
-  const painPoints = [
+  const audiences = [
     {
-      problem: "Lost revenue from unlogged services",
-      solution: "Every transaction logged with amount, customer, and service type",
-      icon: Wallet,
+      icon: Printer,
+      title: "Business centers",
+      detail:
+        "One system for printing, browsing, typing, graphics, training, and more.",
     },
     {
-      problem: "No visibility into daily performance",
-      solution: "Live dashboard with today's total and transaction count",
-      icon: TrendingUp,
+      icon: UsersRound,
+      title: "Growing teams",
+      detail: "Clear roles and shared context for owners, managers, and staff.",
     },
     {
-      problem: "Paper notebooks get lost or damaged",
-      solution: "Digital records that persist and are always accessible",
-      icon: FileText,
-    },
-    {
-      problem: "Can't remember repeat customers",
-      solution: "Customer names stored on every transaction for easy lookup",
-      icon: Users,
+      icon: Layers3,
+      title: "Service businesses",
+      detail:
+        "Flexible tools that adapt as your offers and revenue streams expand.",
     },
   ];
 </script>
 
 <LandingLayout active="/solutions">
-  <Motion let:motion initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: "easeOut" }}>
-    <section use:motion class="relative overflow-hidden pt-20 pb-16 sm:pt-28 sm:pb-20">
+  <Motion
+    let:motion
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    transition={{ duration: 0.7 }}
+  >
+    <section use:motion class="relative overflow-hidden bg-background bg-grid">
       <NoiseOverlay intensity="medium" />
-      <div
-        class="absolute -top-24 left-1/2 -z-10 h-[30rem] w-[60rem] -translate-x-1/2 opacity-20 dark:opacity-10"
-      >
-        <div
-          class="absolute inset-0 rounded-[100%] bg-gradient-to-br from-primary via-purple-400 to-pink-300 blur-3xl dark:from-primary dark:via-purple-800 dark:to-pink-900"
-        ></div>
+      <div class="hero-ambient" aria-hidden="true">
+        <span class="hero-orb hero-orb-1"></span><span
+          class="hero-orb hero-orb-2"
+        ></span><span class="hero-orb hero-orb-3"></span>
       </div>
-
-      <div class="relative z-10 mx-auto max-w-7xl px-6 text-center sm:px-8">
-        <Badge
-          variant="outline"
-          class="mb-6 gap-2 border-primary/30 bg-primary/10 px-3 py-1 text-primary"
-        >
-          <Sparkles class="h-3.5 w-3.5" />
-          Industry solutions
-        </Badge>
-        <h1
-          class="font-heading text-4xl font-black tracking-[-0.06em] text-foreground sm:text-5xl lg:text-6xl"
-        >
-          The right fit for
-          <span class="text-primary">your business</span>
-        </h1>
-        <p class="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
-          Bizflow isn't generic software — it's built specifically for the service
-          businesses that power communities across Africa.
-        </p>
-      </div>
-    </section>
-  </Motion>
-
-  <Motion let:motion initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, ease: "easeOut", delay: 0.08 }}>
-    <section use:motion class="border-y border-border/50 bg-card/50 py-16">
-      <div class="mx-auto max-w-7xl px-6 sm:px-8">
-        <p class="text-center text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-8">
-          Common challenges we solve
-        </p>
-        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {#each painPoints as item, index}
-            <Motion let:motion initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, delay: 0.06 + index * 0.08, ease: "easeOut" }}>
-              <div use:motion class="rounded-xl border border-border/60 bg-background p-5">
-                <item.icon class="h-5 w-5 text-primary mb-3" />
-                <p class="text-sm font-medium text-foreground mb-2">{item.problem}</p>
-                <p class="text-xs leading-relaxed text-muted-foreground flex items-start gap-1.5">
-                  <CheckCircle2 class="h-3.5 w-3.5 shrink-0 text-green-500 mt-0.5" />
-                  {item.solution}
-                </p>
-              </div>
-            </Motion>
-          {/each}
-        </div>
-      </div>
-    </section>
-  </Motion>
-
-  <Motion let:motion initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: "easeOut", delay: 0.12 }}>
-    <section use:motion class="py-24">
-      <div class="mx-auto max-w-7xl px-6 sm:px-8">
-        <div class="space-y-8">
-          {#each solutions as solution, i}
-            <Motion let:motion initial={{ opacity: 0, x: i % 2 === 0 ? -18 : 18, y: 18 }} animate={{ opacity: 1, x: 0, y: 0 }} transition={{ duration: 0.5, delay: 0.08 + i * 0.08, ease: "easeOut" }}>
-              <div use:motion class="relative overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-br {solution.color}">
-                <NoiseOverlay intensity="light" class="rounded-2xl" />
-                <div class="relative z-10 grid items-center gap-8 p-8 lg:grid-cols-2 lg:p-10">
-                  <div class={i % 2 === 1 ? "lg:order-2" : ""}>
-                    <div
-                      class="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-xl {solution.iconColor}"
-                    >
-                      <solution.icon class="h-6 w-6" />
-                    </div>
-                    <h2
-                      class="font-heading text-2xl font-black tracking-[-0.04em] text-foreground sm:text-3xl"
-                    >
-                      {solution.title}
-                    </h2>
-                    <p class="mt-1 text-sm font-medium text-primary">{solution.tagline}</p>
-                    <p class="mt-4 text-sm leading-relaxed text-muted-foreground">
-                      {solution.description}
-                    </p>
-                    <ul class="mt-6 space-y-2.5">
-                      {#each solution.features as feature}
-                        <li class="flex items-center gap-2 text-sm text-foreground">
-                          <CheckCircle2 class="h-4 w-4 shrink-0 text-primary" />
-                          {feature}
-                        </li>
-                      {/each}
-                    </ul>
-                  </div>
-
-                  <div class={i % 2 === 1 ? "lg:order-1" : ""}>
-                    <Card.Root class="border-border/60 bg-card/80 backdrop-blur-sm">
-                      <Card.Content class="p-6">
-                        <div class="mb-6 flex items-center justify-between">
-                          <div>
-                            <p class="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                              Key metric
-                            </p>
-                            <p
-                              class="font-heading text-3xl font-black tracking-[-0.04em] text-primary"
-                            >
-                              {solution.stats.value}
-                            </p>
-                          </div>
-                          <Badge variant="outline" class="text-xs">{solution.stats.label}</Badge>
-                        </div>
-
-                        <div class="space-y-3">
-                          <p class="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                            Sample transactions
-                          </p>
-                          {#each [
-                            { service: "Service", customer: "Customer", amount: "₦4,500" },
-                            { service: "Service", customer: "Customer", amount: "₦2,800" },
-                          ] as tx}
-                            <div
-                              class="flex items-center justify-between rounded-lg border border-border/50 bg-background/60 px-3 py-2.5"
-                            >
-                              <div class="flex items-center gap-2">
-                                <ShoppingBag class="h-4 w-4 text-primary" />
-                                <div>
-                                  <p class="text-sm font-medium">{tx.service}</p>
-                                  <p class="text-xs text-muted-foreground">{tx.customer}</p>
-                                </div>
-                              </div>
-                              <p class="text-sm font-semibold">{tx.amount}</p>
-                            </div>
-                          {/each}
-                        </div>
-
-                        <div class="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
-                          <Clock class="h-3.5 w-3.5" />
-                          Updated in real-time
-                        </div>
-                      </Card.Content>
-                    </Card.Root>
-                  </div>
-                </div>
-              </div>
-            </Motion>
-          {/each}
-        </div>
-      </div>
-    </section>
-  </Motion>
-
-  <Motion let:motion initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: "easeOut", delay: 0.16 }}>
-    <section use:motion class="relative overflow-hidden border-t border-border/50 py-20">
-      <NoiseOverlay intensity="medium" />
-      <div
-        class="absolute inset-0 -z-10 bg-gradient-to-br from-primary/5 via-transparent to-purple-400/5"
-      ></div>
-      <div class="relative z-10 mx-auto max-w-3xl px-6 text-center sm:px-8">
-        <h2
-          class="font-heading text-3xl font-black tracking-[-0.05em] text-foreground sm:text-4xl"
-        >
-          Find your perfect setup
-        </h2>
-        <p class="mt-4 text-lg text-muted-foreground">
-          No matter your business type, Bizflow adapts to how you work. Start free
-          and see the difference in your first day.
-        </p>
-        <div class="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-          <Button onclick={handleGetStarted} size="lg" class="h-12 px-8 text-sm font-semibold">
-            Get started free
-            <ArrowRight class="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="lg"
-            class="h-12 px-8 text-sm font-semibold"
-            onclick={() => goto("/features")}
+      <div class="solutions-hero__content relative z-10 mx-auto max-w-7xl">
+        <div class="min-w-0 max-w-4xl">
+          <p
+            class="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.22em] text-primary"
           >
-            View all features
-          </Button>
+            <Sparkles class="h-4 w-4" />Solutions for the way business moves
+          </p>
+          <h1
+            class="mt-7 max-w-4xl font-heading text-5xl font-black leading-[1.03] tracking-tighter text-foreground sm:text-7xl lg:text-[5.5rem]"
+          >
+            One workspace.<br /><span class="text-primary"
+              >Every opportunity.</span
+            >
+          </h1>
+          <p
+            class="mt-8 max-w-2xl text-xl leading-relaxed text-muted-foreground sm:text-2xl"
+          >
+            Bizflow connects the services, people, and decisions behind a modern
+            business center, so you can grow beyond one counter and one revenue
+            stream.
+          </p>
+          <div class="mt-10 flex flex-col gap-3 sm:flex-row">
+            <Button
+              size="lg"
+              class="h-12 px-7"
+              onclick={() => goto("/register")}
+              >Start your workspace <ArrowRight class="h-4 w-4" /></Button
+            ><Button
+              size="lg"
+              variant="outline"
+              class="h-12 px-7"
+              onclick={() => goto("/features")}>Explore the platform</Button
+            >
+          </div>
+        </div>
+        <div class="solutions-reel-wrap relative min-w-0" aria-hidden="true">
+          <div class="solutions-reel-glow" aria-hidden="true"></div>
+          <div class="solutions-reel relative overflow-hidden">
+            <div class="solutions-reel__topline">
+              <span></span><span></span><span></span>
+              <p>Bizflow / connected workspace</p>
+            </div>
+            <div class="solutions-reel__viewport">
+              <div class="solutions-reel__track">
+                <svg
+                  class="solutions-reel__scene"
+                  viewBox="0 0 420 270"
+                  role="img"
+                  aria-label="Workspace switcher and service overview"
+                >
+                  <rect
+                    width="420"
+                    height="270"
+                    rx="14"
+                    fill="currentColor"
+                    opacity=".035"
+                  />
+                  <rect
+                    x="22"
+                    y="22"
+                    width="116"
+                    height="226"
+                    rx="8"
+                    fill="currentColor"
+                    opacity=".08"
+                  />
+                  <circle
+                    cx="48"
+                    cy="48"
+                    r="13"
+                    fill="#339933"
+                    opacity=".8"
+                  /><rect
+                    x="70"
+                    y="42"
+                    width="48"
+                    height="7"
+                    rx="3.5"
+                    fill="currentColor"
+                    opacity=".5"
+                  />
+                  <rect
+                    x="38"
+                    y="86"
+                    width="78"
+                    height="9"
+                    rx="4"
+                    fill="#339933"
+                    opacity=".7"
+                  /><rect
+                    x="38"
+                    y="111"
+                    width="62"
+                    height="7"
+                    rx="3"
+                    fill="currentColor"
+                    opacity=".3"
+                  /><rect
+                    x="38"
+                    y="135"
+                    width="70"
+                    height="7"
+                    rx="3"
+                    fill="currentColor"
+                    opacity=".3"
+                  />
+                  <rect
+                    x="158"
+                    y="22"
+                    width="240"
+                    height="42"
+                    rx="8"
+                    fill="currentColor"
+                    opacity=".08"
+                  /><rect
+                    x="178"
+                    y="38"
+                    width="92"
+                    height="9"
+                    rx="4"
+                    fill="currentColor"
+                    opacity=".55"
+                  /><rect
+                    x="332"
+                    y="36"
+                    width="44"
+                    height="13"
+                    rx="6"
+                    fill="#339933"
+                    opacity=".7"
+                  />
+                  <rect
+                    x="158"
+                    y="82"
+                    width="112"
+                    height="72"
+                    rx="8"
+                    fill="#339933"
+                    opacity=".12"
+                  /><rect
+                    x="286"
+                    y="82"
+                    width="112"
+                    height="72"
+                    rx="8"
+                    fill="currentColor"
+                    opacity=".08"
+                  /><text
+                    x="178"
+                    y="108"
+                    fill="currentColor"
+                    opacity=".55"
+                    font-size="10">WORKSPACE</text
+                  ><text
+                    x="178"
+                    y="137"
+                    fill="currentColor"
+                    font-size="25"
+                    font-weight="700">Free</text
+                  ><text
+                    x="306"
+                    y="108"
+                    fill="currentColor"
+                    opacity=".55"
+                    font-size="10">SERVICES</text
+                  ><text
+                    x="306"
+                    y="137"
+                    fill="#339933"
+                    font-size="25"
+                    font-weight="700">08</text
+                  >
+                  <rect
+                    x="158"
+                    y="174"
+                    width="240"
+                    height="74"
+                    rx="8"
+                    fill="currentColor"
+                    opacity=".08"
+                  /><path
+                    d="M180 226 218 207l34 10 38-25 38 12 32-30"
+                    fill="none"
+                    stroke="#339933"
+                    stroke-width="3"
+                    opacity=".8"
+                  /><circle cx="360" cy="174" r="4" fill="#339933" />
+                </svg>
+                <svg
+                  class="solutions-reel__scene"
+                  viewBox="0 0 420 270"
+                  role="img"
+                  aria-label="Service integrations flowing into Bizflow"
+                >
+                  <rect
+                    width="420"
+                    height="270"
+                    rx="14"
+                    fill="currentColor"
+                    opacity=".035"
+                  /><text
+                    x="26"
+                    y="36"
+                    fill="currentColor"
+                    opacity=".55"
+                    font-size="11"
+                    letter-spacing="2">SERVICE INTEGRATIONS</text
+                  >
+                  <g
+                    fill="currentColor"
+                    opacity=".08"
+                    stroke="#339933"
+                    stroke-opacity=".7"
+                    ><rect x="26" y="65" width="104" height="62" rx="9" /><rect
+                      x="26"
+                      y="145"
+                      width="104"
+                      height="62"
+                      rx="9"
+                    /><rect x="290" y="105" width="104" height="62" rx="9" /></g
+                  >
+                  <g fill="#339933" opacity=".8"
+                    ><circle cx="53" cy="91" r="10" /><circle
+                      cx="53"
+                      cy="171"
+                      r="10"
+                    /><circle cx="317" cy="131" r="10" /></g
+                  >
+                  <g fill="currentColor" opacity=".7" font-size="11"
+                    ><text x="72" y="95">WhatsApp</text><text x="72" y="175"
+                      >Payments</text
+                    ><text x="336" y="135">Bizflow</text></g
+                  >
+                  <path
+                    d="M130 96h74q24 0 24 35v0q0 35 24 35h38M130 176h74q24 0 24-35v0q0-35 24-35h38"
+                    fill="none"
+                    stroke="#339933"
+                    stroke-width="2"
+                    stroke-dasharray="5 6"
+                    opacity=".8"
+                  /><circle
+                    cx="270"
+                    cy="131"
+                    r="24"
+                    fill="#339933"
+                    opacity=".15"
+                  /><path
+                    d="m260 131 7 7 14-16"
+                    fill="none"
+                    stroke="#339933"
+                    stroke-width="3"
+                  />
+                </svg>
+                <svg
+                  class="solutions-reel__scene"
+                  viewBox="0 0 420 270"
+                  role="img"
+                  aria-label="Team roles and business activity"
+                >
+                  <rect
+                    width="420"
+                    height="270"
+                    rx="14"
+                    fill="currentColor"
+                    opacity=".035"
+                  /><text
+                    x="26"
+                    y="38"
+                    fill="currentColor"
+                    opacity=".55"
+                    font-size="11"
+                    letter-spacing="2">TEAM CONTROL</text
+                  >
+                  <rect
+                    x="26"
+                    y="62"
+                    width="368"
+                    height="42"
+                    rx="8"
+                    fill="currentColor"
+                    opacity=".08"
+                  /><rect
+                    x="26"
+                    y="116"
+                    width="368"
+                    height="42"
+                    rx="8"
+                    fill="currentColor"
+                    opacity=".08"
+                  /><rect
+                    x="26"
+                    y="170"
+                    width="368"
+                    height="42"
+                    rx="8"
+                    fill="currentColor"
+                    opacity=".08"
+                  />
+                  <g fill="#339933"
+                    ><circle cx="52" cy="83" r="11" /><circle
+                      cx="52"
+                      cy="137"
+                      r="11"
+                    /><circle cx="52" cy="191" r="11" /></g
+                  ><g fill="currentColor" opacity=".7" font-size="11"
+                    ><text x="75" y="80">Owner account</text><text
+                      x="75"
+                      y="94"
+                      opacity=".5">Full workspace access</text
+                    ><text x="75" y="134">Operations manager</text><text
+                      x="75"
+                      y="148"
+                      opacity=".5">Team and reports</text
+                    ><text x="75" y="188">Service staff</text><text
+                      x="75"
+                      y="202"
+                      opacity=".5">Focused daily access</text
+                    ></g
+                  ><g fill="#339933" font-size="10"
+                    ><text x="340" y="87">ACTIVE</text><text x="340" y="141"
+                      >ACTIVE</text
+                    ><text x="340" y="195">ACTIVE</text></g
+                  >
+                </svg>
+              </div>
+            </div>
+            <div class="solutions-reel__fade" aria-hidden="true"></div>
+            <div class="solutions-reel__footer">
+              <span
+                class="font-mono text-[10px] uppercase tracking-[0.18em] text-primary"
+                >Scroll through your system</span
+              ><span class="solutions-reel__line"></span>
+            </div>
+          </div>
         </div>
       </div>
     </section>
   </Motion>
+
+  <section class="solutions-section border-y border-border/60 bg-card/40">
+    <div class="solutions-section__content mx-auto max-w-7xl">
+      <div class="grid gap-12 lg:grid-cols-[0.7fr_1.3fr] lg:gap-24">
+        <div>
+          <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary">
+            The connected business
+          </p>
+          <h2
+            class="mt-5 font-heading text-4xl font-black leading-tight tracking-tighter text-foreground sm:text-5xl"
+          >
+            Stop operating in pieces.
+          </h2>
+          <p class="mt-6 text-base leading-relaxed text-muted-foreground">
+            Your customer conversations, transactions, team, and tools belong in
+            the same picture. Bizflow gives them a common operating layer.
+          </p>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-2">
+          {#each pillars as pillar}<article
+              class="group rounded-xl border border-border/70 bg-background p-5 transition hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg"
+            >
+              <div class="flex items-center justify-between">
+                <div
+                  class="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary"
+                >
+                  <pillar.icon class="h-5 w-5" />
+                </div>
+                <span class="font-mono text-xs font-bold text-primary"
+                  >{pillar.number}</span
+                >
+              </div>
+              <h3 class="mt-6 font-heading text-lg font-bold text-foreground">
+                {pillar.title}
+              </h3>
+              <p class="mt-3 text-sm leading-relaxed text-muted-foreground">
+                {pillar.detail}
+              </p>
+              <ul class="mt-6 space-y-2 border-t border-border/60 pt-5">
+                {#each pillar.items as item}<li
+                    class="flex items-center gap-2 text-xs font-semibold text-foreground"
+                  >
+                    <Check class="h-3.5 w-3.5 text-primary" />{item}
+                  </li>{/each}
+              </ul>
+              <ChevronRight
+                class="mt-6 h-4 w-4 text-muted-foreground transition group-hover:translate-x-1 group-hover:text-primary"
+              />
+            </article>{/each}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section
+    class="solutions-section relative overflow-hidden bg-background bg-grid"
+  >
+    <NoiseOverlay intensity="light" />
+    <div class="solutions-section__content relative z-10 mx-auto max-w-7xl">
+      <div
+        class="flex flex-col gap-8 border-b border-border/70 pb-12 lg:flex-row lg:items-end lg:justify-between"
+      >
+        <div>
+          <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary">
+            Made for the next version of your business
+          </p>
+          <h2
+            class="mt-5 max-w-2xl font-heading text-4xl font-black leading-tight tracking-tighter text-foreground sm:text-5xl"
+          >
+            Start where you are.<br />Build what comes next.
+          </h2>
+        </div>
+        <p class="max-w-md text-base leading-relaxed text-muted-foreground">
+          Whether you run solo or lead a growing team, Bizflow gives you the
+          structure to add services without adding chaos.
+        </p>
+      </div>
+      <div class="mt-12 grid gap-4 lg:grid-cols-3">
+        {#each audiences as audience}<article
+            class="rounded-xl border border-border/70 bg-card/90 p-5 backdrop-blur-sm"
+          >
+            <div
+              class="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary"
+            >
+              <audience.icon class="h-5 w-5" />
+            </div>
+            <h3 class="mt-6 font-heading text-lg font-bold text-foreground">
+              {audience.title}
+            </h3>
+            <p class="mt-3 text-sm leading-relaxed text-muted-foreground">
+              {audience.detail}
+            </p>
+          </article>{/each}
+      </div>
+    </div>
+  </section>
+
+  <section
+    class="solutions-section relative overflow-hidden border-t border-border/60 bg-background bg-grid"
+  >
+    <NoiseOverlay intensity="light" />
+    <div
+      class="solutions-cta relative z-10 mx-auto flex max-w-7xl flex-col gap-10 rounded-2xl border border-primary/20 bg-primary/5 lg:flex-row lg:items-center lg:justify-between"
+    >
+      <div class="max-w-2xl">
+        <p
+          class="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-primary"
+        >
+          <ShieldCheck class="h-4 w-4" />A platform that stays open
+        </p>
+        <h2
+          class="mt-5 font-heading text-3xl font-black leading-tight tracking-tighter text-foreground sm:text-5xl"
+        >
+          The foundation is free.<br />Your growth is yours.
+        </h2>
+        <p
+          class="mt-5 max-w-xl text-base leading-relaxed text-muted-foreground"
+        >
+          Use the workspace without a platform fee. Activate the services that
+          make sense for your business, and keep building from one trusted
+          system.
+        </p>
+      </div>
+      <Button
+        size="lg"
+        class="h-12 shrink-0 px-7"
+        onclick={() => goto("/register")}
+        >Create your workspace <ArrowRight class="h-4 w-4" /></Button
+      >
+    </div>
+  </section>
 </LandingLayout>
+
+<style>
+  .solutions-reel-wrap {
+    isolation: isolate;
+    display: none;
+  }
+
+  @media (min-width: 1024px) {
+    .solutions-reel-wrap {
+      position: absolute;
+      top: 43%;
+      right: clamp(-24rem, -18vw, -10rem);
+      display: block;
+      width: min(52rem, 66vw);
+      transform: translateY(-50%) rotate(45deg);
+      opacity: 0.28;
+      pointer-events: none;
+    }
+  }
+
+  .solutions-reel-glow {
+    position: absolute;
+    inset: 12% -12% -10%;
+    z-index: -1;
+    border-radius: 999px;
+    background: radial-gradient(
+      circle,
+      rgba(51, 153, 51, 0.22),
+      transparent 68%
+    );
+    filter: blur(28px);
+  }
+
+  .solutions-reel {
+    overflow: visible !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    -webkit-mask-image: linear-gradient(
+      90deg,
+      transparent 0%,
+      transparent 18%,
+      rgba(0, 0, 0, 0.45) 38%,
+      black 62%,
+      black 100%
+    );
+    mask-image: linear-gradient(
+      90deg,
+      transparent 0%,
+      transparent 18%,
+      rgba(0, 0, 0, 0.45) 38%,
+      black 62%,
+      black 100%
+    );
+  }
+
+  .solutions-reel__topline,
+  .solutions-reel__footer {
+    display: none;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  }
+
+  .solutions-reel__topline span {
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 999px;
+    background: var(--primary);
+    opacity: 0.55;
+  }
+
+  .solutions-reel__topline p {
+    margin-left: 0.45rem;
+    overflow: hidden;
+    color: var(--muted-foreground);
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .solutions-reel__viewport {
+    position: relative;
+    height: clamp(28rem, 64vh, 44rem);
+    overflow: hidden;
+    mask-image: radial-gradient(ellipse at center, black 36%, transparent 76%);
+    -webkit-mask-image: radial-gradient(
+      ellipse at center,
+      black 36%,
+      transparent 76%
+    );
+  }
+
+  .solutions-reel__track {
+    display: flex;
+    flex-direction: column;
+    animation: solutions-reel-scroll 15s ease-in-out infinite;
+  }
+
+  .solutions-reel__scene {
+    display: block;
+    flex: 0 0 auto;
+    width: 100%;
+    height: auto;
+    padding: 0.75rem;
+    color: var(--foreground);
+  }
+
+  .solutions-reel__fade {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 48%;
+    pointer-events: none;
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      color-mix(in srgb, var(--background) 72%, transparent) 76%,
+      var(--background) 100%
+    );
+  }
+
+  .solutions-reel__footer {
+    justify-content: space-between;
+    border-top: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+    border-bottom: 0;
+  }
+
+  .solutions-reel__line {
+    width: 3rem;
+    height: 1px;
+    background: var(--primary);
+    opacity: 0.6;
+  }
+
+  @keyframes solutions-reel-scroll {
+    0%,
+    24% {
+      transform: translateY(0);
+    }
+    34%,
+    57% {
+      transform: translateY(-33.333%);
+    }
+    67%,
+    90% {
+      transform: translateY(-66.666%);
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .solutions-reel__track {
+      animation: none;
+      transform: translateY(0);
+    }
+  }
+
+  @media (max-width: 1023px) {
+    .solutions-reel-wrap {
+      display: block;
+      width: min(100%, 34rem);
+      margin: 2rem auto 0;
+      opacity: 0.38;
+      transform: rotate(18deg);
+    }
+
+    .solutions-reel__viewport {
+      height: 16rem;
+    }
+
+    .solutions-reel__footer,
+    .solutions-reel__topline {
+      padding-block: 0.6rem;
+    }
+  }
+
+  .solutions-hero__content {
+    padding: clamp(5rem, 10vw, 8rem) 1.5rem;
+  }
+
+  .solutions-section__content {
+    padding: clamp(4.5rem, 8vw, 7rem) 1.5rem;
+  }
+
+  .solutions-cta {
+    padding: clamp(2.5rem, 5vw, 4rem) clamp(1.25rem, 5vw, 3rem);
+  }
+
+  @media (min-width: 640px) {
+    .solutions-hero__content,
+    .solutions-section__content {
+      padding-inline: 2rem;
+    }
+  }
+</style>

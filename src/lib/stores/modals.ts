@@ -10,6 +10,8 @@ type ModalState = {
   newTransaction: boolean;
   sendFile: boolean;
   sendFileTarget: SendFileTarget | null;
+  settings: boolean;
+  settingsSection: string;
 };
 
 function createModalStore() {
@@ -18,15 +20,25 @@ function createModalStore() {
     newTransaction: false,
     sendFile: false,
     sendFileTarget: null,
+    settings: false,
+    settingsSection: "profile",
   });
 
   return {
     subscribe,
     openDailySales: () =>
-      update((state) => ({ ...state, dailySales: true, newTransaction: false })),
+      update((state) => ({
+        ...state,
+        dailySales: true,
+        newTransaction: false,
+      })),
     closeDailySales: () => update((state) => ({ ...state, dailySales: false })),
     openNewTransaction: () =>
-      update((state) => ({ ...state, newTransaction: true, dailySales: false })),
+      update((state) => ({
+        ...state,
+        newTransaction: true,
+        dailySales: false,
+      })),
     closeNewTransaction: () =>
       update((state) => ({ ...state, newTransaction: false })),
     openSendFile: (target: SendFileTarget) =>
@@ -41,12 +53,21 @@ function createModalStore() {
         sendFile: false,
         sendFileTarget: null,
       })),
+    openSettings: (section = "profile") =>
+      update((state) => ({
+        ...state,
+        settings: true,
+        settingsSection: section,
+      })),
+    closeSettings: () => update((state) => ({ ...state, settings: false })),
     closeAll: () =>
       set({
         dailySales: false,
         newTransaction: false,
         sendFile: false,
         sendFileTarget: null,
+        settings: false,
+        settingsSection: "profile",
       }),
   };
 }

@@ -8,38 +8,7 @@ import type {
 
 const nowIso = () => new Date().toISOString();
 
-const seedNotifications: AppNotification[] = [
-  {
-    id: "notif-1",
-    title: "File transfer ready",
-    message: "PC-03 (Training Room) accepted incoming files from staff.",
-    kind: "success",
-    category: "file_transfer",
-    read: false,
-    createdAt: nowIso(),
-    href: "/computers",
-  },
-  {
-    id: "notif-2",
-    title: "New support ticket",
-    message: "TKT-1042 — Customer cannot open saved document on PC-01.",
-    kind: "warning",
-    category: "ticket",
-    read: false,
-    createdAt: nowIso(),
-    href: "/support",
-  },
-  {
-    id: "notif-3",
-    title: "Staff message",
-    message: "Grace: Please check toner on Canon before the training session.",
-    kind: "info",
-    category: "chat",
-    read: true,
-    createdAt: nowIso(),
-    href: "/support",
-  },
-];
+const seedNotifications: AppNotification[] = [];
 
 function createNotificationStore() {
   const items = writable<AppNotification[]>(seedNotifications);

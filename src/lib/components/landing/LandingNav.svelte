@@ -7,7 +7,7 @@
   let { active = "" }: { active?: string } = $props();
 
   function handleGetStarted() {
-    goto("/login");
+    goto("/register");
   }
 
   function navigate(path: string) {
@@ -29,17 +29,13 @@
     <button
       type="button"
       onclick={() => navigate("/")}
-      class="flex items-center gap-3 transition hover:opacity-80"
+      class="flex items-center gap-1 transition hover:opacity-80"
     >
-      <div
-        class="flex h-9 w-9 items-center justify-center overflow-hidden rounded-lg border border-border bg-background shadow-sm"
-      >
-        <img
+       <img
           src="/cafe-logo.png"
           alt="Bizflow logo"
-          class="h-7 w-7 object-contain"
+          class="h-14 w-14 object-contain"
         />
-      </div>
       <span class="font-heading text-xl font-black tracking-[-0.04em] text-foreground"
         >Bizflow</span
       >
@@ -74,7 +70,7 @@
       </button>
       <button
         type="button"
-        onclick={handleGetStarted}
+        onclick={() => goto("/login")}
         class="hidden text-sm font-medium text-muted-foreground transition hover:text-foreground sm:block"
       >
         Sign in

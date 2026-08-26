@@ -360,8 +360,20 @@
         </div>
 
         {#if todayTx.length === 0}
-          <div class="rounded-xl border border-dashed border-border/40 bg-muted/20 px-6 py-12 text-center text-sm text-muted-foreground">
-            No sales yet today. Record the first sale to start balancing.
+          <div class="flex flex-col items-center justify-center p-12 text-center border border-dashed border-border/40 bg-muted/10 rounded-2xl">
+            <div class="mx-auto mb-5 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <ShoppingBag class="h-8 w-8" />
+            </div>
+            <h3 class="font-heading text-xl font-bold text-foreground mb-2">No sales yet today</h3>
+            <p class="text-muted-foreground text-sm max-w-sm mx-auto mb-6">
+              Record the first sale to start balancing the register.
+            </p>
+            {#if canCreate}
+              <button type="button" on:click={() => modals.openNewTransaction()} class="btn-app-primary">
+                <Plus class="h-4 w-4" />
+                Record first sale
+              </button>
+            {/if}
           </div>
         {:else}
           <div class="max-h-[420px] space-y-2 overflow-y-auto">
@@ -621,7 +633,15 @@
                           </tr>
                         {:else}
                           <tr>
-                            <td colspan="5" class="px-3 py-8 text-center text-sm text-muted-foreground">No transactions match your search or filters.</td>
+                            <td colspan="5" class="px-3 py-16 text-center">
+                              <div class="flex flex-col items-center justify-center text-muted-foreground">
+                                <Search class="h-6 w-6 mb-2 opacity-50" />
+                                <p class="text-sm">No transactions match your search or filters.</p>
+                                <button type="button" on:click={clearFilters} class="mt-4 text-xs text-primary hover:underline font-medium">
+                                  Clear all filters
+                                </button>
+                              </div>
+                            </td>
                           </tr>
                         {/each}
                       </tbody>

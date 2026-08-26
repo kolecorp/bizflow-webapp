@@ -11,8 +11,8 @@ type EnsureDefined<T> = T extends null | undefined ? {} : T;
 type OptionalUnion<U extends Record<string, any>, A extends keyof U = U extends U ? keyof U : never> = U extends unknown ? { [P in Exclude<A, keyof U>]?: never } & U : never;
 export type Snapshot<T = any> = Kit.Snapshot<T>;
 type PageParentData = EnsureDefined<LayoutData>;
-type LayoutRouteId = RouteId | "/" | "/(app)/ai-tracking" | "/(app)/computers" | "/(app)/dashboard" | "/(app)/inventory" | "/(app)/overview" | "/(app)/printing" | "/(app)/printing/settings" | "/(app)/reports" | "/(app)/services" | "/(app)/support" | "/(app)/transactions" | "/features" | "/login" | "/solutions" | null
-type LayoutParams = RouteParams & {  }
+type LayoutRouteId = RouteId | "/" | "/(app)/ai-tracking" | "/(app)/computers" | "/(app)/dashboard" | "/(app)/extensions" | "/(app)/extensions/automations" | "/(app)/extensions/marketing" | "/(app)/extensions/marketing/forms" | "/(app)/extensions/vtu" | "/(app)/extensions/vtu/pricing" | "/(app)/extensions/wallet" | "/(app)/extensions/whatsapp" | "/(app)/extensions/whatsapp/business" | "/(app)/extensions/whatsapp/customers" | "/(app)/inventory" | "/(app)/overview" | "/(app)/printing" | "/(app)/printing/settings" | "/(app)/reports" | "/(app)/services" | "/(app)/settings" | "/(app)/support" | "/(app)/team" | "/(app)/team/[id]" | "/(app)/transactions" | "/extensions/marketing/builder" | "/features" | "/invite/[id]" | "/login" | "/onboarding" | "/register" | "/solutions" | null
+type LayoutParams = RouteParams & { id?: string | undefined }
 type LayoutParentData = EnsureDefined<{}>;
 
 export type PageServerData = null;

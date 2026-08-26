@@ -1,0 +1,1409 @@
+The following Vite config options will be overridden by SvelteKit:
+  - root
+Loading svelte-check in workspace: c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp
+Getting Svelte diagnostics...
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\lib\stores\team.ts[39m:162:3
+[31mError[39m: Cannot find name 'teamMembers'. Did you mean 'getTeamMember'? 
+[36m  let result: TeamMember | undefined;
+  [35mteamMembers[36m.subscribe((value) => {
+    result = value.find((member) => member.id === id);[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\lib\stores\team.ts[39m:162:26
+[31mError[39m: Parameter 'value' implicitly has an 'any' type. 
+[36m  let result: TeamMember | undefined;
+  teamMembers.subscribe(([35mvalue[36m) => {
+    result = value.find((member) => member.id === id);[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\lib\stores\team.ts[39m:163:26
+[31mError[39m: Parameter 'member' implicitly has an 'any' type. 
+[36m  teamMembers.subscribe((value) => {
+    result = value.find(([35mmember[36m) => member.id === id);
+  })();[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\lib\components\builder\AiAssistantTab.svelte[39m:118:9
+[33mWarn[39m: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+[36m      <div class="ai-section">
+        [35m<label class="ai-label">Original Text</label>[36m
+        <div class="ai-original-box">[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\lib\components\builder\AiAssistantTab.svelte[39m:143:11
+[33mWarn[39m: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+[36m        <div class="ai-section">
+          [35m<label class="ai-label">Quick Actions</label>[36m
+          <div class="ai-grid">[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\lib\components\builder\AiAssistantTab.svelte[39m:154:11
+[33mWarn[39m: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+[36m        <div class="ai-section relative">
+          [35m<label class="ai-label">Custom Instruction</label>[36m
+          <textarea[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\lib\components\layout\AIAssistantShell.svelte[39m:137:5
+[33mWarn[39m: Non-interactive element `<section>` cannot have interactive role 'dialog'
+https://svelte.dev/e/a11y_no_noninteractive_element_to_interactive_role (svelte)
+[36m  >
+    [35m<section
+      class="flex h-full w-full max-w-[440px] flex-col overflow-hidden border-l border-border bg-popover text-popover-foreground sm:max-w-[440px]"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Bizzy workspace"
+    >
+      <header
+        class="flex items-center justify-between border-b border-border/60 px-5 py-4"
+      >
+        <div class="flex items-center gap-3">
+          <span
+            class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl border border-border bg-card"
+            ><img
+              src="/bizflow-ai.png"
+              alt=""
+              aria-hidden="true"
+              class="h-full w-full object-cover"
+            /></span
+          >
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="font-heading text-sm font-bold">Bizzy workspace</h2>
+              <span
+                class="flex items-center gap-1 text-[10px] font-medium text-green-600"
+                ><span class="h-1.5 w-1.5 rounded-full bg-green-500"></span> Online</span
+              >
+            </div>
+            <p class="mt-0.5 text-xs text-muted-foreground">
+              Your shortcut into the entire workspace
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onclick={() => (open = false)}
+          aria-label="Close Bizzy workspace"
+          class="rounded-xl p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
+          ><X class="h-4 w-4" /></button
+        >
+      </header>
+      <div
+        class="flex items-center justify-between border-b border-border/60 px-5 py-3"
+      >
+        <div class="flex rounded-xl bg-muted/60 p-1">
+          <button
+            type="button"
+            onclick={() => (mode = "agent")}
+            class={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition ${mode === "agent" ? "bg-background text-foreground ring-1 ring-border" : "text-muted-foreground"}`}
+            ><Zap class="h-3.5 w-3.5" />Agent</button
+          ><button
+            type="button"
+            onclick={() => (mode = "chat")}
+            class={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition ${mode === "chat" ? "bg-background text-foreground ring-1 ring-border" : "text-muted-foreground"}`}
+            ><MessageSquareText class="h-3.5 w-3.5" />Chat</button
+          >
+        </div>
+        <span class="hidden text-[10px] text-muted-foreground sm:block"
+          >Press <kbd
+            class="rounded border border-border bg-muted px-1.5 py-0.5 font-mono"
+            >/</kbd
+          > to switch modes</span
+        >
+      </div>
+      <div class="min-h-0 flex-1 overflow-y-auto px-5 py-5">
+        <div class="rounded-2xl bg-muted/35 p-2 sm:p-2.5">
+          <div class="flex items-center justify-between px-2 pb-2">
+            <div
+              class="flex items-center gap-2 text-[11px] font-semibold text-foreground"
+            >
+              <span
+                class="flex h-5 w-5 items-center justify-center rounded-md bg-primary/10 text-primary"
+              >
+                {#if mode === "agent"}<Zap
+                    class="h-3 w-3"
+                  />{:else}<MessageSquareText class="h-3 w-3" />{/if}
+              </span>
+              {mode === "agent" ? "Agent command" : "Ask Bizzy"}
+            </div>
+            <span class="text-[10px] text-muted-foreground"
+              >{mode === "agent"
+                ? "Navigate and act"
+                : "Explore and understand"}</span
+            >
+          </div>
+          <form
+            class="flex items-center gap-3 rounded-xl border border-transparent bg-background px-3.5 py-3.5 transition-colors focus-within:border-primary/50"
+            onsubmit={(event) => {
+              event.preventDefault();
+              runCommand();
+            }}
+          >
+            <span class="text-xs font-semibold text-primary"
+              >{mode === "agent" ? ">" : "?"}</span
+            ><input
+              bind:value={command}
+              autofocus
+              placeholder={mode === "agent"
+                ? "Tell Bizzy what to do..."
+                : "Ask Bizzy a question..."}
+              class="min-w-0 flex-1 border-0 bg-transparent text-[15px] text-foreground outline-none ring-0 placeholder:text-muted-foreground/55 focus:border-0 focus:outline-none focus:ring-0"
+            /><button
+              type="submit"
+              disabled={!command.trim()}
+              aria-label="Run request"
+              class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-40"
+              ><CornerDownLeft class="h-4 w-4" /></button
+            >
+          </form>
+          <div
+            class="flex items-center justify-between px-2 pt-2 text-[10px] text-muted-foreground"
+          >
+            <span>{status}</span><span class="hidden items-center gap-1 sm:flex"
+              ><CornerDownLeft class="h-3 w-3" /> Enter to run</span
+            >
+          </div>
+        </div>
+        {#if entries.length > 0}<div class="mt-5 space-y-3">
+            {#each entries as entry}<div
+                class={`flex gap-3 ${entry.role === "user" ? "justify-end" : "justify-start"}`}
+              >
+                <div
+                  class={`max-w-[85%] rounded-2xl px-3.5 py-3 text-xs leading-relaxed ${entry.role === "user" ? "rounded-br-md bg-primary text-primary-foreground" : "rounded-bl-md border border-border/60 bg-background text-foreground"}`}
+                >
+                  <p>{entry.text}</p>
+                  {#if entry.path}<button
+                      type="button"
+                      onclick={() => goto(entry.path!)}
+                      class="mt-2 flex items-center gap-1 font-semibold text-primary hover:underline"
+                      >Go there <ChevronRight class="h-3.5 w-3.5" /></button
+                    >{/if}
+                </div>
+              </div>{/each}
+          </div>{/if}
+        <div class="mt-6">
+          <div
+            class="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground"
+          >
+            <Lightbulb class="h-3.5 w-3.5" /> Try asking
+          </div>
+          <div class="mt-3 grid gap-2 sm:grid-cols-2">
+            {#each shortcuts as shortcut}<button
+                type="button"
+                onclick={() => runCommand(shortcut.command)}
+                class="flex items-center gap-3 rounded-xl border border-border/60 p-3 text-left transition hover:border-primary/40 hover:bg-primary/[0.04]"
+                ><span
+                  class="flex h-7 w-7 items-center justify-center rounded-lg bg-muted text-xs font-semibold text-primary"
+                  >{shortcut.icon}</span
+                ><span
+                  class="min-w-0 flex-1 text-xs font-medium text-foreground"
+                  >{shortcut.label}</span
+                ><ChevronRight
+                  class="h-3.5 w-3.5 text-muted-foreground"
+                /></button
+              >{/each}
+          </div>
+        </div>
+      </div>
+      <footer
+        class="flex items-center justify-between border-t border-border/60 bg-muted/20 px-5 py-3 text-[10px] text-muted-foreground"
+      >
+        <span class="flex items-center gap-1.5"
+          ><History class="h-3.5 w-3.5" />
+          {entries.length
+            ? `${entries.length} recent requests`
+            : "No recent requests"}</span
+        ><span class="hidden sm:block">Current page: {page.url.pathname}</span
+        ><button
+          type="button"
+          onclick={() => {
+            entries = [];
+            status = "Ready when you are.";
+          }}
+          class="flex items-center gap-1 text-primary hover:underline"
+          ><Check class="h-3.5 w-3.5" /> Clear</button
+        >
+      </footer>
+    </section>[36m
+  </div>[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\lib\components\layout\AIAssistantShell.svelte[39m:232:15
+[33mWarn[39m: Avoid using autofocus
+https://svelte.dev/e/a11y_autofocus (svelte)
+[36m              bind:value={command}
+              [35mautofocus[36m
+              placeholder={mode === "agent"[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\lib\components\layout\NotificationBell.svelte[39m:45:1
+[33mWarn[39m: Visible, non-interactive element `<div>` with a click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as `<button type="button">` or `<a>` might be more appropriate
+https://svelte.dev/e/a11y_click_events_have_key_events (svelte)
+[36m
+[35m<div class="relative" on:click|stopPropagation>
+  <button
+    type="button"
+    aria-label="Notifications"
+    on:click|stopPropagation={togglePanel}
+    class="relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border bg-background text-foreground transition hover:bg-muted"
+  >
+    <Bell class="h-4 w-4" />
+    {#if $notificationUnreadCount > 0}
+      <span
+        class="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground"
+      >
+        {$notificationUnreadCount > 9 ? "9+" : $notificationUnreadCount}
+      </span>
+    {/if}
+  </button>
+
+  {#if open}
+    <div
+      class="absolute right-0 top-11 z-50 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-border bg-popover shadow-xl"
+    >
+      <div class="flex items-center justify-between border-b border-border px-4 py-3">
+        <p class="text-sm font-semibold text-foreground">Notifications</p>
+        {#if $notificationUnreadCount > 0}
+          <button
+            type="button"
+            on:click={handleMarkAllRead}
+            class="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+          >
+            <CheckCheck class="h-3.5 w-3.5" />
+            Mark all read
+          </button>
+        {/if}
+      </div>
+
+      <div class="max-h-80 overflow-y-auto">
+        {#if $notificationItems.length === 0}
+          <p class="px-4 py-8 text-center text-sm text-muted-foreground">
+            No notifications yet
+          </p>
+        {:else}
+          {#each $notificationItems as notification (notification.id)}
+            {@const Icon = categoryIcon(notification.category)}
+            <button
+              type="button"
+              on:click={() => handleOpen(notification)}
+              class={`flex w-full items-start gap-3 border-b border-border/60 px-4 py-3 text-left transition hover:bg-muted/60 ${
+                notification.read ? "opacity-70" : "bg-primary/5"
+              }`}
+            >
+              <div
+                class={`mt-0.5 rounded-lg p-1.5 ${
+                  notification.kind === "success"
+                    ? "bg-green-500/10 text-green-600"
+                    : notification.kind === "error"
+                      ? "bg-red-500/10 text-red-600"
+                      : notification.kind === "warning"
+                        ? "bg-amber-500/10 text-amber-600"
+                        : "bg-primary/10 text-primary"
+                }`}
+              >
+                <Icon class="h-3.5 w-3.5" />
+              </div>
+              <div class="min-w-0 flex-1">
+                <p class="text-sm font-medium text-foreground">{notification.title}</p>
+                <p class="mt-0.5 text-xs text-muted-foreground line-clamp-2">
+                  {notification.message}
+                </p>
+              </div>
+              {#if !notification.read}
+                <span class="mt-1 h-2 w-2 shrink-0 rounded-full bg-primary"></span>
+              {/if}
+            </button>
+          {/each}
+        {/if}
+      </div>
+    </div>
+  {/if}
+</div>[36m[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\lib\components\layout\NotificationBell.svelte[39m:45:1
+[33mWarn[39m: `<div>` with a click handler must have an ARIA role
+https://svelte.dev/e/a11y_no_static_element_interactions (svelte)
+[36m
+[35m<div class="relative" on:click|stopPropagation>
+  <button
+    type="button"
+    aria-label="Notifications"
+    on:click|stopPropagation={togglePanel}
+    class="relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border bg-background text-foreground transition hover:bg-muted"
+  >
+    <Bell class="h-4 w-4" />
+    {#if $notificationUnreadCount > 0}
+      <span
+        class="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground"
+      >
+        {$notificationUnreadCount > 9 ? "9+" : $notificationUnreadCount}
+      </span>
+    {/if}
+  </button>
+
+  {#if open}
+    <div
+      class="absolute right-0 top-11 z-50 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-border bg-popover shadow-xl"
+    >
+      <div class="flex items-center justify-between border-b border-border px-4 py-3">
+        <p class="text-sm font-semibold text-foreground">Notifications</p>
+        {#if $notificationUnreadCount > 0}
+          <button
+            type="button"
+            on:click={handleMarkAllRead}
+            class="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+          >
+            <CheckCheck class="h-3.5 w-3.5" />
+            Mark all read
+          </button>
+        {/if}
+      </div>
+
+      <div class="max-h-80 overflow-y-auto">
+        {#if $notificationItems.length === 0}
+          <p class="px-4 py-8 text-center text-sm text-muted-foreground">
+            No notifications yet
+          </p>
+        {:else}
+          {#each $notificationItems as notification (notification.id)}
+            {@const Icon = categoryIcon(notification.category)}
+            <button
+              type="button"
+              on:click={() => handleOpen(notification)}
+              class={`flex w-full items-start gap-3 border-b border-border/60 px-4 py-3 text-left transition hover:bg-muted/60 ${
+                notification.read ? "opacity-70" : "bg-primary/5"
+              }`}
+            >
+              <div
+                class={`mt-0.5 rounded-lg p-1.5 ${
+                  notification.kind === "success"
+                    ? "bg-green-500/10 text-green-600"
+                    : notification.kind === "error"
+                      ? "bg-red-500/10 text-red-600"
+                      : notification.kind === "warning"
+                        ? "bg-amber-500/10 text-amber-600"
+                        : "bg-primary/10 text-primary"
+                }`}
+              >
+                <Icon class="h-3.5 w-3.5" />
+              </div>
+              <div class="min-w-0 flex-1">
+                <p class="text-sm font-medium text-foreground">{notification.title}</p>
+                <p class="mt-0.5 text-xs text-muted-foreground line-clamp-2">
+                  {notification.message}
+                </p>
+              </div>
+              {#if !notification.read}
+                <span class="mt-1 h-2 w-2 shrink-0 rounded-full bg-primary"></span>
+              {/if}
+            </button>
+          {/each}
+        {/if}
+      </div>
+    </div>
+  {/if}
+</div>[36m[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\lib\components\layout\AppHeader.svelte[39m:33:29
+[33mWarn[39m: This reference only captures the initial value of `subtitle`. Did you mean to reference it inside a closure instead?
+https://svelte.dev/e/state_referenced_locally (svelte)
+[36m  let selectedBusiness = $state("Cafe Bloom");
+  let selectedRole = $state([35msubtitle[36m);
+  const businesses = [[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\lib\components\layout\SettingsModal.svelte[39m:43:14
+[33mWarn[39m: `<svelte:component>` is deprecated in runes mode — components are dynamic by default
+https://svelte.dev/e/svelte_component_deprecated (svelte)
+[36m            class={`flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium transition ${activeSection === setting.key ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
+            >[35m<svelte:component
+              this={setting.icon}
+              class="h-4 w-4"
+            />[36m{setting.title}</button
+          >[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\lib\components\layout\SettingsModal.svelte[39m:89:35
+[31mError[39m: Property 'set' does not exist on type '{ readonly current: SystemModeValue; }'. (ts)
+[36m              type="button"
+              onclick={() => mode.[35mset[36m("light")}
+              class={`flex flex-col items-center gap-2 rounded-lg border p-3 text-xs ${mode.current === "light" ? "border-primary bg-primary/5 text-primary" : "border-border/60 text-muted-foreground"}`}[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\lib\components\layout\SettingsModal.svelte[39m:94:35
+[31mError[39m: Property 'set' does not exist on type '{ readonly current: SystemModeValue; }'. (ts)
+[36m              type="button"
+              onclick={() => mode.[35mset[36m("dark")}
+              class={`flex flex-col items-center gap-2 rounded-lg border p-3 text-xs ${mode.current === "dark" ? "border-primary bg-primary/5 text-primary" : "border-border/60 text-muted-foreground"}`}[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\lib\components\layout\SettingsModal.svelte[39m:99:35
+[31mError[39m: Property 'set' does not exist on type '{ readonly current: SystemModeValue; }'. (ts)
+[36m              type="button"
+              onclick={() => mode.[35mset[36m("system")}
+              class="flex flex-col items-center gap-2 rounded-lg border border-border/60 p-3 text-xs text-muted-foreground"[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\AcceptInvitePage.svelte[39m:19:5
+[33mWarn[39m: This reference only captures the initial value of `inviteId`. Did you mean to reference it inside a derived instead?
+https://svelte.dev/e/state_referenced_locally (svelte)
+[36m  let member = $state<TeamMember | undefined>(
+    [35minviteId[36m === "demo-invite"
+      ? {[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\AutomationsPage.svelte[39m:84:36
+[33mWarn[39m: Using `on:click` to listen to the click event is deprecated. Use the event attribute `onclick` instead
+https://svelte.dev/e/event_directive_deprecated (svelte)
+[36m          <div class="pt-6">
+             <button type="button" [35mon:click={getStarted}[36m class="btn-app-primary text-lg px-8 py-3">
+               <Sparkles class="h-5 w-5" /> Get Started with Automations[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\AutomationsPage.svelte[39m:122:18
+[33mWarn[39m: Buttons and links should either contain text or have an `aria-label`, `aria-labelledby` or `title` attribute
+https://svelte.dev/e/a11y_consider_explicit_label (svelte)
+[36m                 </div>
+                 [35m<button 
+                   type="button" 
+                   on:click={() => toggleTemplate(i)}
+                   class={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${tpl.enabled ? 'bg-primary' : 'bg-muted-foreground/30'}`}
+                 >
+                   <span class={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${tpl.enabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                 </button>[36m
+              </div>[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\AutomationsPage.svelte[39m:124:20
+[33mWarn[39m: Using `on:click` to listen to the click event is deprecated. Use the event attribute `onclick` instead
+https://svelte.dev/e/event_directive_deprecated (svelte)
+[36m                   type="button" 
+                   [35mon:click={() => toggleTemplate(i)}[36m
+                   class={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${tpl.enabled ? 'bg-primary' : 'bg-muted-foreground/30'}`}[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\AutomationsPage.svelte[39m:127:20
+[33mWarn[39m: Self-closing HTML tags for non-void elements are ambiguous — use `<span ...></span>` rather than `<span ... />`
+https://svelte.dev/e/element_invalid_self_closing_tag (svelte)
+[36m                 >
+                   [35m<span class={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${tpl.enabled ? 'translate-x-6' : 'translate-x-1'}`} />[36m
+                 </button>[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\AutomationsPage.svelte[39m:148:33
+[33mWarn[39m: Using `on:click` to listen to the click event is deprecated. Use the event attribute `onclick` instead
+https://svelte.dev/e/event_directive_deprecated (svelte)
+[36m      <div class="flex justify-end pt-4">
+          <button type="button" [35mon:click={() => disconnectExtension("automations")}[36m
+            class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-red-500 hover:bg-red-500/10 transition">[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\DashboardPage.svelte[39m:159:11
+[33mWarn[39m: Using `on:click` to listen to the click event is deprecated. Use the event attribute `onclick` instead
+https://svelte.dev/e/event_directive_deprecated (svelte)
+[36m          type="button"
+          [35mon:click={() => goto("/transactions")}[36m
+          class="rounded-md px-2 py-1 text-xs font-semibold text-primary transition hover:bg-primary/10"[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\DashboardPage.svelte[39m:194:15
+[33mWarn[39m: Using `on:click` to listen to the click event is deprecated. Use the event attribute `onclick` instead
+https://svelte.dev/e/event_directive_deprecated (svelte)
+[36m              type="button"
+              [35mon:click={() => modals.openNewTransaction()}[36m
+              class="mt-4 rounded-md px-2 py-1 text-xs font-semibold text-primary transition hover:bg-primary/10"[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\DashboardPage.svelte[39m:222:15
+[33mWarn[39m: Using `on:click` to listen to the click event is deprecated. Use the event attribute `onclick` instead
+https://svelte.dev/e/event_directive_deprecated (svelte)
+[36m              type="button"
+              [35mon:click={() => {
+                markRead(notif.id);
+                if (notif.href) goto(notif.href);
+              }}[36m
+              class={`flex w-full items-start gap-3 rounded-lg border px-4 py-3 text-left transition hover:-translate-y-px hover:bg-muted/50 ${[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\ExtensionsPage.svelte[39m:76:19
+[33mWarn[39m: Using `on:click` to listen to the click event is deprecated. Use the event attribute `onclick` instead
+https://svelte.dev/e/event_directive_deprecated (svelte)
+[36m                  type="button"
+                  [35mon:click={() => toggleExtension(ext.id)}[36m
+                  class="text-xs font-semibold {ext.status === 'active' ? 'text-red-500 hover:text-red-600' : 'text-primary hover:text-primary/80'} transition"[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\ExtensionsPage.svelte[39m:110:19
+[33mWarn[39m: Using `on:click` to listen to the click event is deprecated. Use the event attribute `onclick` instead
+https://svelte.dev/e/event_directive_deprecated (svelte)
+[36m                  type="button"
+                  [35mon:click={() => toggleExtension(ext.id)}[36m
+                  class="text-xs font-semibold {ext.status === 'active' ? 'text-red-500 hover:text-red-600' : 'text-primary hover:text-primary/80'} transition"[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\ExtensionsPage.svelte[39m:144:19
+[33mWarn[39m: Using `on:click` to listen to the click event is deprecated. Use the event attribute `onclick` instead
+https://svelte.dev/e/event_directive_deprecated (svelte)
+[36m                  type="button"
+                  [35mon:click={() => toggleExtension(ext.id)}[36m
+                  class="text-xs font-semibold {ext.status === 'active' ? 'text-red-500 hover:text-red-600' : 'text-primary hover:text-primary/80'} transition"[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\InventoryPage.svelte[39m:330:11
+[33mWarn[39m: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+[36m        <div class="space-y-2">
+          [35m<label
+            class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+          >
+            Item
+          </label>[36m
+          <select[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\InventoryPage.svelte[39m:346:11
+[33mWarn[39m: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+[36m        <div class="space-y-2">
+          [35m<label
+            class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+          >
+            Type
+          </label>[36m
+          <select[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\InventoryPage.svelte[39m:361:11
+[33mWarn[39m: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+[36m        <div class="space-y-2">
+          [35m<label
+            class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+          >
+            Quantity
+          </label>[36m
+          <input[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\InventoryPage.svelte[39m:374:11
+[33mWarn[39m: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+[36m        <div class="space-y-2">
+          [35m<label
+            class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+          >
+            Reason
+          </label>[36m
+          <input[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\MarketingBuilderPage.svelte[39m:419:3
+[33mWarn[39m: Elements with the 'dialog' interactive role must have a tabindex value
+https://svelte.dev/e/a11y_interactive_supports_focus (svelte)
+[36m  {@const preset = PRESETS.find((p) => p.id === showPresetConfirm)}
+  [35m<div
+    class="preset-confirm-overlay"
+    onclick={() => (showPresetConfirm = null)}
+    role="dialog"
+    aria-modal="true"
+  >
+    <div
+      class="preset-confirm-modal"
+      onclick={(e) => e.stopPropagation()}
+      onkeydown={(e) => e.stopPropagation()}
+      role="document"
+    >
+      <div class="mb-4 flex justify-center">
+        <LayoutTemplate class="size-10 text-primary" />
+      </div>
+      <h3 class="preset-confirm-title">Load "{preset?.name}"?</h3>
+      <p class="preset-confirm-desc">
+        This will replace your current canvas. This action cannot be undone.
+      </p>
+      <div class="preset-confirm-actions">
+        <button
+          type="button"
+          onclick={() => (showPresetConfirm = null)}
+          class="btn-secondary">Cancel</button
+        >
+        <button
+          type="button"
+          onclick={() => loadPreset(showPresetConfirm!)}
+          class="btn-primary">Yes, Load Preset</button
+        >
+      </div>
+    </div>
+  </div>[36m
+{/if}[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\MarketingBuilderPage.svelte[39m:419:3
+[33mWarn[39m: Visible, non-interactive element `<div>` with a click event must be accompanied by a keyboard event handler. Consider whether an interactive element such as `<button type="button">` or `<a>` might be more appropriate
+https://svelte.dev/e/a11y_click_events_have_key_events (svelte)
+[36m  {@const preset = PRESETS.find((p) => p.id === showPresetConfirm)}
+  [35m<div
+    class="preset-confirm-overlay"
+    onclick={() => (showPresetConfirm = null)}
+    role="dialog"
+    aria-modal="true"
+  >
+    <div
+      class="preset-confirm-modal"
+      onclick={(e) => e.stopPropagation()}
+      onkeydown={(e) => e.stopPropagation()}
+      role="document"
+    >
+      <div class="mb-4 flex justify-center">
+        <LayoutTemplate class="size-10 text-primary" />
+      </div>
+      <h3 class="preset-confirm-title">Load "{preset?.name}"?</h3>
+      <p class="preset-confirm-desc">
+        This will replace your current canvas. This action cannot be undone.
+      </p>
+      <div class="preset-confirm-actions">
+        <button
+          type="button"
+          onclick={() => (showPresetConfirm = null)}
+          class="btn-secondary">Cancel</button
+        >
+        <button
+          type="button"
+          onclick={() => loadPreset(showPresetConfirm!)}
+          class="btn-primary">Yes, Load Preset</button
+        >
+      </div>
+    </div>
+  </div>[36m
+{/if}[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\MarketingBuilderPage.svelte[39m:425:5
+[33mWarn[39m: Non-interactive element `<div>` should not be assigned mouse or keyboard event listeners
+https://svelte.dev/e/a11y_no_noninteractive_element_interactions (svelte)
+[36m  >
+    [35m<div
+      class="preset-confirm-modal"
+      onclick={(e) => e.stopPropagation()}
+      onkeydown={(e) => e.stopPropagation()}
+      role="document"
+    >
+      <div class="mb-4 flex justify-center">
+        <LayoutTemplate class="size-10 text-primary" />
+      </div>
+      <h3 class="preset-confirm-title">Load "{preset?.name}"?</h3>
+      <p class="preset-confirm-desc">
+        This will replace your current canvas. This action cannot be undone.
+      </p>
+      <div class="preset-confirm-actions">
+        <button
+          type="button"
+          onclick={() => (showPresetConfirm = null)}
+          class="btn-secondary">Cancel</button
+        >
+        <button
+          type="button"
+          onclick={() => loadPreset(showPresetConfirm!)}
+          class="btn-primary">Yes, Load Preset</button
+        >
+      </div>
+    </div>[36m
+  </div>[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\MarketingBuilderPage.svelte[39m:882:9
+[33mWarn[39m: `<div>` with a click handler must have an ARIA role
+https://svelte.dev/e/a11y_no_static_element_interactions (svelte)
+[36m      >
+        [35m<div
+          class="canvas-page-sheet"
+          style="width: {viewport === 'Mobile'
+            ? '375px'
+            : viewport === 'Tablet'
+              ? '540px'
+              : '1120px'}; min-height: 700px;"
+          use:dndzone={{
+            items: canvasElements,
+            flipDurationMs: 200,
+            dropTargetStyle: {
+              outline: "2px dashed hsl(var(--primary))",
+              outlineOffset: "-2px",
+              background: "hsl(var(--primary) / 0.04)",
+            },
+          }}
+          onconsider={(e) => handleDndConsider("root", e)}
+          onfinalize={(e) => handleDndFinalize("root", e)}
+          onclick={(e) => {
+            if (e.currentTarget === e.target) selectedElementId = null;
+          }}
+        >
+          {#each canvasElements as el (el.id)}
+            <CanvasNode
+              element={el}
+              {selectedElementId}
+              onSelect={(id) => (selectedElementId = id)}
+              onUpdateElement={updateElement}
+              onDelete={deleteElement}
+              onDuplicate={duplicateElement}
+              onDndConsider={handleDndConsider}
+              onDndFinalize={handleDndFinalize}
+            />
+          {/each}
+          {#if canvasElements.length === 0}
+            <div class="canvas-empty-state">
+              <div class="canvas-empty-icon">🎨</div>
+              <h3>Your canvas is empty</h3>
+              <p>
+                Choose a preset on the left to start with a full template,<br
+                />or click any element in the panel to add it.
+              </p>
+              <div class="canvas-empty-shortcuts">
+                <kbd>Space</kbd><span>+ drag to pan</span>
+                <kbd>Ctrl</kbd><span>+ scroll to zoom</span>
+                <kbd>Del</kbd><span>to delete selected</span>
+              </div>
+            </div>
+          {/if}
+        </div>[36m
+      </div>[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\MarketingBuilderPage.svelte[39m:936:9
+[33mWarn[39m: `<div>` with a mousedown handler must have an ARIA role
+https://svelte.dev/e/a11y_no_static_element_interactions (svelte)
+[36m      {#if isInPanMode}
+        [35m<div
+          style="position: absolute; inset: 0; z-index: 50; cursor: {isPanning
+            ? 'grabbing'
+            : 'grab'};"
+          onmousedown={handleViewportMouseDown}
+        ></div>[36m
+      {/if}[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\MarketingBuilderPage.svelte[39m:1258:13
+[33mWarn[39m: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+[36m          <div class="space-y-2 pt-2">
+            [35m<label class="text-sm font-medium">Social Share Image</label>[36m
+            <div[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\MarketingBuilderPage.svelte[39m:1378:3
+[33mWarn[39m: Elements with the 'dialog' interactive role must have a tabindex value
+https://svelte.dev/e/a11y_interactive_supports_focus (svelte)
+[36m{#if showShortcuts}
+  [35m<div
+    class="fixed inset-0 z-[200] bg-background/80 backdrop-blur-sm flex items-center justify-center p-4"
+    onclick={() => (showShortcuts = false)}
+    onkeydown={(e) => e.key === "Escape" && (showShortcuts = false)}
+    role="dialog"
+    aria-modal="true"
+    aria-label="Keyboard Shortcuts"
+  >
+    <div
+      class="bg-card w-full max-w-2xl rounded-xl border border-border/60 shadow-2xl overflow-hidden flex flex-col"
+      onclick={(e) => e.stopPropagation()}
+      onkeydown={(e) => e.stopPropagation()}
+      role="document"
+    >
+      <div
+        class="px-6 py-4 border-b border-border/60 flex items-center justify-between"
+      >
+        <h2 class="text-lg font-bold flex items-center gap-2">
+          <Keyboard class="size-5 text-primary" /> Keyboard Shortcuts
+        </h2>
+        <button
+          type="button"
+          onclick={() => (showShortcuts = false)}
+          class="text-muted-foreground hover:text-foreground">✕</button
+        >
+      </div>
+      <div class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-8 bg-muted/20">
+        <div>
+          <h3
+            class="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4"
+          >
+            Canvas Navigation
+          </h3>
+          <ul class="space-y-3 text-sm">
+            <li class="flex items-center justify-between">
+              <span>Select Tool</span>
+              <div class="flex gap-1">
+                <kbd
+                  class="px-2 py-1 rounded border border-border bg-card shadow-sm text-xs"
+                  >V</kbd
+                >
+              </div>
+            </li>
+            <li class="flex items-center justify-between">
+              <span>Pan Tool</span>
+              <div class="flex gap-1">
+                <kbd
+                  class="px-2 py-1 rounded border border-border bg-card shadow-sm text-xs"
+                  >H</kbd
+                >
+              </div>
+            </li>
+            <li class="flex items-center justify-between">
+              <span>Temp Pan</span>
+              <div class="flex gap-1">
+                <kbd
+                  class="px-2 py-1 rounded border border-border bg-card shadow-sm text-xs"
+                  >Space</kbd
+                > + Drag
+              </div>
+            </li>
+            <li class="flex items-center justify-between">
+              <span>Zoom In/Out</span>
+              <div class="flex gap-1">
+                <kbd
+                  class="px-2 py-1 rounded border border-border bg-card shadow-sm text-xs"
+                  >Ctrl/⌘</kbd
+                > + Scroll
+              </div>
+            </li>
+            <li class="flex items-center justify-between">
+              <span>Zoom In</span>
+              <div class="flex gap-1">
+                <kbd
+                  class="px-2 py-1 rounded border border-border bg-card shadow-sm text-xs"
+                  >Ctrl/⌘</kbd
+                >
+                +
+                <kbd
+                  class="px-2 py-1 rounded border border-border bg-card shadow-sm text-xs"
+                  >=</kbd
+                >
+              </div>
+            </li>
+            <li class="flex items-center justify-between">
+              <span>Zoom Out</span>
+              <div class="flex gap-1">
+                <kbd
+                  class="px-2 py-1 rounded border border-border bg-card shadow-sm text-xs"
+                  >Ctrl/⌘</kbd
+                >
+                +
+                <kbd
+                  class="px-2 py-1 rounded border border-border bg-card shadow-sm text-xs"
+                  >-</kbd
+                >
+              </div>
+            </li>
+            <li class="flex items-center justify-between">
+              <span>Reset Zoom</span>
+              <div class="flex gap-1">
+                <kbd
+                  class="px-2 py-1 rounded border border-border bg-card shadow-sm text-xs"
+                  >Ctrl/⌘</kbd
+                >
+                +
+                <kbd
+                  class="px-2 py-1 rounded border border-border bg-card shadow-sm text-xs"
+                  >0</kbd
+                >
+              </div>
+            </li>
+          </ul>
+        </div>
+        <div>
+          <h3
+            class="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4"
+          >
+            Element Actions
+          </h3>
+          <ul class="space-y-3 text-sm">
+            <li class="flex items-center justify-between">
+              <span>Undo</span>
+              <div class="flex gap-1">
+                <kbd
+                  class="px-2 py-1 rounded border border-border bg-card shadow-sm text-xs"
+                  >Ctrl/⌘</kbd
+                >
+                +
+                <kbd
+                  class="px-2 py-1 rounded border border-border bg-card shadow-sm text-xs"
+                  >Z</kbd
+                >
+              </div>
+            </li>
+            <li class="flex items-center justify-between">
+              <span>Redo</span>
+              <div class="flex gap-1">
+                <kbd
+                  class="px-2 py-1 rounded border border-border bg-card shadow-sm text-xs"
+                  >Ctrl/⌘</kbd
+                >
+                +
+                <kbd
+                  class="px-2 py-1 rounded border border-border bg-card shadow-sm text-xs"
+                  >Y</kbd
+                >
+              </div>
+            </li>
+            <li class="flex items-center justify-between">
+              <span>Duplicate</span>
+              <div class="flex gap-1">
+                <kbd
+                  class="px-2 py-1 rounded border border-border bg-card shadow-sm text-xs"
+                  >Ctrl/⌘</kbd
+                >
+                +
+                <kbd
+                  class="px-2 py-1 rounded border border-border bg-card shadow-sm text-xs"
+                  >D</kbd
+                >
+              </div>
+            </li>
+            <li class="flex items-center justify-between">
+              <span>Delete Element</span>
+              <div class="flex gap-1">
+                <kbd
+                  class="px-2 py-1 rounded border border-border bg-card shadow-sm text-xs"
+                  >Del / Backspace</kbd
+                >
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="px-6 py-4 border-t border-border/60 bg-card text-center">
+        <button
+          type="button"
+          onclick={() => (showShortcuts = false)}
+          class="btn-primary w-full sm:w-auto">Got it</button
+        >
+      </div>
+    </div>
+  </div>[36m
+{/if}[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\MarketingBuilderPage.svelte[39m:1386:5
+[33mWarn[39m: Non-interactive element `<div>` should not be assigned mouse or keyboard event listeners
+https://svelte.dev/e/a11y_no_noninteractive_element_interactions (svelte)
+[36m  >
+    [35m<div
+      class="bg-card w-full max-w-2xl rounded-xl border border-border/60 shadow-2xl overflow-hidden flex flex-col"
+      onclick={(e) => e.stopPropagation()}
+      onkeydown={(e) => e.stopPropagation()}
+      role="document"
+    >
+      <div
+        class="px-6 py-4 border-b border-border/60 flex items-center justify-between"
+      >
+        <h2 class="text-lg font-bold flex items-center gap-2">
+          <Keyboard class="size-5 text-primary" /> Keyboard Shortcuts
+        </h2>
+        <button
+          type="button"
+          onclick={() => (showShortcuts = false)}
+          class="text-muted-foreground hover:text-foreground">✕</button
+        >
+      </div>
+      <div class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-8 bg-muted/20">
+        <div>
+          <h3
+            class="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4"
+          >
+            Canvas Navigation
+          </h3>
+          <ul class="space-y-3 text-sm">
+            <li class="flex items-center justify-between">
+              <span>Select Tool</span>
+              <div class="flex gap-1">
+                <kbd
+                  class="px-2 py-1 rounded border border-border bg-card shadow-sm text-xs"
+                  >V</kbd
+                >
+              </div>
+            </li>
+            <li class="flex items-center justify-between">
+              <span>Pan Tool</span>
+              <div class="flex gap-1">
+                <kbd
+                  class="px-2 py-1 rounded border border-border bg-card shadow-sm text-xs"
+                  >H</kbd
+                >
+              </div>
+            </li>
+            <li class="flex items-center justify-between">
+              <span>Temp Pan</span>
+              <div class="flex gap-1">
+                <kbd
+                  class="px-2 py-1 rounded border border-border bg-card shadow-sm text-xs"
+                  >Space</kbd
+                > + Drag
+              </div>
+            </li>
+            <li class="flex items-center justify-between">
+              <span>Zoom In/Out</span>
+              <div class="flex gap-1">
+                <kbd
+                  class="px-2 py-1 rounded border border-border bg-card shadow-sm text-xs"
+                  >Ctrl/⌘</kbd
+                > + Scroll
+              </div>
+            </li>
+            <li class="flex items-center justify-between">
+              <span>Zoom In</span>
+              <div class="flex gap-1">
+                <kbd
+                  class="px-2 py-1 rounded border border-border bg-card shadow-sm text-xs"
+                  >Ctrl/⌘</kbd
+                >
+                +
+                <kbd
+                  class="px-2 py-1 rounded border border-border bg-card shadow-sm text-xs"
+                  >=</kbd
+                >
+              </div>
+            </li>
+            <li class="flex items-center justify-between">
+              <span>Zoom Out</span>
+              <div class="flex gap-1">
+                <kbd
+                  class="px-2 py-1 rounded border border-border bg-card shadow-sm text-xs"
+                  >Ctrl/⌘</kbd
+                >
+                +
+                <kbd
+                  class="px-2 py-1 rounded border border-border bg-card shadow-sm text-xs"
+                  >-</kbd
+                >
+              </div>
+            </li>
+            <li class="flex items-center justify-between">
+              <span>Reset Zoom</span>
+              <div class="flex gap-1">
+                <kbd
+                  class="px-2 py-1 rounded border border-border bg-card shadow-sm text-xs"
+                  >Ctrl/⌘</kbd
+                >
+                +
+                <kbd
+                  class="px-2 py-1 rounded border border-border bg-card shadow-sm text-xs"
+                  >0</kbd
+                >
+              </div>
+            </li>
+          </ul>
+        </div>
+        <div>
+          <h3
+            class="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4"
+          >
+            Element Actions
+          </h3>
+          <ul class="space-y-3 text-sm">
+            <li class="flex items-center justify-between">
+              <span>Undo</span>
+              <div class="flex gap-1">
+                <kbd
+                  class="px-2 py-1 rounded border border-border bg-card shadow-sm text-xs"
+                  >Ctrl/⌘</kbd
+                >
+                +
+                <kbd
+                  class="px-2 py-1 rounded border border-border bg-card shadow-sm text-xs"
+                  >Z</kbd
+                >
+              </div>
+            </li>
+            <li class="flex items-center justify-between">
+              <span>Redo</span>
+              <div class="flex gap-1">
+                <kbd
+                  class="px-2 py-1 rounded border border-border bg-card shadow-sm text-xs"
+                  >Ctrl/⌘</kbd
+                >
+                +
+                <kbd
+                  class="px-2 py-1 rounded border border-border bg-card shadow-sm text-xs"
+                  >Y</kbd
+                >
+              </div>
+            </li>
+            <li class="flex items-center justify-between">
+              <span>Duplicate</span>
+              <div class="flex gap-1">
+                <kbd
+                  class="px-2 py-1 rounded border border-border bg-card shadow-sm text-xs"
+                  >Ctrl/⌘</kbd
+                >
+                +
+                <kbd
+                  class="px-2 py-1 rounded border border-border bg-card shadow-sm text-xs"
+                  >D</kbd
+                >
+              </div>
+            </li>
+            <li class="flex items-center justify-between">
+              <span>Delete Element</span>
+              <div class="flex gap-1">
+                <kbd
+                  class="px-2 py-1 rounded border border-border bg-card shadow-sm text-xs"
+                  >Del / Backspace</kbd
+                >
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="px-6 py-4 border-t border-border/60 bg-card text-center">
+        <button
+          type="button"
+          onclick={() => (showShortcuts = false)}
+          class="btn-primary w-full sm:w-auto">Got it</button
+        >
+      </div>
+    </div>[36m
+  </div>[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\MarketingBuilderPage.svelte[39m:2062:3
+[33mWarn[39m: Unused CSS selector ".preset-confirm-icon"
+https://svelte.dev/e/css_unused_selector (svelte)
+[36m  }
+  [35m.preset-confirm-icon[36m {
+    font-size: 40px;[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\MarketingBuilderPage.svelte[39m:1358:5
+[31mError[39m: Object literal may only specify known properties, and '"isOpen"' does not exist in type '$$ComponentProps'. (ts)
+[36m  <AiDesignModal
+    [35misOpen[36m={showAiModal}
+    onClose={() => (showAiModal = false)}[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\MarketingBuilderPage.svelte[39m:1360:15
+[31mError[39m: Parameter 'elements' implicitly has an 'any' type. (ts)
+[36m    onClose={() => (showAiModal = false)}
+    onApply={([35melements[36m) => {
+      canvasElements = elements;[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\MarketingFormsPage.svelte[39m:44:9
+[33mWarn[39m: Using `on:click` to listen to the click event is deprecated. Use the event attribute `onclick` instead
+https://svelte.dev/e/event_directive_deprecated (svelte)
+[36m        type="button"
+        [35mon:click={() => (saved = true)}[36m
+        class="btn-app-primary"[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\MarketingFormsPage.svelte[39m:89:19
+[33mWarn[39m: Using `on:click` to listen to the click event is deprecated. Use the event attribute `onclick` instead
+https://svelte.dev/e/event_directive_deprecated (svelte)
+[36m                  type="button"
+                  [35mon:click={() => toggle(action)}[36m
+                  class="ml-auto text-xs text-red-500">Remove</button[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\MarketingFormsPage.svelte[39m:112:13
+[33mWarn[39m: Using `on:click` to listen to the click event is deprecated. Use the event attribute `onclick` instead
+https://svelte.dev/e/event_directive_deprecated (svelte)
+[36m            type="button"
+            [35mon:click={() => toggle(action)}[36m
+            class={`flex items-center gap-3 rounded-xl border p-4 text-left transition ${actions.includes(action) ? "border-primary bg-primary/5" : "border-border/60 hover:bg-muted/20"}`}[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\MarketingFormsWorkspace.svelte[39m:80:63
+[33mWarn[39m: A form label must be associated with a control
+https://svelte.dev/e/a11y_label_has_associated_control (svelte)
+[36m          <label class="block text-sm font-medium text-foreground">Supporting copy<textarea rows="2" class="mt-2 w-full resize-none rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20">Leave your details and we will send the offer to WhatsApp.</textarea></label>
+          <div><div class="flex items-center justify-between">[35m<label class="text-sm font-medium text-foreground">Fields</label>[36m<span class="text-[11px] text-muted-foreground">{fields.length} selected</span></div><div class="mt-2 space-y-2">{#each fields as field}<div class="flex items-center gap-2 rounded-lg border border-border/60 bg-muted/20 px-3 py-2.5"><GripVertical class="h-4 w-4 text-muted-foreground/50" /><span class="flex-1 text-sm text-foreground">{field}</span>{#if field === "Phone number"}<span class="text-[10px] font-medium text-primary">Required</span>{:else}<button type="button" aria-label={`Remove ${field}`} onclick={() => removeField(field)} class="text-muted-foreground hover:text-red-500"><X class="h-3.5 w-3.5" /></button>{/if}</div>{/each}</div><div class="relative mt-2"><select bind:value={activeField} onchange={(event) => addField(event.currentTarget.value)} class="w-full appearance-none rounded-lg border border-dashed border-primary/40 bg-primary/5 px-3 py-2.5 pr-9 text-xs font-medium text-primary outline-none"><option value="">Add a field</option>{#each fieldOptions as field}<option value={field}>Add {field}</option>{/each}</select><Plus class="pointer-events-none absolute right-3 top-2.5 h-4 w-4 text-primary" /></div></div>
+        </div>[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\MarketingFormsWorkspace.svelte[39m:86:1350
+[33mWarn[39m: `<svelte:component>` is deprecated in runes mode — components are dynamic by default
+https://svelte.dev/e/svelte_component_deprecated (svelte)
+[36m        <div class="border-b border-border/60 px-5 py-4"><div class="flex items-center justify-between"><div><p class="text-[10px] font-semibold uppercase tracking-[0.18em] text-primary">02 · Automate</p><h3 class="mt-1 text-base font-bold text-foreground">After submission</h3></div><span class="rounded-full bg-primary/10 px-2 py-1 text-[10px] font-semibold text-primary">{actions.length} actions</span></div><p class="mt-1 text-xs text-muted-foreground">Choose what Bizflow should do, in order, when someone submits.</p></div>
+        <div class="p-5"><div class="space-y-2">{#each actions as action, index}<div class="flex items-center gap-3 rounded-lg border border-primary/20 bg-primary/5 px-3 py-3"><span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">{index + 1}</span><span class="flex-1 text-sm font-medium text-foreground">{action}</span><button type="button" aria-label={`Remove ${action}`} onclick={() => toggleAction(action)} class="text-xs text-muted-foreground hover:text-red-500"><X class="h-3.5 w-3.5" /></button></div>{/each}</div><div class="my-4 flex items-center gap-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground"><span class="h-px flex-1 bg-border"></span>Add an action<span class="h-px flex-1 bg-border"></span></div><div class="grid gap-2 sm:grid-cols-2">{#each actionOptions as action}<button type="button" onclick={() => toggleAction(action.name)} class={`flex items-center gap-2 rounded-lg border px-3 py-2.5 text-left transition ${actions.includes(action.name) ? "border-primary/30 bg-muted/40" : "border-border/60 hover:border-primary/40 hover:bg-muted/20"}`}><span class={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md ${actions.includes(action.name) ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>[35m<svelte:component this={action.icon} class="h-3.5 w-3.5" />[36m</span><span class="min-w-0"><span class="block truncate text-xs font-medium text-foreground">{action.name}</span><span class="mt-0.5 block truncate text-[10px] text-muted-foreground">{action.detail}</span></span>{#if actions.includes(action.name)}<Check class="ml-auto h-3.5 w-3.5 shrink-0 text-primary" />{:else}<CirclePlus class="ml-auto h-3.5 w-3.5 shrink-0 text-muted-foreground" />{/if}</button>{/each}</div></div>
+      </section>[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\RegisterPage.svelte[39m:181:17
+[31mError[39m: Type 'string' is not assignable to type 'number'. (ts)
+[36m                required
+                [35mminlength[36m="8"
+                type="password"[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\VTUPage.svelte[39m:179:20
+[33mWarn[39m: `<svelte:component>` is deprecated in runes mode — components are dynamic by default
+https://svelte.dev/e/svelte_component_deprecated (svelte)
+[36m                  class="flex h-8 w-8 items-center justify-center rounded-lg bg-muted/70 text-primary"
+                  >[35m<svelte:component
+                    this={service.icon}
+                    class="h-4 w-4"
+                  />[36m</span
+                ><span class="flex-1"[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\VTUPricingPage.svelte[39m:90:20
+[33mWarn[39m: Buttons and links should either contain text or have an `aria-label`, `aria-labelledby` or `title` attribute
+https://svelte.dev/e/a11y_consider_explicit_label (svelte)
+[36m                ><td class="p-4"
+                  >[35m<button
+                    type="button"
+                    on:click={() =>
+                      (services[index].enabled = !service.enabled)}
+                    class={`relative h-5 w-9 rounded-full ${service.enabled ? "bg-primary" : "bg-muted"}`}
+                    ><span
+                      class={`absolute top-1 h-3 w-3 rounded-full bg-white ${service.enabled ? "left-5" : "left-1"}`}
+                    ></span></button
+                  >[36m</td
+                ></tr[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\VTUPricingPage.svelte[39m:92:21
+[33mWarn[39m: Using `on:click` to listen to the click event is deprecated. Use the event attribute `onclick` instead
+https://svelte.dev/e/event_directive_deprecated (svelte)
+[36m                    type="button"
+                    [35mon:click={() =>
+                      (services[index].enabled = !service.enabled)}[36m
+                    class={`relative h-5 w-9 rounded-full ${service.enabled ? "bg-primary" : "bg-muted"}`}[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\VTUPricingPage.svelte[39m:105:31
+[33mWarn[39m: Using `on:click` to listen to the click event is deprecated. Use the event attribute `onclick` instead
+https://svelte.dev/e/event_directive_deprecated (svelte)
+[36m      <div class="flex justify-end border-t border-border/60 p-5">
+        <button type="button" [35mon:click={save}[36m class="btn-app-primary"
+          ><Save class="h-4 w-4" /> Save pricing rules</button[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\WalletPage.svelte[39m:120:13
+[33mWarn[39m: Using `on:click` to listen to the click event is deprecated. Use the event attribute `onclick` instead
+https://svelte.dev/e/event_directive_deprecated (svelte)
+[36m            type="button"
+            [35mon:click={() => (provider = "Monnify")}[36m
+            class={`flex w-full items-center justify-between rounded-xl border p-4 text-left ${provider === "Monnify" ? "border-primary bg-primary/5" : "border-border/60"}`}[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\WalletPage.svelte[39m:134:13
+[33mWarn[39m: Using `on:click` to listen to the click event is deprecated. Use the event attribute `onclick` instead
+https://svelte.dev/e/event_directive_deprecated (svelte)
+[36m            type="button"
+            [35mon:click={() => (provider = "Flutterwave")}[36m
+            class={`flex w-full items-center justify-between rounded-xl border p-4 text-left ${provider === "Flutterwave" ? "border-primary bg-primary/5" : "border-border/60"}`}[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\WalletPage.svelte[39m:151:13
+[33mWarn[39m: Using `on:click` to listen to the click event is deprecated. Use the event attribute `onclick` instead
+https://svelte.dev/e/event_directive_deprecated (svelte)
+[36m            type="button"
+            [35mon:click={() => (connected = true)}[36m
+            class="btn-app-primary mt-4 w-full"[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\WhatsAppBusinessPage.svelte[39m:319:11
+[33mWarn[39m: Using `on:click` to listen to the click event is deprecated. Use the event attribute `onclick` instead
+https://svelte.dev/e/event_directive_deprecated (svelte)
+[36m          type="button"
+          [35mon:click={() => disconnectExtension("whatsapp-business")}[36m
+          class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-red-500 hover:bg-red-500/10"[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\WhatsAppPage.svelte[39m:346:17
+[33mWarn[39m: Using `on:click` to listen to the click event is deprecated. Use the event attribute `onclick` instead
+https://svelte.dev/e/event_directive_deprecated (svelte)
+[36m                disabled={bizPhone.replace(/\D/g, "").length < 7}
+                [35mon:click={() => (bizStep = 2)}[36m
+                class="btn-app-primary w-full disabled:opacity-40 disabled:cursor-not-allowed"[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\WhatsAppPage.svelte[39m:377:21
+[33mWarn[39m: Using `on:input` to listen to the input event is deprecated. Use the event attribute `oninput` instead
+https://svelte.dev/e/event_directive_deprecated (svelte)
+[36m                    value={digit}
+                    [35mon:input={(e) => bizOtpInput(i, e.currentTarget.value)}[36m
+                    on:keydown={(e) => bizOtpKeydown(i, e)}[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\WhatsAppPage.svelte[39m:378:21
+[33mWarn[39m: Using `on:keydown` to listen to the keydown event is deprecated. Use the event attribute `onkeydown` instead
+https://svelte.dev/e/event_directive_deprecated (svelte)
+[36m                    on:input={(e) => bizOtpInput(i, e.currentTarget.value)}
+                    [35mon:keydown={(e) => bizOtpKeydown(i, e)}[36m
+                    class="h-12 w-12 rounded-xl border border-border bg-background text-center text-lg font-bold text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition font-mono"[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\WhatsAppPage.svelte[39m:386:19
+[33mWarn[39m: Using `on:click` to listen to the click event is deprecated. Use the event attribute `onclick` instead
+https://svelte.dev/e/event_directive_deprecated (svelte)
+[36m                  type="button"
+                  [35mon:click={() => (bizStep = 1)}[36m
+                  class="btn-app-secondary flex-1"[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\WhatsAppPage.svelte[39m:393:19
+[33mWarn[39m: Using `on:click` to listen to the click event is deprecated. Use the event attribute `onclick` instead
+https://svelte.dev/e/event_directive_deprecated (svelte)
+[36m                  disabled={bizOtp.some((d) => !d) || bizVerifying}
+                  [35mon:click={bizVerifyOtp}[36m
+                  class="btn-app-primary flex-1 disabled:opacity-40 disabled:cursor-not-allowed"[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\WhatsAppPage.svelte[39m:491:19
+[33mWarn[39m: Using `on:click` to listen to the click event is deprecated. Use the event attribute `onclick` instead
+https://svelte.dev/e/event_directive_deprecated (svelte)
+[36m                  type="button"
+                  [35mon:click={() => (bizStep = 2)}[36m
+                  class="btn-app-secondary flex-1"[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\WhatsAppPage.svelte[39m:497:19
+[33mWarn[39m: Using `on:click` to listen to the click event is deprecated. Use the event attribute `onclick` instead
+https://svelte.dev/e/event_directive_deprecated (svelte)
+[36m                  type="button"
+                  [35mon:click={() => (bizStep = 4)}[36m
+                  class="btn-app-primary flex-1"[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\WhatsAppPage.svelte[39m:548:17
+[33mWarn[39m: Using `on:click` to listen to the click event is deprecated. Use the event attribute `onclick` instead
+https://svelte.dev/e/event_directive_deprecated (svelte)
+[36m                type="button"
+                [35mon:click={bizComplete}[36m
+                class="btn-app-primary w-full"[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\WhatsAppPage.svelte[39m:698:19
+[33mWarn[39m: Using `on:click` to listen to the click event is deprecated. Use the event attribute `onclick` instead
+https://svelte.dev/e/event_directive_deprecated (svelte)
+[36m                  type="button"
+                  [35mon:click={() => (selectedModel = model.id)}[36m
+                  class={`flex items-start gap-3 rounded-xl border p-4 text-left transition ${selectedModel === model.id ? "border-primary bg-primary/5 ring-1 ring-primary/20" : "border-border/60 hover:border-primary/40 hover:bg-muted/20"}`}[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\WhatsAppPage.svelte[39m:833:19
+[33mWarn[39m: Using `on:click` to listen to the click event is deprecated. Use the event attribute `onclick` instead
+https://svelte.dev/e/event_directive_deprecated (svelte)
+[36m                  type="button"
+                  [35mon:click={() => toggleWorkflow(i)}[36m
+                  class="flex w-full items-center gap-3 rounded-xl border border-border/60 p-3 text-left transition hover:bg-muted/20"[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\WhatsAppPage.svelte[39m:838:22
+[33mWarn[39m: `<svelte:component>` is deprecated in runes mode — components are dynamic by default
+https://svelte.dev/e/svelte_component_deprecated (svelte)
+[36m                    class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"
+                    >[35m<svelte:component
+                      this={workflow.icon}
+                      class="h-4 w-4"
+                    />[36m</span
+                  >[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\WhatsAppPage.svelte[39m:897:15
+[33mWarn[39m: Using `on:submit` to listen to the submit event is deprecated. Use the event attribute `onsubmit` instead
+https://svelte.dev/e/event_directive_deprecated (svelte)
+[36m              class="flex gap-2 border-t border-border/60 p-4"
+              [35mon:submit|preventDefault={sendTestMessage}[36m
+            >[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\WhatsAppPage.svelte[39m:964:15
+[33mWarn[39m: Using `on:click` to listen to the click event is deprecated. Use the event attribute `onclick` instead
+https://svelte.dev/e/event_directive_deprecated (svelte)
+[36m              type="button"
+              [35mon:click={saveBotSettings}[36m
+              class="btn-app-primary text-sm"[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\WhatsAppPage.svelte[39m:983:13
+[33mWarn[39m: Using `on:click` to listen to the click event is deprecated. Use the event attribute `onclick` instead
+https://svelte.dev/e/event_directive_deprecated (svelte)
+[36m            type="button"
+            [35mon:click={() => disconnectExtension("whatsapp-business")}[36m
+            class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-red-500 hover:bg-red-500/10 transition"[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\WhatsAppPage.svelte[39m:1102:15
+[33mWarn[39m: Using `on:click` to listen to the click event is deprecated. Use the event attribute `onclick` instead
+https://svelte.dev/e/event_directive_deprecated (svelte)
+[36m              disabled={!custBusinessName.trim()}
+              [35mon:click={() => (custStep = 2)}[36m
+              class="btn-app-primary w-full disabled:opacity-40 disabled:cursor-not-allowed"[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\WhatsAppPage.svelte[39m:1194:17
+[33mWarn[39m: Using `on:click` to listen to the click event is deprecated. Use the event attribute `onclick` instead
+https://svelte.dev/e/event_directive_deprecated (svelte)
+[36m                type="button"
+                [35mon:click={() => (custStep = 1)}[36m
+                class="btn-app-secondary flex-1"[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\WhatsAppPage.svelte[39m:1200:17
+[33mWarn[39m: Using `on:click` to listen to the click event is deprecated. Use the event attribute `onclick` instead
+https://svelte.dev/e/event_directive_deprecated (svelte)
+[36m                type="button"
+                [35mon:click={() => (custStep = 3)}[36m
+                class="btn-app-primary flex-1"[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\WhatsAppPage.svelte[39m:1248:15
+[33mWarn[39m: Using `on:click` to listen to the click event is deprecated. Use the event attribute `onclick` instead
+https://svelte.dev/e/event_directive_deprecated (svelte)
+[36m              type="button"
+              [35mon:click={custComplete}[36m
+              class="btn-app-primary w-full"[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\pages\WhatsAppPage.svelte[39m:1406:11
+[33mWarn[39m: Using `on:click` to listen to the click event is deprecated. Use the event attribute `onclick` instead
+https://svelte.dev/e/event_directive_deprecated (svelte)
+[36m          type="button"
+          [35mon:click={() => disconnectExtension("whatsapp-customers")}[36m
+          class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-red-500 hover:bg-red-500/10 transition"[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\routes\(app)\team\[id]\+page.svelte[39m:6:17
+[31mError[39m: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'. (ts)
+[36m
+<TeamMemberPage [35mmemberId[36m={page.params.id} />[39m
+
+c:\@Projects\@ABJ Creative\bizflow\bizflow-webapp\[32msrc\routes\invite\[id]\+page.svelte[39m:6:19
+[31mError[39m: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'. (ts)
+[36m
+<AcceptInvitePage [35minviteId[36m={page.params.id} />[39m
+
+====================================
+[31msvelte-check found 11 errors and 66 warnings in 22 files
+[39m
