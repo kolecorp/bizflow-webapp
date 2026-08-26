@@ -12,7 +12,7 @@ dist
 dist-ssr
 *.local
 build
-.svelte-kit/*
+.svelte-kit
 
 .clasprc.json
 
