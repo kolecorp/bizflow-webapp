@@ -12,7 +12,7 @@
     SunMedium,
     Monitor,
   } from "@lucide/svelte";
-  import { mode } from "mode-watcher";
+  import { mode, setMode } from "mode-watcher";
 
   let open = $derived($modals.settings);
   let activeSection = $derived($modals.settingsSection);
@@ -86,17 +86,17 @@
           <div class="mt-5 grid grid-cols-3 gap-2">
             <button
               type="button"
-              onclick={() => mode.set("light")}
+              onclick={() => setMode("light")}
               class={`flex flex-col items-center gap-2 rounded-lg border p-3 text-xs ${mode.current === "light" ? "border-primary bg-primary/5 text-primary" : "border-border/60 text-muted-foreground"}`}
               ><SunMedium class="h-4 w-4" />Light</button
             ><button
               type="button"
-              onclick={() => mode.set("dark")}
+              onclick={() => setMode("dark")}
               class={`flex flex-col items-center gap-2 rounded-lg border p-3 text-xs ${mode.current === "dark" ? "border-primary bg-primary/5 text-primary" : "border-border/60 text-muted-foreground"}`}
               ><Moon class="h-4 w-4" />Dark</button
             ><button
               type="button"
-              onclick={() => mode.set("system")}
+              onclick={() => setMode("system")}
               class="flex flex-col items-center gap-2 rounded-lg border border-border/60 p-3 text-xs text-muted-foreground"
               ><Monitor class="h-4 w-4" />System</button
             >

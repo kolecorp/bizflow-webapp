@@ -14,6 +14,7 @@
   import NoiseOverlay from "$lib/components/landing/NoiseOverlay.svelte";
   import { Button } from "$lib/components/ui/button";
   import * as Card from "$lib/components/ui/card";
+  import BetaPill from "$lib/components/ui/beta-pill.svelte";
 
   function handleGetStarted() {
     goto("/register");
@@ -112,11 +113,14 @@
       <div class="relative z-10 mx-auto max-w-7xl px-6 sm:px-8">
         <div class="grid items-top gap-12 lg:grid-cols-2 lg:gap-16">
           <div>
-            <div
-              class="mb-6 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.18em] text-primary"
-            >
-              <span class="h-px w-8 bg-primary"></span>
-              One calm place to run the day
+            <div class="mb-6 flex flex-wrap items-center gap-3">
+              <BetaPill />
+              <div
+                class="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.18em] text-primary"
+              >
+                <span class="h-px w-8 bg-primary"></span>
+                One calm place to run the day
+              </div>
             </div>
 
             <h1

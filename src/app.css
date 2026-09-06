@@ -1,4 +1,9 @@
 @import "tailwindcss";
+
+@keyframes loading-slide {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(420%); }
+}
 @import "tw-animate-css";
 @import "shadcn-svelte/tailwind.css";
 @import "@fontsource-variable/inter";
@@ -1045,4 +1050,33 @@
   .dark .glow-panel {
     @apply bg-card/80;
   }
+}
+
+/* Modern Transparent Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--muted-foreground) / 0.2);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--muted-foreground) / 0.4);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--muted-foreground) / 0.3);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--muted-foreground) / 0.5);
 }

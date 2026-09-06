@@ -13,7 +13,6 @@
   import { modals } from "$lib/stores/modals";
   import { authStore } from "$lib/stores/auth";
   import { initializeTeam, teamMembers } from "$lib/stores/team";
-  import { resolveRoleKey } from "$lib/stores/permissions";
   import {
     notificationItems,
     notificationUnreadCount,
@@ -29,12 +28,22 @@
     Calendar,
     UsersRound,
   } from "@lucide/svelte";
+  import { Skeleton } from "$lib/components/ui/skeleton";
+
+  let teamLoading = $state(true);
 
   let canManageTeam = $derived(
-    resolveRoleKey($authStore.user?.role ?? "") === "manager",
+    $authStore.user?.role === "OWNER" || $authStore.user?.role === "ADMIN",
   );
 
-  onMount(() => initializeTeam($authStore.user));
+  onMount(async () => {
+    try {
+      await initializeTeam($authStore.user);
+    } finally {
+      teamLoading = false;
+    }
+  });
+
 </script>
 
 <AppShell>
@@ -128,11 +137,15 @@
         </div>
         <div>
           <p class="text-sm font-semibold text-foreground">Team access</p>
-          <p class="mt-1 text-xs text-muted-foreground">
-            {$teamMembers.length}
-            {$teamMembers.length === 1 ? "person has" : "people have"} access to
-            this workspace. Review roles, invite staff, or remove access.
-          </p>
+          {#if teamLoading}
+            <Skeleton class="mt-2 h-4 w-72" />
+          {:else}
+            <p class="mt-1 text-xs text-muted-foreground">
+              {$teamMembers.length}
+              {$teamMembers.length === 1 ? "person has" : "people have"} access to
+              this workspace. Review roles, invite staff, or remove access.
+            </p>
+          {/if}
         </div>
       </div>
       <Button type="button" variant="outline" onclick={() => goto("/team")}>

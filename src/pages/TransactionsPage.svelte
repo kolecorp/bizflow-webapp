@@ -2,7 +2,7 @@
   import AppShell from "$lib/components/layout/AppShell.svelte";
   import GlowStatCard from "$lib/components/ui/GlowStatCard.svelte";
   import NoiseOverlay from "$lib/components/landing/NoiseOverlay.svelte";
-  import { canAccess, resolveRoleKey } from "$lib/stores/permissions";
+  import { canAccess } from "$lib/stores/permissions";
   import { authStore } from "$lib/stores/auth";
   import {
     transactions,
@@ -53,7 +53,7 @@
   $: userRole = $authStore.user?.role ?? "staff";
   $: userId = $authStore.user?.id ?? "";
   $: userName = $authStore.user?.name ?? "Staff";
-  $: isManager = resolveRoleKey(userRole) === "manager";
+  $: isManager = userRole === "OWNER" || userRole === "ADMIN";
   $: canCreate = canAccess(userRole, "transactions.create");
   $: canDelete = canAccess(userRole, "transactions.delete");
   $: canViewAudit = canAccess(userRole, "reports.view");

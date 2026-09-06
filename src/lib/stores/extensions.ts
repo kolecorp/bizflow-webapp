@@ -1,6 +1,7 @@
 import { writable, derived, get } from "svelte/store";
 import { browser } from "$app/environment";
 import type { Component } from "svelte";
+import { authStore, handleUnauthorized, type AuthUser } from "$lib/stores/auth";
 import {
   Printer,
   Monitor,
@@ -16,7 +17,16 @@ import {
   Megaphone,
   LayoutTemplate,
   ListChecks,
+  BarChart3,
+  ShieldCheck,
+  QrCode,
+  Package,
+  CalendarClock,
+  Globe,
 } from "@lucide/svelte";
+
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000/api/v1";
 
 export type ExtensionStatus = "active" | "inactive" | "coming-soon";
 
@@ -26,10 +36,8 @@ export interface Extension {
   description: string;
   icon: Component<{ class?: string }>;
   status: ExtensionStatus;
-  category: "channels" | "operations" | "automation";
-  /** Whether the extension has completed its onboarding/setup flow */
+  category: "channels" | "operations" | "automation" | "analytics";
   connected?: boolean;
-  /** Arbitrary configuration data stored after onboarding completes */
   connectionData?: Record<string, unknown>;
   navItems?: {
     label: string;
@@ -38,13 +46,16 @@ export interface Extension {
     permission: string;
     badge?: string;
   }[];
-  /** When true, the extension page is server-rendered and loaded on activation */
   serverRendered?: boolean;
+  subscribed?: boolean;
+  price?: string;
+  expiresAt?: string;
 }
 
 const defaultExtensions: Extension[] = [
+  // ── Channels ──
   {
-    id: "whatsapp-business",
+    id: "WHATSAPP_BUSINESS",
     name: "WhatsApp for Business",
     description:
       "Receive instant sales alerts, daily summaries, and manage approvals directly from WhatsApp.",
@@ -57,12 +68,14 @@ const defaultExtensions: Extension[] = [
         label: "WhatsApp Business",
         path: "/extensions/whatsapp/business",
         icon: MessageCircle,
-        permission: "extensions.whatsapp",
+        permission: "dashboard.view",
       },
     ],
+    price: "₦3,000/mo",
+    subscribed: false,
   },
   {
-    id: "whatsapp-customers",
+    id: "WHATSAPP_CUSTOMERS",
     name: "WhatsApp for Customers",
     description:
       "Automated receipts, order updates, and a direct support channel for your customers.",
@@ -75,49 +88,121 @@ const defaultExtensions: Extension[] = [
         label: "WhatsApp Customers",
         path: "/extensions/whatsapp/customers",
         icon: Smartphone,
-        permission: "extensions.whatsapp-customers",
+        permission: "dashboard.view",
       },
     ],
+    price: "₦2,500/mo",
+    subscribed: false,
   },
   {
-    id: "vtu",
+    id: "SMS",
+    name: "SMS Notifications",
+    description:
+      "Send transaction confirmations, receipts, and promotional alerts to customers and staff via SMS.",
+    icon: Mail,
+    status: "inactive",
+    category: "channels",
+    serverRendered: true,
+    navItems: [
+      {
+        label: "SMS Dashboard",
+        path: "/extensions/sms",
+        icon: Mail,
+        permission: "dashboard.view",
+      },
+      {
+        label: "SMS Templates",
+        path: "/extensions/sms/templates",
+        icon: Settings2,
+        permission: "dashboard.view",
+      },
+    ],
+    price: "₦2,000/mo",
+    subscribed: false,
+  },
+  {
+    id: "USSD",
+    name: "USSD Access",
+    description:
+      "Allow staff and customers to log transactions, check balances, and interact with Bizflow via USSD codes.",
+    icon: Hash,
+    status: "inactive",
+    category: "channels",
+    serverRendered: true,
+    navItems: [
+      {
+        label: "USSD Dashboard",
+        path: "/extensions/ussd",
+        icon: Hash,
+        permission: "dashboard.view",
+      },
+    ],
+    price: "₦3,500/mo",
+    subscribed: false,
+  },
+  {
+    id: "WEB_STOREFRONT",
+    name: "Web Storefront",
+    description:
+      "Launch a public-facing online store connected to your Bizflow inventory for walk-in and delivery orders.",
+    icon: Globe,
+    status: "inactive",
+    category: "channels",
+    serverRendered: true,
+    navItems: [
+      {
+        label: "Storefront",
+        path: "/extensions/storefront",
+        icon: Globe,
+        permission: "dashboard.view",
+      },
+    ],
+    price: "₦6,000/mo",
+    subscribed: false,
+  },
+  // ── Operations ──
+  {
+    id: "VTU",
     name: "VTU Platform",
-    description: "Sell airtime, data, electricity, cable TV, and education pins from one connected platform.",
+    description:
+      "Sell airtime, data, electricity, cable TV, and education pins from one connected platform.",
     icon: SmartphoneNfc,
     status: "inactive",
     category: "operations",
     serverRendered: true,
     navItems: [
-      { label: "VTU Dashboard", path: "/extensions/vtu", icon: SmartphoneNfc, permission: "dashboard.view" },
-      { label: "VTU Rules & Pricing", path: "/extensions/vtu/pricing", icon: Settings2, permission: "dashboard.view" },
+      {
+        label: "VTU Dashboard",
+        path: "/extensions/vtu",
+        icon: SmartphoneNfc,
+        permission: "dashboard.view",
+      },
     ],
+    price: "₦5,000/mo",
+    subscribed: false,
   },
   {
-    id: "wallet",
+    id: "WALLET",
     name: "Wallet & Payments",
-    description: "Manage your business wallet, customer balances, funding, and payment providers.",
+    description:
+      "Manage your business wallet, customer balances, funding, and payment providers.",
     icon: WalletCards,
-    status: "inactive",
+    status: "active", // Always active basic wallet
     category: "operations",
     serverRendered: true,
-    navItems: [{ label: "Wallet & Payments", path: "/extensions/wallet", icon: WalletCards, permission: "dashboard.view" }],
-  },
-  {
-    id: "marketing",
-    name: "Marketing Studio",
-    description: "Create campaigns, landing pages, forms, coupons, and WhatsApp-led customer journeys.",
-    icon: Megaphone,
-    status: "inactive",
-    category: "automation",
-    serverRendered: true,
     navItems: [
-      { label: "Marketing", path: "/extensions/marketing", icon: Megaphone, permission: "dashboard.view" },
-      { label: "Landing Page Builder", path: "/extensions/marketing/builder", icon: LayoutTemplate, permission: "dashboard.view" },
-      { label: "Forms & Lead Actions", path: "/extensions/marketing/forms", icon: ListChecks, permission: "dashboard.view" },
+      {
+        label: "Wallet & Payments",
+        path: "/extensions/wallet",
+        icon: WalletCards,
+        permission: "wallet.view",
+      },
     ],
+    price: "Free",
+    subscribed: true,
   },
   {
-    id: "printing",
+    id: "PRINTING",
     name: "Printing & Print Agent",
     description:
       "Print queue management, printer health monitoring, and the Bizflow Print Agent integration.",
@@ -138,9 +223,11 @@ const defaultExtensions: Extension[] = [
         permission: "printing.settings",
       },
     ],
+    price: "₦1,500/mo",
+    subscribed: false,
   },
   {
-    id: "computers",
+    id: "COMPUTERS",
     name: "Computer Management",
     description:
       "Track workstation sessions, rental fees, and file transfers to customer PCs.",
@@ -155,9 +242,11 @@ const defaultExtensions: Extension[] = [
         permission: "computers.view",
       },
     ],
+    price: "₦2,000/mo",
+    subscribed: false,
   },
   {
-    id: "support-chat",
+    id: "SUPPORT_CHAT",
     name: "Support & Staff Chat",
     description:
       "Internal team messaging and customer ticket management across operations.",
@@ -172,9 +261,72 @@ const defaultExtensions: Extension[] = [
         permission: "support.view",
       },
     ],
+    price: "Free",
+    subscribed: true,
   },
   {
-    id: "automations",
+    id: "INVENTORY_PRO",
+    name: "Inventory Pro",
+    description:
+      "Advanced stock management with barcode scanning, batch tracking, low-stock alerts.",
+    icon: Package,
+    status: "inactive",
+    category: "operations",
+    serverRendered: true,
+    navItems: [
+      {
+        label: "Inventory Pro",
+        path: "/extensions/inventory",
+        icon: Package,
+        permission: "dashboard.view",
+      },
+    ],
+    price: "₦4,500/mo",
+    subscribed: false,
+  },
+  {
+    id: "QR_PAYMENTS",
+    name: "QR Code Payments",
+    description:
+      "Generate dynamic QR codes for instant NFC-free payments at point of sale.",
+    icon: QrCode,
+    status: "inactive",
+    category: "operations",
+    serverRendered: true,
+    navItems: [
+      {
+        label: "QR Payments",
+        path: "/extensions/qr-payments",
+        icon: QrCode,
+        permission: "dashboard.view",
+      },
+    ],
+    price: "₦1,000/mo",
+    subscribed: false,
+  },
+  // ── Automation ──
+  {
+    id: "MARKETING",
+    name: "Marketing Studio",
+    description:
+      "Create campaigns, landing pages, forms, coupons, and WhatsApp-led customer journeys.",
+    icon: Megaphone,
+    status: "inactive",
+    category: "automation",
+    serverRendered: true,
+    navItems: [
+      {
+        label: "Marketing",
+        path: "/extensions/marketing",
+        icon: Megaphone,
+        permission: "dashboard.view",
+      },
+    ],
+    price: "₦8,500/mo",
+    subscribed: false,
+  },
+  {
+    id: "AUTOMATIONS",
     name: "Workflow Automations",
     description:
       "Set up automated workflows triggered by transactions, stock levels, or schedules.",
@@ -187,97 +339,246 @@ const defaultExtensions: Extension[] = [
         label: "Automations",
         path: "/extensions/automations",
         icon: Zap,
-        permission: "extensions.automations",
+        permission: "dashboard.view",
       },
     ],
+    price: "₦4,000/mo",
+    subscribed: false,
   },
   {
-    id: "sms",
-    name: "SMS Notifications",
+    id: "SCHEDULED_REPORTS",
+    name: "Scheduled Reports",
     description:
-      "Send transaction confirmations and alerts to customers and staff via SMS.",
-    icon: Mail,
-    status: "coming-soon",
-    category: "channels",
+      "Automatically generate and deliver daily, weekly, or monthly business reports.",
+    icon: CalendarClock,
+    status: "inactive",
+    category: "automation",
     serverRendered: true,
+    navItems: [
+      {
+        label: "Scheduled Reports",
+        path: "/extensions/reports",
+        icon: CalendarClock,
+        permission: "dashboard.view",
+      },
+    ],
+    price: "₦2,000/mo",
+    subscribed: false,
   },
   {
-    id: "ussd",
-    name: "USSD Access",
+    id: "FRAUD_SHIELD",
+    name: "Fraud Shield",
     description:
-      "Allow staff to log transactions and check balances via USSD codes on any phone.",
-    icon: Hash,
-    status: "coming-soon",
-    category: "channels",
+      "Real-time anomaly detection for transactions, flagging suspicious activity and preventing loss.",
+    icon: ShieldCheck,
+    status: "inactive",
+    category: "automation",
     serverRendered: true,
+    navItems: [
+      {
+        label: "Fraud Shield",
+        path: "/extensions/fraud-shield",
+        icon: ShieldCheck,
+        permission: "dashboard.view",
+      },
+    ],
+    price: "₦3,000/mo",
+    subscribed: false,
+  },
+  // ── Analytics ──
+  {
+    id: "ADVANCED_ANALYTICS",
+    name: "Advanced Analytics",
+    description:
+      "Deep business intelligence dashboards with trend analysis, customer insights, and revenue forecasting.",
+    icon: BarChart3,
+    status: "inactive",
+    category: "analytics",
+    serverRendered: true,
+    navItems: [
+      {
+        label: "Analytics",
+        path: "/extensions/analytics",
+        icon: BarChart3,
+        permission: "dashboard.view",
+      },
+    ],
+    price: "₦7,000/mo",
+    subscribed: false,
   },
 ];
 
-const extensionStorageKey = "bizflow.extensions";
+export const extensions = writable<Extension[]>([...defaultExtensions]);
+export const staffAccessMap = writable<Record<string, string[]>>({}); // extensionId -> array of userIds with access
+export const installedExtensionIds = writable<string[]>([]);
+export const extensionsLoaded = writable(false);
 
-function getInitialExtensions() {
-  if (!browser) return defaultExtensions;
+function getAuthHeader(): Record<string, string> {
+  if (typeof window === "undefined") return {};
+  const token = get(authStore).accessToken;
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+/** Sync extensions and access from the API */
+export async function syncExtensions(user: AuthUser | null) {
+  if (!user || typeof window === "undefined") {
+    extensionsLoaded.set(true);
+    return;
+  }
+
+  extensionsLoaded.set(false);
 
   try {
-    const saved = JSON.parse(localStorage.getItem(extensionStorageKey) ?? "{}") as Record<string, Partial<Extension>>;
-    return defaultExtensions.map((extension) => ({
-      ...extension,
-      ...(saved[extension.id] ?? {}),
-      icon: extension.icon,
-      navItems: extension.navItems,
-    }));
-  } catch {
-    return defaultExtensions;
+    const isOwnerOrAdmin = user.role === "OWNER" || user.role === "ADMIN";
+
+    // Determine which endpoint to call based on role
+    const endpoint = isOwnerOrAdmin ? "/extensions" : "/extensions/me";
+    const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+      headers: { ...getAuthHeader() },
+    });
+    handleUnauthorized(res);
+
+    if (res.ok) {
+      const data = await res.json();
+
+      // data format depends on endpoint.
+      // If /extensions (OWNER/ADMIN): returns full list with isInstalled boolean (and staffAccess if I added it)
+      // If /extensions/me (STAFF): returns only the ones installed AND accessible by staff.
+
+      extensions.update((exts) => {
+        return exts.map((baseExt) => {
+          // Find matching backend info
+          const backendExt = Array.isArray(data)
+            ? data.find(
+                (d: any) => d.extension === baseExt.id || d.id === baseExt.id,
+              )
+            : null;
+
+          if (isOwnerOrAdmin) {
+            // Owner/Admin sees everything. Status is 'active' if installed.
+            const isInstalled = backendExt ? backendExt.isInstalled : false;
+
+            // Staff can be populated if we want, but for now we just mark installed.
+            return {
+              ...baseExt,
+              status:
+                isInstalled || baseExt.price === "Free" ? "active" : "inactive",
+              subscribed: isInstalled || baseExt.price === "Free",
+            };
+          } else {
+            // Staff only sees what is returned by /extensions/me
+            const hasAccess = !!backendExt;
+            return {
+              ...baseExt,
+              status: hasAccess ? "active" : "inactive",
+              subscribed: hasAccess,
+            };
+          }
+        });
+      });
+      installedExtensionIds.set(
+        data
+          .filter((item: any) => item.isInstalled)
+          .map((item: any) => item.extension),
+      );
+    }
+  } catch (error) {
+    console.error("Failed to sync extensions", error);
+  } finally {
+    extensionsLoaded.set(true);
   }
 }
 
-export const extensions = writable<Extension[]>(getInitialExtensions());
-
-if (browser) {
-  extensions.subscribe((currentExtensions) => {
-    const persisted = Object.fromEntries(
-      currentExtensions.map((extension) => [extension.id, {
-        status: extension.status,
-        connected: extension.connected,
-        connectionData: extension.connectionData,
-      }]),
-    );
-    localStorage.setItem(extensionStorageKey, JSON.stringify(persisted));
+export async function syncStaffExtensionAccess() {
+  if (typeof window === "undefined") return;
+  const res = await fetch(`${API_BASE_URL}/extensions/access`, {
+    headers: getAuthHeader(),
   });
+  handleUnauthorized(res);
+  if (!res.ok) throw new Error("Failed to load extension access");
+  const rows = (await res.json()) as { extension: string; userId: string }[];
+  const next: Record<string, string[]> = {};
+  for (const row of rows)
+    next[row.extension] = [...(next[row.extension] ?? []), row.userId];
+  staffAccessMap.set(next);
 }
 
 export const activeExtensions = derived(extensions, ($ext) =>
-  $ext.filter((e) => e.status === "active")
+  $ext.filter((e) => e.status === "active"),
 );
 
 export const extensionNavItems = derived(activeExtensions, ($active) =>
-  $active.flatMap((ext) => ext.navItems ?? [])
+  $active.flatMap((ext) => ext.navItems ?? []),
 );
 
-export function toggleExtension(id: string) {
-  extensions.update((exts) =>
-    exts.map((e) => {
-      if (e.id === id && e.status !== "coming-soon") {
-        return { ...e, status: e.status === "active" ? "inactive" : "active" } as Extension;
-      }
-      return e;
-    })
-  );
+/** Send install request to API */
+export async function toggleExtension(id: string) {
+  // If it's active, uninstall. If inactive, install.
+  const ext = get(extensions).find((e) => e.id === id);
+  if (!ext) return;
+
+  const isInstalling = ext.status !== "active";
+
+  try {
+    if (isInstalling) {
+      const response = await fetch(`${API_BASE_URL}/extensions/install`, {
+        method: "POST",
+        headers: { ...getAuthHeader(), "Content-Type": "application/json" },
+        body: JSON.stringify({ extension: id }),
+      });
+      handleUnauthorized(response);
+      if (!response.ok) throw new Error("Failed to install extension");
+    } else {
+      const response = await fetch(`${API_BASE_URL}/extensions/${id}`, {
+        method: "DELETE",
+        headers: { ...getAuthHeader() },
+      });
+      handleUnauthorized(response);
+      if (!response.ok) throw new Error("Failed to uninstall extension");
+    }
+
+    // Optimistic update
+    extensions.update((exts) =>
+      exts.map((e) =>
+        e.id === id
+          ? {
+              ...e,
+              status: isInstalling ? "active" : "inactive",
+              subscribed: isInstalling,
+            }
+          : e,
+      ),
+    );
+  } catch (error) {
+    console.error("Failed to toggle extension", error);
+  }
 }
 
-/** Mark an extension as connected with its configuration data */
-export function connectExtension(id: string, data: Record<string, unknown> = {}) {
+export function subscribeExtension(id: string) {
+  toggleExtension(id); // For now, subscription is just an install action
+}
+
+export function getDaysRemaining(expiresAt?: string): number | null {
+  if (!expiresAt) return null;
+  const diff = new Date(expiresAt).getTime() - Date.now();
+  if (diff <= 0) return 0;
+  return Math.ceil(diff / (1000 * 60 * 60 * 24));
+}
+
+export function connectExtension(
+  id: string,
+  data: Record<string, unknown> = {},
+) {
   extensions.update((exts) =>
     exts.map((e) => {
       if (e.id === id) {
         return { ...e, connected: true, connectionData: data };
       }
       return e;
-    })
+    }),
   );
 }
 
-/** Disconnect an extension, clearing its configuration data */
 export function disconnectExtension(id: string) {
   extensions.update((exts) =>
     exts.map((e) => {
@@ -285,12 +586,54 @@ export function disconnectExtension(id: string) {
         return { ...e, connected: false, connectionData: undefined };
       }
       return e;
-    })
+    }),
   );
 }
 
-/** Get a single extension by its ID */
-export function getExtension(id: string): Extension | undefined {
-  return get(extensions).find((e) => e.id === id);
+/** Grant a staff member access to an installed extension (OWNER/ADMIN only) */
+export async function grantStaffExtensionAccess(
+  extensionId: string,
+  userId: string,
+) {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/extensions/${extensionId}/access/${userId}`,
+      {
+        method: "POST",
+        headers: { ...getAuthHeader() },
+      },
+    );
+    if (!response.ok) throw new Error("Failed to grant extension access");
+    staffAccessMap.update((map) => ({
+      ...map,
+      [extensionId]: [...(map[extensionId] ?? []), userId],
+    }));
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 }
 
+/** Revoke a staff member access to an installed extension (OWNER/ADMIN only) */
+export async function revokeStaffExtensionAccess(
+  extensionId: string,
+  userId: string,
+) {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/extensions/${extensionId}/access/${userId}`,
+      {
+        method: "DELETE",
+        headers: { ...getAuthHeader() },
+      },
+    );
+    if (!response.ok) throw new Error("Failed to revoke extension access");
+    staffAccessMap.update((map) => ({
+      ...map,
+      [extensionId]: (map[extensionId] ?? []).filter((id) => id !== userId),
+    }));
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}

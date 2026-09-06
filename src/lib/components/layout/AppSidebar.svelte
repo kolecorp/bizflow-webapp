@@ -1,11 +1,22 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import { authStore } from "$lib/stores/auth";
-  import { canAccess } from "$lib/stores/permissions";
+  import { authStore, signOut } from "$lib/stores/auth";
+  import { canAccess, hasPermission } from "$lib/stores/permissions";
+  import type { Permission } from "$lib/stores/permissions";
   import { appNavItems, isNavActive } from "$lib/config/navigation";
   import { activeExtensions } from "$lib/stores/extensions";
-  import { Lock, Puzzle, UserRound } from "@lucide/svelte";
+  import {
+    Puzzle,
+    UserRound,
+    Settings,
+    LogOut,
+    ChevronsUpDown,
+    HelpCircle,
+    Bell,
+  } from "@lucide/svelte";
   import NoiseOverlay from "$lib/components/landing/NoiseOverlay.svelte";
+  import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
+  import BetaPill from "$lib/components/ui/beta-pill.svelte";
 
   let { activePath = "" }: { activePath?: string } = $props();
 
@@ -43,6 +54,10 @@
     );
   });
 
+  let visibleExtensionItems = $derived(
+    extensionItems.filter((item) => hasPermission(item.permission as Permission)),
+  );
+
   function navigate(path: string) {
     goto(path);
   }
@@ -64,11 +79,14 @@
       />
     </div>
     <div class="min-w-0">
-      <p
-        class="font-heading text-lg font-extrabold tracking-tight text-foreground"
-      >
-        Bizflow
-      </p>
+      <div class="flex items-center gap-2">
+        <p
+          class="font-heading text-lg font-extrabold tracking-tight text-foreground"
+        >
+          Bizflow
+        </p>
+        <BetaPill class="hidden sm:inline-flex" />
+      </div>
       <p
         class="truncate text-[10px] uppercase tracking-[0.2em] text-muted-foreground"
       >
@@ -82,6 +100,8 @@
   >
     <!-- Core sections -->
     {#each [...coreSections.entries()] as [section, items]}
+      {@const visibleItems = items.filter((item) => canAccess(userRole, item.permission))}
+      {#if visibleItems.length > 0}
       <div class="app-sidebar__section">
         <div
           class="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground"
@@ -89,29 +109,21 @@
           {section}
         </div>
         <div class="space-y-0.5">
-          {#each items as item}
-            {@const allowed = canAccess(userRole, item.permission)}
+          {#each visibleItems as item}
             <button
               type="button"
-              disabled={!allowed}
-              onclick={() => allowed && navigate(item.path)}
+              onclick={() => navigate(item.path)}
               class={`app-sidebar__item flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-left text-sm font-medium transition ${
                 isNavActive(item.path, activePath)
                   ? "bg-primary/10 text-primary"
-                  : allowed
-                    ? "text-muted-foreground hover:bg-muted/70 hover:text-foreground"
-                    : "text-muted-foreground/50 cursor-not-allowed"
+                  : "text-muted-foreground hover:bg-muted/70 hover:text-foreground"
               }`}
             >
               <span class="flex items-center gap-3 min-w-0">
-                {#if !allowed}
-                  <Lock class="h-4 w-4 shrink-0" />
-                {:else}
-                  <item.icon class="h-4 w-4 shrink-0" />
-                {/if}
+                <item.icon class="h-4 w-4 shrink-0" />
                 <span class="truncate">{item.label}</span>
               </span>
-              {#if item.badge && allowed}
+              {#if item.badge}
                 <span
                   class="rounded-md bg-background/70 px-1.5 py-0.5 text-[10px] font-semibold text-primary"
                 >
@@ -122,10 +134,11 @@
           {/each}
         </div>
       </div>
+      {/if}
     {/each}
 
     <!-- Extension items -->
-    {#if extensionItems.length > 0}
+    {#if visibleExtensionItems.length > 0}
       <div class="app-sidebar__section">
         <div
           class="mb-2 flex items-center gap-1.5 px-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground"
@@ -134,7 +147,7 @@
           Extensions
         </div>
         <div class="space-y-0.5">
-          {#each extensionItems as item}
+          {#each visibleExtensionItems as item}
             <button
               type="button"
               onclick={() => navigate(item.path)}
@@ -162,22 +175,74 @@
     {/if}
   </div>
 
-  <div class="relative z-10 shrink-0 border-t border-border/60 p-4">
-    <div
-      class="flex items-center gap-3 rounded-xl border border-border/60 bg-card/60 p-3"
-    >
-      <div
-        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-xs font-bold text-primary"
+  <div class="relative z-10 shrink-0 border-t border-border/60 p-3">
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger
+        class="flex w-full items-center gap-3 rounded-xl p-2.5 text-left transition hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        {#if userInitials}{userInitials}{:else}<UserRound
-            class="h-4 w-4"
-          />{/if}
-      </div>
-      <div class="min-w-0">
-        <p class="truncate text-sm font-semibold text-foreground">{userName}</p>
-        <p class="truncate text-xs text-muted-foreground">{userRole}</p>
-        <p class="truncate text-[10px] text-muted-foreground/80">{userEmail}</p>
-      </div>
-    </div>
+        <div
+          class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary"
+        >
+          {#if userInitials}{userInitials}{:else}<UserRound
+              class="h-4 w-4"
+            />{/if}
+        </div>
+        <div class="min-w-0 flex-1">
+          <p class="truncate text-sm font-semibold text-foreground">
+            {userName}
+          </p>
+          <p class="truncate text-[11px] text-muted-foreground">{userEmail}</p>
+        </div>
+        <ChevronsUpDown class="h-4 w-4 shrink-0 text-muted-foreground" />
+      </DropdownMenu.Trigger>
+
+      <DropdownMenu.Content
+        side="right"
+        align="end"
+        sideOffset={12}
+        class="w-64 rounded-xl p-1.5"
+      >
+        <div class="px-3 py-2.5">
+          <p class="text-sm font-semibold text-foreground">{userName}</p>
+          <p class="text-xs text-muted-foreground">{userEmail}</p>
+          <span
+            class="mt-1.5 inline-block rounded-md bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary"
+            >{userRole}</span
+          >
+        </div>
+        <DropdownMenu.Separator />
+        <DropdownMenu.Group>
+          <DropdownMenu.Item
+            class="gap-2.5 rounded-lg py-2"
+            onclick={() => navigate("/settings")}
+          >
+            <Settings class="h-4 w-4 text-muted-foreground" />
+            Settings
+          </DropdownMenu.Item>
+          <DropdownMenu.Item
+            class="gap-2.5 rounded-lg py-2"
+            onclick={() => navigate("/notifications")}
+          >
+            <Bell class="h-4 w-4 text-muted-foreground" />
+            Notifications
+          </DropdownMenu.Item>
+          <DropdownMenu.Item class="gap-2.5 rounded-lg py-2">
+            <HelpCircle class="h-4 w-4 text-muted-foreground" />
+            Help & Support
+          </DropdownMenu.Item>
+        </DropdownMenu.Group>
+        <DropdownMenu.Separator />
+        <DropdownMenu.Item
+          class="gap-2.5 rounded-lg py-2 text-destructive focus:text-destructive"
+          onclick={() => {
+            signOut();
+            navigate("/login");
+          }}
+        >
+          <LogOut class="h-4 w-4" />
+          Sign out
+        </DropdownMenu.Item>
+      </DropdownMenu.Content>
+    </DropdownMenu.Root>
   </div>
 </aside>

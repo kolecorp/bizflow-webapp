@@ -3,7 +3,6 @@
   import {
     Moon,
     SunMedium,
-    BarChart3,
     Sparkles,
     ArrowRight,
     ArrowLeft,
@@ -14,6 +13,9 @@
   import { Input } from "$lib/components/ui/input";
   import { Label } from "$lib/components/ui/label";
   import { Button } from "$lib/components/ui/button";
+  import BetaPill from "$lib/components/ui/beta-pill.svelte";
+  import PasswordInput from "$lib/components/ui/password-input.svelte";
+  import { toast } from "svelte-sonner";
 
   const featureTags = [
     "Live orders",
@@ -23,8 +25,8 @@
     "Sales insights",
   ];
 
-  let email = "manager@cafe.io";
-  let password = "password123";
+  let email = "owner@acme.test";
+  let password = "SecurePass1!";
   let loading = false;
 
   async function handleSubmit() {
@@ -33,6 +35,12 @@
     try {
       await signIn({ email, password });
       goto("/dashboard");
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Unable to sign in.";
+      toast.error("Sign in failed", {
+        description: message,
+      });
     } finally {
       loading = false;
     }
@@ -87,11 +95,14 @@
             />
           </div>
           <div class="leading-none">
-            <p
-              class="font-heading text-[1.6rem] font-black tracking-[-0.06em] text-foreground"
-            >
-              Bizflow
-            </p>
+            <div class="flex items-center gap-2">
+              <p
+                class="font-heading text-[1.6rem] font-black tracking-[-0.06em] text-foreground"
+              >
+                Bizflow
+              </p>
+              <BetaPill class="-translate-y-px" />
+            </div>
             <p
               class="mt-1 text-[10px] uppercase tracking-[0.22em] text-muted-foreground"
             >
@@ -155,12 +166,13 @@
                 class="h-9 w-9 object-contain"
               />
             </div>
-            <div>
+            <div class="flex items-center gap-2">
               <p
                 class="font-heading text-[1.45rem] font-black tracking-[-0.06em] text-foreground"
               >
                 Bizflow
               </p>
+              <BetaPill class="hidden sm:inline-flex" />
             </div>
           </div>
 
@@ -198,10 +210,9 @@
                   >Forgot?</a
                 >
               </div>
-              <Input
+              <PasswordInput
                 id="password"
                 bind:value={password}
-                type="password"
                 autocomplete="current-password"
                 placeholder="••••••••"
               />

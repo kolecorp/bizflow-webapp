@@ -13,6 +13,8 @@
   import NotificationBell from "./NotificationBell.svelte";
   import { modals } from "$lib/stores/modals";
 
+  import { authStore } from "$lib/stores/auth";
+
   let {
     title = "Admin",
     subtitle = "Operations Studio",
@@ -29,13 +31,16 @@
 
   const isDarkMode = () => mode.current === "dark";
   let businessMenuOpen = $state(false);
-  let selectedBusiness = $state("Cafe Bloom");
-  let selectedRole = $state(subtitle);
-  const businesses = [
-    { name: "Cafe Bloom", detail: "Lagos · Main workspace" },
-    { name: "QuickPrint Center", detail: "Lagos · Operations workspace" },
-  ];
-  const roles = ["Business Owner", "Operations Manager", "Staff"];
+  let selectedBusiness = $derived($authStore.user?.business?.name ?? "Bizflow Workspace");
+  let selectedRole = $derived($authStore.user?.role ?? "STAFF");
+  
+  let businesses = $derived(
+    $authStore.user?.business
+      ? [{ name: $authStore.user.business.name, detail: "Main workspace" }]
+      : []
+  );
+  
+  const roles = ["OWNER", "ADMIN", "STAFF"];
 
   function handleWindowKeydown(event: KeyboardEvent) {
     if (event.key === "Escape") businessMenuOpen = false;
@@ -106,7 +111,7 @@
               <button
                 type="button"
                 onclick={() => {
-                  selectedBusiness = business.name;
+                  // selectedBusiness = business.name;
                   businessMenuOpen = false;
                 }}
                 class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-muted"
@@ -137,7 +142,7 @@
               <button
                 type="button"
                 onclick={() => {
-                  selectedRole = role;
+                  // selectedRole = role;
                   businessMenuOpen = false;
                 }}
                 class="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm hover:bg-muted"

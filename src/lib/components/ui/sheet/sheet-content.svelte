@@ -53,3 +53,11 @@
 		{/if}
 	</SheetPrimitive.Content>
 </SheetPortal>
+
+<style>
+  /* Allow floating sheet variant to override fixed inset positioning */
+  :global([data-slot="sheet-content"].sheet-floating[data-side="right"]) {
+    inset-y: unset !important;
+    height: auto !important;
+  }
+</style>

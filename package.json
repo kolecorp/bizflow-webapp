@@ -59,8 +59,10 @@
     "@tiptap/pm": "^3.30.3",
     "@tiptap/starter-kit": "^3.30.3",
     "chart.js": "^4.5.1",
+    "driver.js": "^1.8.0",
     "firebase": "^12.17.1",
     "lucide-svelte": "^1.0.1",
+    "rxjs": "^7.8.2",
     "svelte-dnd-action": "^0.9.79",
     "zod": "^4.4.3"
   }

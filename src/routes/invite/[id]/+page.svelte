@@ -3,4 +3,4 @@
   import AcceptInvitePage from "../../../pages/AcceptInvitePage.svelte";
 </script>
 
-<AcceptInvitePage inviteId={page.params.id} />
+<AcceptInvitePage inviteId={page.params.id || ""} />

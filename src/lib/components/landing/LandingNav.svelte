@@ -3,6 +3,7 @@
   import { Moon, SunMedium } from "@lucide/svelte";
   import { mode, toggleMode } from "mode-watcher";
   import { Button } from "$lib/components/ui/button";
+  import BetaPill from "$lib/components/ui/beta-pill.svelte";
 
   let { active = "" }: { active?: string } = $props();
 
@@ -29,16 +30,20 @@
     <button
       type="button"
       onclick={() => navigate("/")}
-      class="flex items-center gap-1 transition hover:opacity-80"
+      class="flex items-center gap-2 transition hover:opacity-80"
     >
-       <img
-          src="/cafe-logo.png"
-          alt="Bizflow logo"
-          class="h-14 w-14 object-contain"
-        />
-      <span class="font-heading text-xl font-black tracking-[-0.04em] text-foreground"
-        >Bizflow</span
-      >
+      <img
+        src="/cafe-logo.png"
+        alt="Bizflow logo"
+        class="h-14 w-14 object-contain"
+      />
+      <div class="flex items-center gap-2">
+        <span
+          class="font-heading text-xl font-black tracking-[-0.04em] text-foreground"
+          >Bizflow</span
+        >
+        <BetaPill class="hidden sm:inline-flex" />
+      </div>
     </button>
 
     <div class="hidden items-center gap-8 md:flex">

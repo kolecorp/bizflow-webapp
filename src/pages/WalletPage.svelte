@@ -9,6 +9,11 @@
     Plus,
     WalletCards,
   } from "@lucide/svelte";
+  import FundWalletModal from "$lib/components/modals/FundWalletModal.svelte";
+  import CustomerBalancesModal from "$lib/components/modals/CustomerBalancesModal.svelte";
+
+  let fundWalletModalOpen = $state(false);
+  let customerBalancesModalOpen = $state(false);
   let provider = $state("Monnify");
   let connected = $state(false);
   let fundingAmount = $state(10000);
@@ -50,7 +55,10 @@
             ><WalletCards class="h-5 w-5" /></span
           >
         </div>
-        <button type="button" class="btn-app-primary mt-5 text-xs"
+        <button
+          type="button"
+          class="btn-app-primary mt-5 text-xs"
+          onclick={() => (fundWalletModalOpen = true)}
           ><Plus class="h-4 w-4" /> Fund business wallet</button
         >
       </div>
@@ -73,6 +81,7 @@
         <button
           type="button"
           class="mt-5 text-xs font-semibold text-primary hover:underline"
+          onclick={() => (customerBalancesModalOpen = true)}
           >View customer balances</button
         >
       </div>
@@ -117,7 +126,7 @@
         <div class="mt-5 space-y-3">
           <button
             type="button"
-            on:click={() => (provider = "Monnify")}
+            onclick={() => (provider = "Monnify")}
             class={`flex w-full items-center justify-between rounded-xl border p-4 text-left ${provider === "Monnify" ? "border-primary bg-primary/5" : "border-border/60"}`}
             ><span
               ><span class="block font-semibold text-foreground">Monnify</span
@@ -131,7 +140,7 @@
             ></button
           ><button
             type="button"
-            on:click={() => (provider = "Flutterwave")}
+            onclick={() => (provider = "Flutterwave")}
             class={`flex w-full items-center justify-between rounded-xl border p-4 text-left ${provider === "Flutterwave" ? "border-primary bg-primary/5" : "border-border/60"}`}
             ><span
               ><span class="block font-semibold text-foreground"
@@ -148,7 +157,7 @@
             /></label
           ><button
             type="button"
-            on:click={() => (connected = true)}
+            onclick={() => (connected = true)}
             class="btn-app-primary mt-4 w-full"
             ><WalletCards class="h-4 w-4" />
             {connected ? "Provider connected" : `Connect ${provider}`}</button
@@ -190,5 +199,18 @@
         </div>
       </div>
     </div>
-  </div></AppShell
->
+  </div>
+</AppShell>
+
+<FundWalletModal
+  open={fundWalletModalOpen}
+  onOpenChange={(isOpen) => (fundWalletModalOpen = isOpen)}
+  onConfirm={(amount, method) => {
+    fundWalletModalOpen = false;
+  }}
+/>
+
+<CustomerBalancesModal
+  open={customerBalancesModalOpen}
+  onOpenChange={(isOpen) => (customerBalancesModalOpen = isOpen)}
+/>

@@ -74,3 +74,18 @@
 - Moved the dashboard header into the content column beside the sidebar.
 - Sidebar now begins at the app viewport top, has no sticky offset or top margin, and spans the full desktop viewport height.
 - Desktop app frame uses a flush 248px rail with dashboard content starting at the rail boundary.
+
+## 2026-08-28
+
+- Implemented `ExtensionPaymentModal` to handle premium extension subscriptions.
+- Pivoted "AI Tracking" to a business "Activity Log" (Audit Trail) and moved it to the Workspace section.
+- Added `FundWalletModal` and `CustomerBalancesModal` to `WalletPage` for a complete UI.
+- Wired up "Change provider" and "View all" interactions in the VTU page.
+- Converted Extension Payment from modal to a floating right-side Sheet with rounded borders.
+- Added `subscribed`, `price`, and `expiresAt` fields to the Extension data model.
+- Built out SMS, USSD, Web Storefront, Inventory Pro, QR Code Payments, Scheduled Reports, Fraud Shield, and Advanced Analytics extensions.
+- Added a new "Analytics" extension category.
+- Rebuilt the Extensions page with a search bar, Browse/Installed tabs, and a DRY snippet-based category grid.
+- Installed tab shows subscription expiry countdown, free-forever badges, and per-extension activate/deactivate controls.
+- Replaced sidebar user avatar block with a professional DropdownMenu (pops out right) with Settings, Notifications, Help, and Sign Out.
+- Added global transparent scrollbar styling to `app.css`.

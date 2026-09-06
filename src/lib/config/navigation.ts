@@ -1,4 +1,7 @@
 import type { Permission } from "$lib/stores/permissions";
+import { get } from "svelte/store";
+import { extensionNavItems } from "$lib/stores/extensions";
+import { hasPermission } from "$lib/stores/permissions";
 import type { Component } from "svelte";
 import {
   LayoutGrid,
@@ -59,25 +62,24 @@ export const appNavItems: NavItem[] = [
     section: "Reports",
   },
   {
-    label: "AI Tracking",
+    label: "Activity Log",
     path: "/ai-tracking",
     icon: TerminalSquare,
     permission: "ai-tracking.view",
-    badge: "Dev",
-    section: "System",
+    section: "Workspace",
   },
   {
     label: "Extensions",
     path: "/extensions",
     icon: Puzzle,
-    permission: "dashboard.view",
+    permission: "extensions.manage",
     section: "System",
   },
   {
     label: "Settings",
     path: "/settings",
     icon: Settings,
-    permission: "dashboard.view",
+    permission: "settings.view",
     section: "System",
   },
   {
@@ -105,4 +107,51 @@ export function isNavActive(path: string, currentPath: string): boolean {
     return currentPath === path;
   }
   return currentPath === path || currentPath.startsWith(path + "/");
+}
+
+export function permissionForPath(path: string): Permission | null {
+  if (path === "/dashboard" || path === "/overview") return "dashboard.view";
+  if (path === "/transactions" || path.startsWith("/transactions/")) {
+    return "transactions.view";
+  }
+  if (path === "/inventory" || path.startsWith("/inventory/")) {
+    return "inventory.view";
+  }
+  if (path === "/services" || path.startsWith("/services/")) {
+    return "services.view";
+  }
+  if (path === "/printing" || path.startsWith("/printing/")) {
+    return "printing.view";
+  }
+  if (path === "/computers" || path.startsWith("/computers/")) {
+    return "computers.view";
+  }
+  if (path === "/support" || path.startsWith("/support/")) {
+    return "support.view";
+  }
+  if (path === "/ai-tracking" || path.startsWith("/ai-tracking/")) {
+    return "ai-tracking.view";
+  }
+  if (path === "/settings" || path.startsWith("/settings/")) {
+    return "settings.view";
+  }
+  if (path === "/reports" || path.startsWith("/reports/"))
+    return "reports.view";
+  if (path === "/team" || path.startsWith("/team/")) return "team.manage";
+  if (path === "/extensions") return "extensions.manage";
+  if (path.startsWith("/extensions/")) {
+    const extensionItem = get(extensionNavItems).find(
+      (item) => path === item.path || path.startsWith(`${item.path}/`),
+    );
+    if (
+      !extensionItem ||
+      !hasPermission(extensionItem.permission as Permission)
+    ) {
+      return "extensions.manage";
+    }
+  }
+  if (path === "/extensions/wallet" || path.startsWith("/extensions/wallet/")) {
+    return "wallet.view";
+  }
+  return null;
 }

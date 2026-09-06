@@ -1,160 +1,213 @@
-import { writable } from "svelte/store";
+import { get, writable } from "svelte/store";
 import type { AuthUser } from "$lib/stores/auth";
+import { authStore } from "$lib/stores/auth";
 
-export type TeamRole = string;
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000/api/v1";
+
+export type TeamRole = "STAFF" | "ADMIN" | "OWNER";
 export type TeamStatus = "Active" | "Invited";
 
 export interface TeamMember {
   id: string;
   name: string;
   email: string;
-  role: TeamRole | "Business Owner";
+  role: TeamRole;
   status: TeamStatus;
   joinedAt: string;
 }
 
-const TEAM_KEY = "cafe-management-team";
-const ROLES_KEY = "cafe-management-team-roles";
-const WORKSPACE_KEY = "cafe-management-workspace";
+export interface PermissionCatalogItem {
+  code: string;
+  area: string;
+  action: string;
+}
+
 const members = writable<TeamMember[]>([]);
-const roles = writable<string[]>([
-  "Staff",
-  "Receptionist",
-  "Operations Manager",
-]);
+const roles = writable<string[]>(["STAFF", "ADMIN", "OWNER"]);
 const workspaceName = writable("your business");
 
-function persist(nextMembers: TeamMember[]) {
-  if (typeof window !== "undefined") {
-    window.localStorage.setItem(TEAM_KEY, JSON.stringify(nextMembers));
-  }
+function getAuthHeader(): Record<string, string> {
+  if (typeof window === "undefined") return {};
+  const token = get(authStore).accessToken;
+  return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-export function initializeTeam(owner: AuthUser | null, name?: string) {
+export async function initializeTeam(owner: AuthUser | null, name?: string) {
   if (typeof window === "undefined" || !owner) return;
+  if (name) workspaceName.set(name);
 
-  const savedWorkspaceName = name || window.localStorage.getItem(WORKSPACE_KEY);
-  if (savedWorkspaceName) {
-    workspaceName.set(savedWorkspaceName);
-    window.localStorage.setItem(WORKSPACE_KEY, savedWorkspaceName);
-  }
-  const savedRoles = window.localStorage.getItem(ROLES_KEY);
-  if (savedRoles) {
-    try {
-      const parsedRoles = JSON.parse(savedRoles) as string[];
-      if (Array.isArray(parsedRoles) && parsedRoles.length > 0)
-        roles.set(parsedRoles);
-    } catch {
-      // Recreate the default role list when saved state is malformed.
-    }
-  }
-
-  const saved = window.localStorage.getItem(TEAM_KEY);
-  if (saved) {
-    try {
-      const parsed = JSON.parse(saved) as TeamMember[];
-      if (Array.isArray(parsed)) {
-        members.set(parsed);
-        return;
-      }
-    } catch {
-      // Recreate the local demo team when saved state is malformed.
-    }
-  }
-
-  const ownerMember: TeamMember = {
-    id: owner.id,
-    name: owner.name,
-    email: owner.email,
-    role: "Business Owner",
-    status: "Active",
-    joinedAt: new Date().toISOString(),
-  };
-  members.set([ownerMember]);
-  persist([ownerMember]);
+  await loadTeam();
 }
 
-export function loadTeam() {
+export async function loadTeam() {
   if (typeof window === "undefined") return;
-  const saved = window.localStorage.getItem(TEAM_KEY);
-  if (saved) {
-    try {
-      const parsed = JSON.parse(saved) as TeamMember[];
-      if (Array.isArray(parsed)) members.set(parsed);
-    } catch {
-      members.set([]);
+  try {
+    const res = await fetch(`${API_BASE_URL}/team`, {
+      headers: { ...getAuthHeader() },
+    });
+    if (res.ok) {
+      const data = await res.json();
+
+      const mappedMembers: TeamMember[] = [
+        ...data.members.map((m: any) => ({
+          id: m.id,
+          name: m.name,
+          email: m.email,
+          role: m.role,
+          status: "Active",
+          joinedAt: m.createdAt,
+        })),
+        ...data.pendingInvitations.map((inv: any) => ({
+          id: inv.id, // we use invitation ID as temporary ID
+          name: "Pending...",
+          email: inv.email,
+          role: inv.role,
+          status: "Invited",
+          joinedAt: inv.createdAt,
+        })),
+      ];
+
+      members.set(mappedMembers);
     }
+  } catch (error) {
+    console.error("Failed to load team", error);
   }
-  const savedName = window.localStorage.getItem(WORKSPACE_KEY);
-  if (savedName) workspaceName.set(savedName);
 }
 
-export function inviteMember(input: {
+export async function inviteMember(input: {
   name: string;
   email: string;
-  role: TeamRole;
+  role: TeamRole | string;
 }) {
-  const member: TeamMember = {
-    id: `team-${Date.now()}`,
-    ...input,
-    status: "Invited",
-    joinedAt: new Date().toISOString(),
+  try {
+    const res = await fetch(`${API_BASE_URL}/team/invitations`, {
+      method: "POST",
+      headers: { ...getAuthHeader(), "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: input.email,
+        role: input.role.toUpperCase(),
+      }),
+    });
+
+    if (res.ok) {
+      await loadTeam(); // Reload to get the new pending invitation
+      return true;
+    } else {
+      const err = await res.json();
+      throw new Error(err.message || "Failed to send invitation");
+    }
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+
+export async function removeMember(id: string, isInvitation: boolean = false) {
+  try {
+    if (isInvitation) {
+      await fetch(`${API_BASE_URL}/team/invitations/${id}`, {
+        method: "DELETE",
+        headers: { ...getAuthHeader() },
+      });
+    } else {
+      await fetch(`${API_BASE_URL}/team/members/${id}`, {
+        method: "DELETE",
+        headers: { ...getAuthHeader() },
+      });
+    }
+    await loadTeam();
+  } catch (error) {
+    console.error("Failed to remove member", error);
+  }
+}
+
+export async function updateMemberRole(id: string, role: string) {
+  try {
+    await fetch(`${API_BASE_URL}/team/members/${id}/role`, {
+      method: "PATCH",
+      headers: { ...getAuthHeader(), "Content-Type": "application/json" },
+      body: JSON.stringify({ role: role.toUpperCase() }),
+    });
+    await loadTeam();
+  } catch (error) {
+    console.error("Failed to update member role", error);
+  }
+}
+
+export async function getMemberPermissions(id: string) {
+  const res = await fetch(`${API_BASE_URL}/rbac/members/${id}/permissions`, {
+    headers: getAuthHeader(),
+  });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw new Error(error.message || "Failed to load member permissions");
+  }
+  return (await res.json()) as {
+    permissions: string[];
+    grantedPermissions: string[];
+    catalog: PermissionCatalogItem[];
   };
-
-  members.update((current) => {
-    const nextMembers = [...current, member];
-    persist(nextMembers);
-    return nextMembers;
-  });
-  return member;
 }
 
-export function removeMember(id: string) {
-  members.update((current) => {
-    const nextMembers = current.filter((member) => member.id !== id);
-    persist(nextMembers);
-    return nextMembers;
+export async function replaceMemberPermissions(
+  id: string,
+  permissions: string[],
+) {
+  const res = await fetch(`${API_BASE_URL}/rbac/members/${id}/permissions`, {
+    method: "PATCH",
+    headers: { ...getAuthHeader(), "Content-Type": "application/json" },
+    body: JSON.stringify({ permissions }),
   });
-}
-
-export function updateMemberRole(id: string, role: TeamRole) {
-  members.update((current) => {
-    const nextMembers = current.map((member) =>
-      member.id === id ? { ...member, role } : member,
-    );
-    persist(nextMembers);
-    return nextMembers;
-  });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw new Error(error.message || "Failed to save member permissions");
+  }
+  return await res.json();
 }
 
 export function createRole(name: string): boolean {
-  const normalizedName = name.trim();
-  if (!normalizedName) return false;
-  let created = false;
-  roles.update((current) => {
-    if (
-      current.some(
-        (role) => role.toLowerCase() === normalizedName.toLowerCase(),
-      )
-    )
-      return current;
-    const nextRoles = [...current, normalizedName];
-    if (typeof window !== "undefined")
-      window.localStorage.setItem(ROLES_KEY, JSON.stringify(nextRoles));
-    created = true;
-    return nextRoles;
-  });
-  return created;
+  // Roles are fixed enum on backend (OWNER, ADMIN, STAFF)
+  // so creating arbitrary roles locally won't sync. Returning false.
+  return false;
 }
 
-export function acceptInvite(id: string) {
-  members.update((current) => {
-    const nextMembers = current.map((member) =>
-      member.id === id ? { ...member, status: "Active" as const } : member,
+export async function getInviteDetails(token: string) {
+  try {
+    const res = await fetch(
+      `${API_BASE_URL}/team/invitations/details/${token}`,
     );
-    persist(nextMembers);
-    return nextMembers;
-  });
+    if (!res.ok) {
+      throw new Error("Invalid or expired invitation");
+    }
+    return await res.json();
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+}
+
+export async function acceptInvite(
+  token: string,
+  name: string,
+  password: string,
+) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/team/invitations/accept`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token, name, password }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.message || "Failed to accept invitation");
+    }
+    return await res.json();
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 }
 
 export function getTeamMember(id: string) {
@@ -166,39 +219,8 @@ export function getTeamMember(id: string) {
 }
 
 export function ensureDemoInvite(id: string) {
-  if (id !== "demo-invite") return undefined;
-  const existing = getTeamMember(id);
-  if (existing) {
-    const previewMember = { ...existing, status: "Invited" as const };
-    members.update((current) => {
-      const nextMembers = current.map((member) =>
-        member.id === id ? previewMember : member,
-      );
-      persist(nextMembers);
-      return nextMembers;
-    });
-    workspaceName.set("Aisha Business Center");
-    return previewMember;
-  }
-
-  const demoMember: TeamMember = {
-    id,
-    name: "Tosin Adeyemi",
-    email: "tosin@example.com",
-    role: "Staff",
-    status: "Invited",
-    joinedAt: new Date().toISOString(),
-  };
-  workspaceName.set("Aisha Business Center");
-  members.update((current) => {
-    const nextMembers = [...current, demoMember];
-    persist(nextMembers);
-    return nextMembers;
-  });
-  if (typeof window !== "undefined") {
-    window.localStorage.setItem(WORKSPACE_KEY, "Aisha Business Center");
-  }
-  return demoMember;
+  // No-op for real backend logic
+  return undefined;
 }
 
 export { members as teamMembers, roles as teamRoles, workspaceName };

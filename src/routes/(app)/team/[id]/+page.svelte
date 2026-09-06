@@ -3,4 +3,4 @@
   import TeamMemberPage from "../../../../pages/TeamMemberPage.svelte";
 </script>
 
-<TeamMemberPage memberId={page.params.id} />
+<TeamMemberPage memberId={page.params.id || ""} />

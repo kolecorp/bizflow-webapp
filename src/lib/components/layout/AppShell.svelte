@@ -11,11 +11,38 @@
 
   let { children } = $props();
 
+  const pageTitles: Record<string, string> = {
+    "/dashboard": "Dashboard",
+    "/transactions": "Transactions",
+    "/inventory": "Inventory",
+    "/services": "Services",
+    "/team": "Team",
+    "/reports": "Reports",
+    "/settings": "Settings",
+    "/support": "Support",
+    "/overview": "Overview",
+    "/printing": "Printing",
+    "/ai-tracking": "AI Tracking",
+    "/computers": "Computers",
+  };
+
+  const pageTitle = $derived.by(() => {
+    const pathname = page.url.pathname;
+    // Match by exact path or first segment
+    if (pageTitles[pathname]) return pageTitles[pathname];
+    const segment = "/" + pathname.split("/").filter(Boolean)[0];
+    return pageTitles[segment] ?? "Bizflow";
+  });
+
   async function handleSignOut() {
     await signOut();
     goto("/login");
   }
 </script>
+
+<svelte:head>
+  <title>{pageTitle} — Bizflow</title>
+</svelte:head>
 
 {#if $sidebar}
   <div class="app-layout min-h-screen bg-background text-foreground">

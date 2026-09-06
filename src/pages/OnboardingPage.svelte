@@ -5,13 +5,15 @@
   import { Label } from "$lib/components/ui/label";
   import { NativeSelect } from "$lib/components/ui/native-select";
   import { Button } from "$lib/components/ui/button";
+  import BetaPill from "$lib/components/ui/beta-pill.svelte";
   import NoiseOverlay from "$lib/components/landing/NoiseOverlay.svelte";
-  import { authStore } from "$lib/stores/auth";
+  import { authStore, completeOnboarding } from "$lib/stores/auth";
   import {
     initializeTeam,
     inviteMember,
     type TeamRole,
   } from "$lib/stores/team";
+  import { toast } from "svelte-sonner";
 
   let businessName = "";
   let businessType = "";
@@ -24,14 +26,14 @@
   let currentStep = 1;
   let inviteName = "";
   let inviteEmail = "";
-  let inviteRole: TeamRole = "Staff";
+  let inviteRole: TeamRole = "STAFF";
   let inviteError = "";
 
   function continueToInvite() {
     currentStep = 2;
   }
 
-  function addInvite(event: SubmitEvent) {
+  async function addInvite(event: SubmitEvent) {
     event.preventDefault();
     inviteError = "";
     if (!inviteName.trim() || !inviteEmail.trim()) {
@@ -39,19 +41,48 @@
       return;
     }
     initializeTeam($authStore.user, businessName);
-    inviteMember({
-      name: inviteName.trim(),
-      email: inviteEmail.trim(),
-      role: inviteRole,
-    });
-    finishOnboarding();
+    try {
+      await inviteMember({
+        name: inviteName.trim(),
+        email: inviteEmail.trim(),
+        role: inviteRole,
+      });
+      await finishOnboarding();
+    } catch (error) {
+      toast.error("Invitation failed", {
+        description:
+          error instanceof Error ? error.message : "Unable to send invitation.",
+      });
+    }
   }
 
   async function finishOnboarding() {
     loading = true;
-    initializeTeam($authStore.user, businessName);
-    await new Promise((resolve) => setTimeout(resolve, 350));
-    goto("/dashboard");
+
+    try {
+      await completeOnboarding({
+        businessName,
+        type: businessType,
+        streetAddress: address,
+        city,
+        country,
+        teamSize,
+        primaryService: services,
+      });
+
+      initializeTeam($authStore.user, businessName);
+      goto("/dashboard");
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Unable to complete onboarding.";
+      toast.error("Workspace setup failed", {
+        description: message,
+      });
+    } finally {
+      loading = false;
+    }
   }
 </script>
 
@@ -76,9 +107,12 @@
           src="/cafe-logo.png"
           alt="Bizflow logo"
           class="size-10 object-contain"
-        /><span class="font-heading text-xl font-black tracking-[-0.04em]"
-          >Bizflow</span
-        ></a
+        /><span class="flex items-center gap-2">
+          <span class="font-heading text-xl font-black tracking-[-0.04em]"
+            >Bizflow</span
+          >
+          <BetaPill class="hidden sm:inline-flex" />
+        </span></a
       >
       <span
         class="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground"
@@ -281,8 +315,8 @@
                 <Label for="invite-role">Workspace role</Label><NativeSelect
                   id="invite-role"
                   bind:value={inviteRole}
-                  ><option>Staff</option><option>Receptionist</option><option
-                    >Operations Manager</option
+                  ><option value="STAFF">Staff</option><option value="ADMIN"
+                    >Admin</option
                   ></NativeSelect
                 >
               </div>

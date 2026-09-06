@@ -3,10 +3,12 @@
   import { ArrowLeft, ArrowRight, Moon, SunMedium } from "@lucide/svelte";
   import { mode, toggleMode } from "mode-watcher";
   import { signUp } from "$lib/stores/auth";
-  import { Motion } from "svelte-motion";
   import { Input } from "$lib/components/ui/input";
   import { Label } from "$lib/components/ui/label";
   import { Button } from "$lib/components/ui/button";
+  import BetaPill from "$lib/components/ui/beta-pill.svelte";
+  import PasswordInput from "$lib/components/ui/password-input.svelte";
+  import { toast } from "svelte-sonner";
 
   let name = "";
   let email = "";
@@ -16,8 +18,16 @@
   async function handleSubmit() {
     loading = true;
     try {
-      await signUp({ name, businessName: "", email, password });
+      const authState = await signUp({ name, email, password });
       goto("/onboarding");
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Unable to create your account.";
+      toast.error("Registration failed", {
+        description: message,
+      });
     } finally {
       loading = false;
     }
@@ -77,11 +87,14 @@
             />
           </div>
           <div class="leading-none">
-            <p
-              class="font-heading text-[1.6rem] font-black tracking-[-0.06em] text-foreground"
-            >
-              Bizflow
-            </p>
+            <div class="flex items-center gap-2">
+              <p
+                class="font-heading text-[1.6rem] font-black tracking-[-0.06em] text-foreground"
+              >
+                Bizflow
+              </p>
+              <BetaPill class="-translate-y-px" />
+            </div>
             <p
               class="mt-1 text-[10px] uppercase tracking-[0.22em] text-muted-foreground"
             >
@@ -121,11 +134,14 @@
                 class="h-9 w-9 object-contain"
               />
             </div>
-            <p
-              class="font-heading text-[1.45rem] font-black tracking-[-0.06em] text-foreground"
-            >
-              Bizflow
-            </p>
+            <div class="flex items-center gap-2">
+              <p
+                class="font-heading text-[1.45rem] font-black tracking-[-0.06em] text-foreground"
+              >
+                Bizflow
+              </p>
+              <BetaPill class="hidden sm:inline-flex" />
+            </div>
           </div>
 
           <div class="mb-6 space-y-2">
@@ -174,12 +190,11 @@
               />
             </div>
             <div class="space-y-2">
-              <Label for="register-password">Create password</Label><Input
+              <Label for="register-password">Create password</Label><PasswordInput
                 id="register-password"
                 bind:value={password}
                 required
                 minlength={8}
-                type="password"
                 autocomplete="new-password"
                 placeholder="At least 8 characters"
               />

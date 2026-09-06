@@ -1,0 +1,71 @@
+/* Bizflow Driver.js Custom Theme */
+.driver-popover {
+  --driver-popover-bg: var(--popover);
+  --driver-popover-text: var(--popover-foreground);
+  --driver-popover-title-text: var(--foreground);
+  --driver-popover-close-btn-text: var(--muted-foreground);
+  --driver-popover-next-btn-bg: var(--primary);
+  --driver-popover-next-btn-text: var(--primary-foreground);
+  --driver-popover-prev-btn-bg: var(--secondary);
+  --driver-popover-prev-btn-text: var(--secondary-foreground);
+  
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+}
+
+.dark .driver-popover {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+}
+
+.driver-popover-title {
+  font-family: var(--heading);
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.driver-popover-description {
+  font-family: var(--sans);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--muted-foreground);
+}
+
+.driver-popover-footer {
+  margin-top: 1rem;
+}
+
+.driver-popover-progress-text {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.driver-popover-navigation-btns {
+  gap: 0.5rem;
+}
+
+.driver-popover-next-btn, 
+.driver-popover-prev-btn {
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: none;
+  text-shadow: none;
+  transition: opacity 0.2s;
+}
+
+.driver-popover-next-btn:hover,
+.driver-popover-prev-btn:hover {
+  opacity: 0.9;
+}
+
+.driver-popover-close-btn {
+  top: 0.5rem;
+  right: 0.5rem;
+}
+
+.driver-popover-close-btn:hover {
+  color: var(--foreground);
+}

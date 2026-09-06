@@ -1,6 +1,7 @@
 <script lang="ts">
   import AppShell from "$lib/components/layout/AppShell.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
+  import PasswordInput from "$lib/components/ui/password-input.svelte";
   import {
     Activity,
     ArrowRight,
@@ -115,17 +116,15 @@
                 /></label
               >{/if}
             <label class="text-sm font-medium text-foreground"
-              >API key<input
+              >API key<PasswordInput
                 bind:value={apiKey}
-                type="password"
                 placeholder="Enter API key"
                 class="mt-2 w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm"
               /></label
             >
             <label class="text-sm font-medium text-foreground"
-              >Secret / API token<input
+              >Secret / API token<PasswordInput
                 bind:value={secret}
-                type="password"
                 placeholder="Enter secret token"
                 class="mt-2 w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm"
               /></label
@@ -220,7 +219,10 @@
             </p>
           </div>
         </div>
-        <button type="button" class="btn-app-secondary text-sm"
+        <button
+          type="button"
+          class="btn-app-secondary text-sm"
+          onclick={() => (connected = false)}
           ><PlugZap class="h-4 w-4" /> Change provider</button
         >
       </div>
@@ -306,7 +308,10 @@
                 <Activity class="h-5 w-5 text-primary" /> Recent transactions
               </h2>
             </div>
-            <button type="button" class="text-xs font-semibold text-primary"
+            <button
+              type="button"
+              class="text-xs font-semibold text-primary"
+              onclick={() => (window.location.href = "/transactions")}
               >View all</button
             >
           </div>

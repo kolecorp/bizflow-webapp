@@ -1,8 +1,3 @@
-/**
- * RBAC placeholder — extend ROLE_PERMISSIONS when roles are formalized.
- * UI hides nav items the current user cannot access.
- */
-
 export type Permission =
   | "dashboard.view"
   | "transactions.view"
@@ -22,54 +17,66 @@ export type Permission =
   | "services.manage"
   | "ai-tracking.view"
   | "settings.view"
+  | "settings.profile.edit"
+  | "wallet.view"
   | "reports.view"
-  | "team.manage";
+  | "team.manage"
+  | "extensions.manage";
 
-export type RoleKey = "manager" | "staff" | "receptionist";
+import { get } from "svelte/store";
+import { authStore } from "./auth";
 
-const ROLE_PERMISSIONS: Record<RoleKey, Permission[] | ["*"]> = {
-  manager: ["*"],
-  staff: [
-    "dashboard.view",
-    "transactions.view",
-    "transactions.create",
-    "printing.view",
-    "inventory.view",
-    "inventory.adjust",
-    "computers.view",
-    "computers.transfer",
-    "services.view",
-    "support.view",
-  ],
-  receptionist: [
-    "dashboard.view",
-    "transactions.view",
-    "transactions.create",
-    "printing.view",
-    "computers.view",
-    "computers.transfer",
-    "services.view",
-    "support.view",
-  ],
-};
+export type RoleKey = "OWNER" | "ADMIN" | "STAFF";
 
 export function resolveRoleKey(roleLabel: string): RoleKey {
-  const lower = roleLabel.toLowerCase();
-  if (lower.includes("manager") || lower.includes("admin")) return "manager";
-  if (lower.includes("reception")) return "receptionist";
-  return "staff";
+  const upper = roleLabel.toUpperCase();
+  if (upper === "OWNER") return "OWNER";
+  if (upper === "ADMIN") return "ADMIN";
+  return "STAFF";
+}
+
+const BACKEND_PERMISSION: Partial<Record<Permission, string>> = {
+  "transactions.view": "TRANSACTIONS_VIEW",
+  "transactions.create": "TRANSACTIONS_MANAGE",
+  "transactions.delete": "TRANSACTIONS_MANAGE",
+  "printing.view": "PRINTING_VIEW",
+  "inventory.view": "INVENTORY_VIEW",
+  "inventory.adjust": "INVENTORY_MANAGE",
+  "services.view": "SERVICES_VIEW",
+  "computers.view": "COMPUTERS_VIEW",
+  "support.view": "SUPPORT_VIEW",
+  "ai-tracking.view": "ACTIVITY_VIEW",
+  "settings.view": "SETTINGS_VIEW",
+  "settings.profile.edit": "SETTINGS_PROFILE_EDIT",
+  "wallet.view": "WALLET_VIEW",
+  "reports.view": "REPORTS_VIEW",
+  "team.manage": "TEAM_VIEW",
+  "extensions.manage": "EXTENSIONS_VIEW",
+};
+
+function resolvePermission(permission: Permission): string | null {
+  return BACKEND_PERMISSION[permission] ?? null;
+}
+
+export function hasPermission(permission: Permission): boolean {
+  if (permission === "dashboard.view") {
+    return get(authStore).isAuthenticated;
+  }
+  const backendPermission = resolvePermission(permission);
+  return backendPermission
+    ? get(authStore).permissions.includes(backendPermission)
+    : false;
 }
 
 export function canAccess(roleLabel: string, permission: Permission): boolean {
-  const roleKey = resolveRoleKey(roleLabel);
-  const permissions = ROLE_PERMISSIONS[roleKey];
-  if (permissions[0] === "*") return true;
-  return (permissions as Permission[]).includes(permission);
+  void roleLabel;
+  return hasPermission(permission);
 }
 
 export function hasAnyPermission(
   roleLabel: string,
   permissions: Permission[],
 ): boolean {
-  return permissions.some((p) => canAccess(roleLabel, p));
+  void roleLabel;
+  return permissions.some((permission) => hasPermission(permission));
 }

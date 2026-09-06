@@ -35,12 +35,18 @@ importers:
       chart.js:
         specifier: ^4.5.1
         version: 4.5.1
+      driver.js:
+        specifier: ^1.8.0
+        version: 1.8.0
       firebase:
         specifier: ^12.17.1
         version: 12.17.1
       lucide-svelte:
         specifier: ^1.0.1
         version: 1.0.1(svelte@5.56.8)
+      rxjs:
+        specifier: ^7.8.2
+        version: 7.8.2
       svelte-dnd-action:
         specifier: ^0.9.79
         version: 0.9.79(svelte@5.56.8)
@@ -1184,6 +1190,9 @@ packages:
   dlv@1.1.3:
     resolution: {integrity: sha512-+HlytyjlPKnIG8XuRG8WvmBP8xs8P71y+SKKS6ZXWoEgLuePxtDoUEiH7WkdePWrQ5JBpE6aoVqfZfJUQkjXwA==}
 
+  driver.js@1.8.0:
+    resolution: {integrity: sha512-+8/IO7h1v14IzWh2GP60N7T3PFZweXwdn5e5POuxRSBoCYUojsBxzqawPeXh3YZIibRy7EehYNEyxe7slwwtdg==}
+
   effect@3.22.1:
     resolution: {integrity: sha512-TNoXushmPOBAjJlthF5d2QwnX2xBPEtcNJr5XKNKbRLbDvBcOYkXlYDfvGfSA0zriwLFuCll5MDtNMAdZL17PQ==}
 
@@ -1685,6 +1694,9 @@ packages:
 
   rw@1.3.3:
     resolution: {integrity: sha512-PdhdWy89SiZogBLaw42zdeqtRJ//zFd2PgQavcICDUgJT5oW10QCRKbJ6bg4r0/UY2M6BWd5tkxuGFRvCkgfHQ==}
+
+  rxjs@7.8.2:
+    resolution: {integrity: sha512-dhKf903U/PQZY6boNNtAGdWbG85WAbjT/1xYoZIC7FAY0yWapOBQVsVrDl58W86//e1VpMNBtRV4MaXfdMySFA==}
 
   sade@1.8.1:
     resolution: {integrity: sha512-xal3CZX1Xlo/k4ApwCFrHVACi9fBqJ7V+mwhBsuf/1IOKbBy098Fex+Wa/5QMubw09pSZ/u8EY8PWgevJsXp1A==}
@@ -3034,6 +3046,8 @@ snapshots:
   dlv@1.1.3:
     optional: true
 
+  driver.js@1.8.0: {}
+
   effect@3.22.1:
     dependencies:
       '@standard-schema/spec': 1.1.0
@@ -3566,6 +3580,10 @@ snapshots:
       zod: 4.4.3
 
   rw@1.3.3: {}
+
+  rxjs@7.8.2:
+    dependencies:
+      tslib: 2.8.1
 
   sade@1.8.1:
     dependencies:

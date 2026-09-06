@@ -41,16 +41,19 @@
     Eye,
     Gift,
     Globe,
+    HelpCircle,
     Image,
     LayoutTemplate,
     LineChart,
     Mail,
     Minus,
     Monitor,
+    MoreVertical,
     Pencil,
     Plus,
     Redo2,
     Rocket,
+    RotateCcw,
     Search,
     Settings,
     Smartphone,
@@ -68,6 +71,8 @@
     Hand,
     ZoomIn as ZoomTool,
   } from "@lucide/svelte";
+  import { startTour } from "$lib/config/tour";
+  import { tourConfigurations } from "$lib/config/tourConfig";
 
   /* ─── Canvas State ─── */
   let pageTitle = $state("Untitled Page");
@@ -112,6 +117,32 @@
   let previewOpen = $state(false);
   let previewViewport = $state("Desktop");
   let rightTab = $state<"inspector" | "layers">("inspector");
+  let showBuilderMenu = $state(false);
+  let showPublishPanel = $state(false);
+
+  // Publish settings
+  let publishMethod = $state<"bizflow" | "gas" | "html" | "custom">("bizflow");
+  let gasScriptUrl = $state("");
+  let customDomain = $state("");
+  let publishSlug = $state("my-page");
+  let seoTitle = $state("");
+  let seoDescription = $state("");
+  let isPublishing = $state(false);
+
+  function startBuilderTour() {
+    showBuilderMenu = false;
+    const steps = tourConfigurations["/extensions/marketing/builder"];
+    if (steps) startTour(steps);
+  }
+
+  async function handlePublish() {
+    isPublishing = true;
+    // Simulate publish
+    await new Promise((r) => setTimeout(r, 1400));
+    published = true;
+    isPublishing = false;
+    showPublishPanel = false;
+  }
   let workspaceFonts = $state<string[]>(["Inter", "Roboto"]);
 
   /* ─── Page Settings Data ─── */
@@ -613,27 +644,24 @@
         disabled={historyIndex === history.length - 1}
         ><Redo2 class="size-4" /></button
       >
-      <button
-        type="button"
-        class="builder-icon-btn"
-        title="Keyboard Shortcuts"
-        onclick={() => (showShortcuts = true)}
-        ><Keyboard class="size-4" /></button
-      >
 
       <button
         type="button"
-        onclick={() => {
-          previewOpen = true;
-          previewViewport = viewport;
-        }}
-        class="builder-action hidden md:inline-flex"
+        onclick={() => showPublishPanel = true}
+        class="builder-publish shrink-0 ml-2"
       >
-        <Eye class="size-4" /><span>Preview</span>
-      </button>
-      <button type="button" onclick={publish} class="builder-publish shrink-0">
-        {published ? "✓ Published" : "Publish"}
+        {published ? "Published" : "Publish"}
         <ChevronDown class="size-4" />
+      </button>
+
+      <!-- Builder hamburger menu trigger -->
+      <button
+        type="button"
+        class="builder-icon-btn"
+        title="More options"
+        onclick={() => (showBuilderMenu = !showBuilderMenu)}
+      >
+        <MoreVertical class="size-4" />
       </button>
     </div>
   </header>
@@ -1130,6 +1158,291 @@
   </div>
 </main>
 
+{#if showBuilderMenu}
+  <!-- Backdrop -->
+  <div
+    class="fixed inset-0"
+    style="z-index: 9998;"
+    role="presentation"
+    onclick={() => (showBuilderMenu = false)}
+  ></div>
+
+  <!-- Floating menu -->
+  <div
+    class="builder-floating-menu"
+    role="menu"
+  >
+    <div class="builder-floating-menu__header">
+      <WandSparkles class="size-3.5 text-primary" />
+      <span>MK Builder</span>
+    </div>
+
+    <div class="builder-floating-menu__section">
+      <button
+        type="button"
+        role="menuitem"
+        class="builder-floating-menu__item"
+        onclick={startBuilderTour}
+      >
+        <span class="builder-floating-menu__item-icon">
+          <HelpCircle class="size-4" />
+        </span>
+        <span class="builder-floating-menu__item-body">
+          <span class="builder-floating-menu__item-label">Page Tour</span>
+          <span class="builder-floating-menu__item-desc">Guided walkthrough of the builder</span>
+        </span>
+      </button>
+
+      <button
+        type="button"
+        role="menuitem"
+        class="builder-floating-menu__item"
+        onclick={() => { showBuilderMenu = false; showShortcuts = true; }}
+      >
+        <span class="builder-floating-menu__item-icon">
+          <Keyboard class="size-4" />
+        </span>
+        <span class="builder-floating-menu__item-body">
+          <span class="builder-floating-menu__item-label">Keyboard Shortcuts</span>
+          <span class="builder-floating-menu__item-desc">View all hotkeys</span>
+        </span>
+      </button>
+
+      <button
+        type="button"
+        role="menuitem"
+        class="builder-floating-menu__item"
+        onclick={() => { showBuilderMenu = false; showAiModal = true; }}
+      >
+        <span class="builder-floating-menu__item-icon">
+          <WandSparkles class="size-4" />
+        </span>
+        <span class="builder-floating-menu__item-body">
+          <span class="builder-floating-menu__item-label">AI Design Generator</span>
+          <span class="builder-floating-menu__item-desc">Generate a layout with AI</span>
+        </span>
+        <span class="builder-floating-menu__badge">NEW</span>
+      </button>
+    </div>
+
+    <div class="builder-floating-menu__divider"></div>
+
+    <div class="builder-floating-menu__section">
+      <button
+        type="button"
+        role="menuitem"
+        class="builder-floating-menu__item"
+        onclick={() => { showBuilderMenu = false; previewOpen = true; previewViewport = viewport; }}
+      >
+        <span class="builder-floating-menu__item-icon">
+          <Eye class="size-4" />
+        </span>
+        <span class="builder-floating-menu__item-body">
+          <span class="builder-floating-menu__item-label">Preview Page</span>
+          <span class="builder-floating-menu__item-desc">See how your page looks live</span>
+        </span>
+      </button>
+
+      <button
+        type="button"
+        role="menuitem"
+        class="builder-floating-menu__item"
+        onclick={() => { showBuilderMenu = false; resetView(); }}
+      >
+        <span class="builder-floating-menu__item-icon">
+          <RotateCcw class="size-4" />
+        </span>
+        <span class="builder-floating-menu__item-body">
+          <span class="builder-floating-menu__item-label">Reset View</span>
+          <span class="builder-floating-menu__item-desc">Snap canvas back to 100%</span>
+        </span>
+      </button>
+    </div>
+  </div>
+{/if}
+
+<!-- ═══ PUBLISH PANEL ═══ -->
+{#if showPublishPanel}
+  <div
+    class="fixed inset-0"
+    style="z-index: 9998;"
+    role="presentation"
+    onclick={() => (showPublishPanel = false)}
+  ></div>
+  <div class="publish-panel" role="dialog" aria-label="Publish settings">
+    <!-- Panel header -->
+    <div class="publish-panel__header">
+      <div class="publish-panel__header-left">
+        <div class="publish-panel__header-icon">
+          <Rocket class="size-4" />
+        </div>
+        <div>
+          <p class="publish-panel__title">Publish Page</p>
+          <p class="publish-panel__subtitle">{pageTitle}</p>
+        </div>
+      </div>
+      <button
+        type="button"
+        onclick={() => (showPublishPanel = false)}
+        class="publish-panel__close"
+        aria-label="Close"
+      >✕</button>
+    </div>
+
+    <div class="publish-panel__body">
+      <!-- Publish method tabs -->
+      <div class="publish-panel__methods">
+        <p class="publish-panel__section-label">Publish Method</p>
+        <div class="publish-panel__method-grid">
+          <button
+            type="button"
+            class="publish-method-card {publishMethod === 'bizflow' ? 'is-active' : ''}"
+            onclick={() => (publishMethod = 'bizflow')}
+          >
+            <div class="publish-method-card__icon"><Globe class="size-5" /></div>
+            <p class="publish-method-card__name">Bizflow Hosting</p>
+            <p class="publish-method-card__desc">Hosted on Bizflow's CDN with a free subdomain</p>
+            {#if publishMethod === 'bizflow'}<span class="publish-method-card__check"><Check class="size-3" /></span>{/if}
+          </button>
+
+          <button
+            type="button"
+            class="publish-method-card {publishMethod === 'gas' ? 'is-active' : ''}"
+            onclick={() => (publishMethod = 'gas')}
+          >
+            <div class="publish-method-card__icon"><Code2 class="size-5" /></div>
+            <p class="publish-method-card__name">Google Apps Script</p>
+            <p class="publish-method-card__desc">Self-host on your personal GAS URL, powered by our API</p>
+            {#if publishMethod === 'gas'}<span class="publish-method-card__check"><Check class="size-3" /></span>{/if}
+          </button>
+
+          <button
+            type="button"
+            class="publish-method-card {publishMethod === 'html' ? 'is-active' : ''}"
+            onclick={() => (publishMethod = 'html')}
+          >
+            <div class="publish-method-card__icon"><Copy class="size-5" /></div>
+            <p class="publish-method-card__name">Export HTML</p>
+            <p class="publish-method-card__desc">Download a standalone HTML file to host anywhere</p>
+            {#if publishMethod === 'html'}<span class="publish-method-card__check"><Check class="size-3" /></span>{/if}
+          </button>
+
+          <button
+            type="button"
+            class="publish-method-card {publishMethod === 'custom' ? 'is-active' : ''}"
+            onclick={() => (publishMethod = 'custom')}
+          >
+            <div class="publish-method-card__icon"><Star class="size-5" /></div>
+            <p class="publish-method-card__name">Custom Domain</p>
+            <p class="publish-method-card__desc">Connect your own domain via DNS or CNAME record</p>
+            {#if publishMethod === 'custom'}<span class="publish-method-card__check"><Check class="size-3" /></span>{/if}
+          </button>
+        </div>
+      </div>
+
+      <!-- Method-specific settings -->
+      <div class="publish-panel__settings">
+        {#if publishMethod === 'bizflow'}
+          <p class="publish-panel__section-label">Page URL</p>
+          <div class="publish-url-row">
+            <span class="publish-url-prefix">bizflow.page/</span>
+            <input
+              class="publish-url-input"
+              bind:value={publishSlug}
+              placeholder="my-page"
+            />
+          </div>
+          <p class="publish-panel__hint">Your page will be live at <strong>bizflow.page/{publishSlug || 'my-page'}</strong></p>
+
+        {:else if publishMethod === 'gas'}
+          <p class="publish-panel__section-label">Your Apps Script Web App URL</p>
+          <input
+            class="publish-field-input"
+            bind:value={gasScriptUrl}
+            placeholder="https://script.google.com/macros/s/..."
+            type="url"
+          />
+          <div class="publish-panel__info-box">
+            <Code2 class="size-3.5 shrink-0 mt-0.5" />
+            <p>Deploy a Bizflow GAS adapter in your script editor. Your page content is served from your URL while form submissions and analytics connect back to Bizflow's API.</p>
+          </div>
+          <a href="https://docs.bizflow.app/gas-hosting" class="publish-panel__link" target="_blank" rel="noopener">
+            <BookOpen class="size-3.5" /> View GAS setup guide
+          </a>
+
+        {:else if publishMethod === 'html'}
+          <div class="publish-panel__info-box">
+            <Globe class="size-3.5 shrink-0 mt-0.5" />
+            <p>Downloads a self-contained HTML file with all styles and content inlined. Form integrations will require the Bizflow embed script to be added manually.</p>
+          </div>
+
+        {:else if publishMethod === 'custom'}
+          <p class="publish-panel__section-label">Custom Domain</p>
+          <input
+            class="publish-field-input"
+            bind:value={customDomain}
+            placeholder="squeeze.yourbusiness.com"
+            type="text"
+          />
+          <div class="publish-panel__info-box">
+            <Globe class="size-3.5 shrink-0 mt-0.5" />
+            <p>Add a CNAME record pointing to <strong>pages.bizflow.app</strong> in your DNS settings. SSL is provisioned automatically.</p>
+          </div>
+        {/if}
+
+        <!-- SEO Settings (shared) -->
+        {#if publishMethod !== 'html'}
+          <p class="publish-panel__section-label mt-4">SEO & Meta</p>
+          <div class="publish-panel__field-row">
+            <input
+              class="publish-field-input"
+              bind:value={seoTitle}
+              placeholder="Page title for search engines…"
+            />
+            <textarea
+              class="publish-field-input resize-none"
+              rows="2"
+              bind:value={seoDescription}
+              placeholder="Meta description (150 chars)…"
+            ></textarea>
+          </div>
+        {/if}
+      </div>
+    </div>
+
+    <!-- Footer actions -->
+    <div class="publish-panel__footer">
+      {#if published}
+        <div class="publish-live-badge">
+          <span class="publish-live-dot"></span>
+          Live
+        </div>
+      {/if}
+      <button
+        type="button"
+        onclick={() => { showPublishPanel = false; previewOpen = true; previewViewport = viewport; }}
+        class="publish-panel__preview-btn"
+      >
+        <Eye class="size-4" /> Preview first
+      </button>
+      <button
+        type="button"
+        onclick={handlePublish}
+        disabled={isPublishing}
+        class="publish-panel__publish-btn"
+      >
+        {#if isPublishing}
+          <span class="publish-spinner"></span> Publishing…
+        {:else if publishMethod === 'html'}
+          <Copy class="size-4" /> Export HTML
+        {:else}
+          <Rocket class="size-4" /> {published ? 'Update' : 'Publish Now'}
+        {/if}
+      </button>
+    </div>
+  </div>
+{/if}
+
 <!-- Preview Overlay -->
 {#if previewOpen}
   <div
@@ -1400,9 +1713,8 @@
 <!-- AI Design Modal -->
 {#if showAiModal}
   <AiDesignModal
-    isOpen={showAiModal}
     onClose={() => (showAiModal = false)}
-    onApply={(elements) => {
+    onGenerate={(elements: any[]) => {
       canvasElements = elements;
       showAiModal = false;
       commitHistory();
@@ -1684,6 +1996,105 @@
   .builder-publish:hover {
     background: color-mix(in srgb, var(--primary) 85%, black);
     transform: translateY(-1px);
+  }
+
+  /* ─── Builder floating menu ─── */
+  .builder-floating-menu {
+    position: fixed;
+    top: 60px;
+    right: 12px;
+    z-index: 9999;
+    width: 240px;
+    border-radius: 0.875rem;
+    border: 1px solid var(--border);
+    background-color: var(--card);
+    color: var(--card-foreground);
+    box-shadow:
+      0 4px 6px -1px rgba(0,0,0,0.12),
+      0 16px 40px -4px rgba(0,0,0,0.25);
+    overflow: hidden;
+    animation: menu-in 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes menu-in {
+    from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0)    scale(1); }
+  }
+  .builder-floating-menu__header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+    border-bottom: 1px solid var(--border);
+    background-color: var(--muted);
+  }
+  .builder-floating-menu__section {
+    padding: 0.375rem;
+  }
+  .builder-floating-menu__divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0;
+  }
+  .builder-floating-menu__item {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    width: 100%;
+    padding: 0.5rem 0.625rem;
+    border-radius: 0.5rem;
+    text-align: left;
+    transition: background 0.12s;
+    color: var(--card-foreground);
+  }
+  .builder-floating-menu__item:hover {
+    background-color: var(--muted);
+  }
+  .builder-floating-menu__item-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 0.375rem;
+    background-color: var(--secondary);
+    color: var(--foreground);
+    flex-shrink: 0;
+  }
+  .builder-floating-menu__item-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    flex: 1;
+    min-width: 0;
+  }
+  .builder-floating-menu__item-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--foreground);
+    line-height: 1.2;
+  }
+  .builder-floating-menu__item-desc {
+    font-size: 0.7rem;
+    color: var(--muted-foreground);
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .builder-floating-menu__badge {
+    flex-shrink: 0;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 0.15rem 0.4rem;
+    border-radius: 9999px;
+    background: var(--primary);
+    color: var(--primary-foreground);
   }
 
   /* ─── Presets ─── */
@@ -2155,4 +2566,323 @@
   .btn-primary:hover {
     background: color-mix(in srgb, var(--primary) 85%, black);
   }
+
+  /* ─── Publish Panel (Sheet) ─── */
+  .publish-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    width: 400px;
+    background-color: var(--card);
+    color: var(--card-foreground);
+    box-shadow: -4px 0 24px rgba(0,0,0,0.15);
+    animation: slide-in-right 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid var(--border);
+  }
+  @keyframes slide-in-right {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+  }
+  .publish-panel__body {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .publish-panel__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.125rem;
+    border-bottom: 1px solid var(--border);
+    background-color: var(--muted);
+    gap: 0.75rem;
+    flex-shrink: 0;
+  }
+  .publish-panel__header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .publish-panel__header-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.5rem;
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+    flex-shrink: 0;
+  }
+  .publish-panel__title {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--foreground);
+    line-height: 1.2;
+  }
+  .publish-panel__subtitle {
+    font-size: 0.7rem;
+    color: var(--muted-foreground);
+    margin-top: 0.1rem;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .publish-panel__close {
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 0.375rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+    transition: all 0.12s;
+    flex-shrink: 0;
+  }
+  .publish-panel__close:hover {
+    background-color: var(--secondary);
+    color: var(--foreground);
+  }
+  .publish-panel__methods {
+    padding: 1rem 1.125rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .publish-panel__method-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+  .publish-method-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.375rem;
+    padding: 0.625rem 0.75rem;
+    border-radius: 0.625rem;
+    border: 1.5px solid var(--border);
+    background-color: var(--background);
+    text-align: left;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .publish-method-card:hover {
+    border-color: var(--primary);
+    background-color: var(--muted);
+  }
+  .publish-method-card.is-active {
+    border-color: var(--primary);
+    background-color: color-mix(in srgb, var(--primary) 8%, var(--background));
+  }
+  .publish-method-card__icon {
+    color: var(--muted-foreground);
+    margin-bottom: 0.125rem;
+  }
+  .publish-method-card.is-active .publish-method-card__icon {
+    color: var(--primary);
+  }
+  .publish-method-card__name {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--foreground);
+    line-height: 1.2;
+  }
+  .publish-method-card__desc {
+    font-size: 0.65rem;
+    color: var(--muted-foreground);
+    line-height: 1.35;
+  }
+  .publish-method-card__check {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.125rem;
+    height: 1.125rem;
+    border-radius: 50%;
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+  }
+  .publish-panel__settings {
+    padding: 1rem 1.125rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .publish-panel__section-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+    margin-bottom: 0.25rem;
+  }
+  .publish-url-row {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background-color: var(--background);
+  }
+  .publish-url-prefix {
+    padding: 0.5rem 0.625rem;
+    font-size: 0.78rem;
+    color: var(--muted-foreground);
+    background-color: var(--muted);
+    border-right: 1px solid var(--border);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .publish-url-input {
+    flex: 1;
+    padding: 0.5rem 0.625rem;
+    font-size: 0.8rem;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--foreground);
+    min-width: 0;
+  }
+  .publish-field-input {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    background-color: var(--background);
+    color: var(--foreground);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .publish-field-input:focus {
+    border-color: var(--primary);
+  }
+  .publish-panel__info-box {
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-start;
+    padding: 0.625rem 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border);
+    background-color: var(--muted);
+    font-size: 0.72rem;
+    color: var(--muted-foreground);
+    line-height: 1.5;
+  }
+  .publish-panel__hint {
+    font-size: 0.7rem;
+    color: var(--muted-foreground);
+  }
+  .publish-panel__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--primary);
+    text-decoration: none;
+    margin-top: 0.25rem;
+  }
+  .publish-panel__link:hover { text-decoration: underline; }
+  .publish-panel__field-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .publish-panel__footer {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.125rem;
+    background-color: var(--background);
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .publish-live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #22c55e;
+    background: color-mix(in srgb, #22c55e 12%, transparent);
+    border: 1px solid color-mix(in srgb, #22c55e 30%, transparent);
+    padding: 0.25rem 0.625rem;
+    border-radius: 9999px;
+    margin-right: auto;
+  }
+  .publish-live-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #22c55e;
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .publish-panel__preview-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.5rem 0.875rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border);
+    background-color: var(--background);
+    color: var(--foreground);
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .publish-panel__preview-btn:hover {
+    background-color: var(--muted);
+  }
+  .publish-panel__publish-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.5rem 1.125rem;
+    border-radius: 0.5rem;
+    border: none;
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+    font-size: 0.8rem;
+    font-weight: 700;
+    transition: all 0.15s;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--primary) 35%, transparent);
+    flex: 1;
+    justify-content: center;
+  }
+  .publish-panel__publish-btn:hover:not(:disabled) {
+    background-color: color-mix(in srgb, var(--primary) 85%, black);
+    transform: translateY(-1px);
+  }
+  .publish-panel__publish-btn:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+  .publish-spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 </style>

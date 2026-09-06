@@ -2,72 +2,76 @@
   import AppShell from "$lib/components/layout/AppShell.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import {
-    Bot,
+    Activity,
+    AlertCircle,
     CheckCircle2,
-    CircleDot,
     Clock3,
+    FileText,
     MoreHorizontal,
-    TerminalSquare,
+    User,
   } from "@lucide/svelte";
 
-  const aiTasks = [
+  const activities = [
     {
-      id: "AI-101",
-      title: "Rebuild dashboard for business centers",
-      status: "Done",
-      date: "Today",
-      author: "Antigravity",
-      tags: ["UI/UX", "Feature"],
+      id: "ACT-001",
+      action: "New transaction recorded",
+      status: "Success",
+      date: "Today, 10:45 AM",
+      actor: "Jane Doe",
+      tags: ["Sales", "₦5,000"],
     },
     {
-      id: "AI-102",
-      title: "Print Agent architecture & printing module",
-      status: "In Progress",
-      date: "Today",
-      author: "Antigravity",
-      tags: ["Printing", "Feature"],
+      id: "ACT-002",
+      action: "Low stock alert: A4 Paper",
+      status: "Warning",
+      date: "Today, 09:12 AM",
+      actor: "System",
+      tags: ["Inventory", "System"],
     },
     {
-      id: "AI-103",
-      title: "Stock taking & inventory UI",
-      status: "In Progress",
-      date: "Today",
-      author: "Antigravity",
-      tags: ["Inventory"],
+      id: "ACT-003",
+      action: "Extension activated: Wallet",
+      status: "Success",
+      date: "Yesterday",
+      actor: "Admin",
+      tags: ["System", "Billing"],
     },
     {
-      id: "AI-104",
-      title: "RBAC permission gates (placeholder)",
-      status: "To Do",
-      date: "Pending",
-      author: "System",
-      tags: ["Security"],
+      id: "ACT-004",
+      action: "Refund processed",
+      status: "Pending",
+      date: "Yesterday",
+      actor: "Jane Doe",
+      tags: ["Sales", "₦1,500"],
     },
   ];
 
   function getStatusClass(status: string) {
     switch (status) {
-      case "Done":
-        return "border-primary/25 bg-primary/10 text-primary";
-      case "In Progress":
-        return "border-accent bg-accent text-accent-foreground";
+      case "Success":
+        return "border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400";
+      case "Warning":
+        return "border-amber-500/20 bg-amber-500/10 text-amber-600 dark:text-amber-400";
+      case "Pending":
+        return "border-blue-500/20 bg-blue-500/10 text-blue-600 dark:text-blue-400";
       default:
         return "border-border bg-muted text-muted-foreground";
     }
   }
 
   function getStatusIcon(status: string) {
-    if (status === "Done") return CheckCircle2;
-    if (status === "In Progress") return Clock3;
-    return CircleDot;
+    if (status === "Success") return CheckCircle2;
+    if (status === "Warning") return AlertCircle;
+    if (status === "Pending") return Clock3;
+    return Activity;
   }
 </script>
 
 <AppShell>
   <PageHeader
-    eyebrow="System"
-    title="AI Tracking (.ai)"
-    description="Track features, modules, and changes made with AI assistance."
+    eyebrow="Workspace"
+    title="Activity Log"
+    description="Track system events, user actions, and business operations."
   />
 
   <div class="grid gap-4 sm:grid-cols-3">
@@ -75,12 +79,12 @@
       <p
         class="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground"
       >
-        Tracked tasks
+        Actions Today
       </p>
       <p
         class="mt-2 font-heading text-3xl font-black tracking-[-0.06em] text-foreground"
       >
-        {aiTasks.length}
+        24
       </p>
       <p class="mt-1 text-xs text-muted-foreground">Across the workspace</p>
     </div>
@@ -88,27 +92,27 @@
       <p
         class="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground"
       >
-        In progress
+        System Alerts
       </p>
       <p
         class="mt-2 font-heading text-3xl font-black tracking-[-0.06em] text-foreground"
       >
-        {aiTasks.filter((task) => task.status === "In Progress").length}
+        {activities.filter((task) => task.status === "Warning").length}
       </p>
-      <p class="mt-1 text-xs text-muted-foreground">Currently being shaped</p>
+      <p class="mt-1 text-xs text-muted-foreground">Requires attention</p>
     </div>
     <div class="surface-stat p-5">
       <p
         class="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground"
       >
-        Completed
+        Pending Tasks
       </p>
       <p
         class="mt-2 font-heading text-3xl font-black tracking-[-0.06em] text-foreground"
       >
-        {aiTasks.filter((task) => task.status === "Done").length}
+        {activities.filter((task) => task.status === "Pending").length}
       </p>
-      <p class="mt-1 text-xs text-muted-foreground">Ready in the workspace</p>
+      <p class="mt-1 text-xs text-muted-foreground">Awaiting resolution</p>
     </div>
   </div>
 
@@ -118,19 +122,19 @@
     >
       <div class="flex items-center gap-3">
         <div class="rounded-lg bg-primary/10 p-2 text-primary">
-          <TerminalSquare class="h-4 w-4" />
+          <FileText class="h-4 w-4" />
         </div>
         <div>
           <h3 class="font-heading text-lg font-semibold text-foreground">
-            Development tasks
+            Recent Activity
           </h3>
           <p class="mt-1 text-xs text-muted-foreground">
-            A living record of work shaped with AI assistance.
+            A comprehensive audit trail of your business operations.
           </p>
         </div>
       </div>
       <span class="hidden text-xs text-muted-foreground sm:block"
-        >{aiTasks.length} items</span
+        >{activities.length} records</span
       >
     </div>
     <div class="overflow-x-auto">
@@ -139,25 +143,25 @@
           <tr
             class="border-b border-border/60 text-left text-xs uppercase tracking-wider text-muted-foreground"
           >
-            <th class="px-6 py-3 font-semibold">Key</th>
-            <th class="px-4 py-3 font-semibold">Summary</th>
+            <th class="px-6 py-3 font-semibold">Ref</th>
+            <th class="px-4 py-3 font-semibold">Action</th>
             <th class="px-4 py-3 font-semibold">Status</th>
-            <th class="px-4 py-3 font-semibold">Author</th>
+            <th class="px-4 py-3 font-semibold">User</th>
             <th class="px-4 py-3 font-semibold">Date</th>
             <th class="px-4 py-3"></th>
           </tr>
         </thead>
         <tbody>
-          {#each aiTasks as task}
-            {@const StatusIcon = getStatusIcon(task.status)}
-            <tr class="border-b border-border/40 hover:bg-muted/30 group">
+          {#each activities as activity}
+            {@const StatusIcon = getStatusIcon(activity.status)}
+            <tr class="border-b border-border/40 hover:bg-muted/30 group transition">
               <td class="px-6 py-4 font-mono text-xs text-muted-foreground"
-                >{task.id}</td
+                >{activity.id}</td
               >
               <td class="px-4 py-4">
                 <div class="flex flex-wrap items-center gap-2">
-                  <span class="font-medium text-foreground">{task.title}</span>
-                  {#each task.tags as tag}
+                  <span class="font-medium text-foreground">{activity.action}</span>
+                  {#each activity.tags as tag}
                     <span
                       class="rounded-md border border-border/60 bg-muted/60 px-2 py-1 text-[10px] font-medium text-muted-foreground"
                     >
@@ -168,20 +172,20 @@
               </td>
               <td class="px-4 py-4">
                 <span
-                  class={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-semibold ${getStatusClass(task.status)}`}
+                  class={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-semibold ${getStatusClass(activity.status)}`}
                 >
                   <StatusIcon class="h-3.5 w-3.5" />
-                  {task.status}
+                  {activity.status}
                 </span>
               </td>
               <td
                 class="px-4 py-4 text-muted-foreground flex items-center gap-1.5"
               >
-                <Bot class="h-3.5 w-3.5" />
-                {task.author}
+                <User class="h-3.5 w-3.5" />
+                {activity.actor}
               </td>
-              <td class="px-4 py-4 text-muted-foreground">{task.date}</td>
-              <td class="px-4 py-4">
+              <td class="px-4 py-4 text-muted-foreground text-xs">{activity.date}</td>
+              <td class="px-4 py-4 text-right">
                 <button
                   type="button"
                   class="rounded p-1 opacity-0 group-hover:opacity-100 hover:bg-muted transition"

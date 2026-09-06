@@ -12,6 +12,9 @@
     removeMember,
     teamRoles,
     updateMemberRole,
+    getMemberPermissions,
+    replaceMemberPermissions,
+    type PermissionCatalogItem,
     type TeamMember,
   } from "$lib/stores/team";
   import {
@@ -21,15 +24,74 @@
     ShieldCheck,
     Trash2,
     UserRound,
+    LockKeyhole,
+    Save,
   } from "@lucide/svelte";
+  import { toast } from "svelte-sonner";
+  import PageLoadingSkeleton from "$lib/components/layout/PageLoadingSkeleton.svelte";
 
   let { memberId }: { memberId: string } = $props();
   let member = $state<TeamMember | undefined>(undefined);
+  let memberLoading = $state(true);
+  let permissionCatalog = $state<PermissionCatalogItem[]>([]);
+  let selectedPermissions = $state<string[]>([]);
+  let permissionsLoading = $state(false);
+  let permissionsSaving = $state(false);
+  let permissionError = $state("");
 
-  onMount(() => {
-    initializeTeam($authStore.user);
-    member = getTeamMember(memberId);
+  onMount(async () => {
+    try {
+      await initializeTeam($authStore.user);
+      member = getTeamMember(memberId);
+      if (member?.status === "Active" && member.role === "STAFF") {
+        permissionsLoading = true;
+        try {
+          const data = await getMemberPermissions(member.id);
+          permissionCatalog = data.catalog;
+          selectedPermissions = [...data.grantedPermissions];
+        } catch (error) {
+          permissionError = error instanceof Error ? error.message : "Failed to load permissions";
+        } finally {
+          permissionsLoading = false;
+        }
+      }
+    } finally {
+      memberLoading = false;
+    }
   });
+
+  let permissionGroups = $derived.by(() => {
+    const groups = new Map<string, PermissionCatalogItem[]>();
+    for (const item of permissionCatalog) {
+      const group = groups.get(item.area) ?? [];
+      group.push(item);
+      groups.set(item.area, group);
+    }
+    return groups;
+  });
+
+  function togglePermission(code: string) {
+    selectedPermissions = selectedPermissions.includes(code)
+      ? selectedPermissions.filter((permission) => permission !== code)
+      : [...selectedPermissions, code];
+  }
+
+  async function savePermissions() {
+    if (!member || member.status !== "Active" || member.role !== "STAFF") return;
+    permissionsSaving = true;
+    try {
+      await replaceMemberPermissions(member.id, selectedPermissions);
+      toast.success("Permissions updated", {
+        description: `${member.name} can now use the selected areas.`,
+      });
+    } catch (error) {
+      toast.error("Could not update permissions", {
+        description: error instanceof Error ? error.message : "Please try again.",
+      });
+    } finally {
+      permissionsSaving = false;
+    }
+  }
 
   function changeRole(event: Event) {
     const value = (event.currentTarget as HTMLSelectElement).value;
@@ -58,7 +120,9 @@
     </svelte:fragment>
   </PageHeader>
 
-  {#if member}
+  {#if memberLoading}
+    <PageLoadingSkeleton rows={4} />
+  {:else if member}
     <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
       <section class="surface-panel p-6 sm:p-8">
         <div class="flex items-center gap-4 border-b border-border/60 pb-6">
@@ -90,7 +154,7 @@
             >
               Workspace role
             </p>
-            {#if member.role === "Business Owner"}<p
+            {#if member.role === "OWNER"}<p
                 class="mt-2 flex items-center gap-2 text-sm font-semibold text-foreground"
               >
                 <ShieldCheck class="h-4 w-4 text-primary" />Business Owner
@@ -121,6 +185,49 @@
           </div>
         </div>
       </section>
+      {#if member.status === "Active" && member.role === "STAFF"}
+        <section class="surface-panel p-6 sm:p-8 lg:col-span-2">
+          <div class="flex flex-col gap-4 border-b border-border/60 pb-5 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Access control</p>
+              <h2 class="mt-1 font-heading text-xl font-bold text-foreground">Staff permissions</h2>
+              <p class="mt-1 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+                Choose the specific areas and actions this team member can access. Changes apply immediately.
+              </p>
+            </div>
+            <Button type="button" onclick={savePermissions} disabled={permissionsLoading || permissionsSaving}>
+              {#if permissionsSaving}<div class="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>{:else}<Save class="h-4 w-4" />{/if}
+              Save permissions
+            </Button>
+          </div>
+          {#if permissionsLoading}
+            <div class="flex items-center gap-3 py-8 text-sm text-muted-foreground"><div class="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>Loading permissions...</div>
+          {:else if permissionError}
+            <p class="py-6 text-sm text-destructive">{permissionError}</p>
+          {:else}
+            <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {#each [...permissionGroups.entries()] as [area, permissions]}
+                <div class="rounded-lg border border-border/60 bg-muted/20 p-4">
+                  <h3 class="flex items-center gap-2 text-sm font-semibold text-foreground"><LockKeyhole class="h-4 w-4 text-primary" />{area}</h3>
+                  <div class="mt-3 space-y-2">
+                    {#each permissions as permission}
+                      <label class="flex cursor-pointer items-start gap-3 rounded-md p-2 transition hover:bg-background/70">
+                        <input
+                          type="checkbox"
+                          checked={selectedPermissions.includes(permission.code)}
+                          onchange={() => togglePermission(permission.code)}
+                          class="mt-0.5 h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                        />
+                        <span class="text-sm text-foreground">{permission.action}</span>
+                      </label>
+                    {/each}
+                  </div>
+                </div>
+              {/each}
+            </div>
+          {/if}
+        </section>
+      {/if}
       <aside class="surface-panel h-fit p-6">
         <p
           class="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground"
@@ -130,7 +237,7 @@
         <p class="mt-3 text-sm leading-relaxed text-muted-foreground">
           Remove this person’s access to the workspace.
         </p>
-        {#if member.role !== "Business Owner"}<Button
+        {#if member.role !== "OWNER"}<Button
             type="button"
             variant="outline"
             onclick={remove}
