@@ -43,7 +43,9 @@
         .map((row) => ({
           name: row.name ?? row.customer?.name ?? "Unnamed customer",
           phone: row.phone ?? row.customer?.phone ?? "",
-          balance: Number(row.balance ?? row.walletBalance ?? 0),
+          balance: Number.isFinite(Number(row.balance ?? row.walletBalance))
+            ? Number(row.balance ?? row.walletBalance)
+            : 0,
         }));
     } catch (loadError) {
       error =

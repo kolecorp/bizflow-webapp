@@ -20,6 +20,7 @@
   import { onMount } from "svelte";
   import { authStore } from "$lib/stores/auth";
   import { syncExtensions } from "$lib/stores/extensions";
+  import { toast } from "svelte-sonner";
 
   let paymentModalOpen = $state(false);
   let selectedExtension = $state<Extension | null>(null);
@@ -30,11 +31,25 @@
     void syncExtensions($authStore.user);
   });
 
-  function handleExtensionClick(ext: Extension) {
+  async function handleExtensionClick(ext: Extension) {
     if (ext.status === "active") {
-      toggleExtension(ext.id);
+      try {
+        await toggleExtension(ext.id);
+      } catch (error) {
+        toast.error("Extension update failed", {
+          description:
+            error instanceof Error ? error.message : "Please try again.",
+        });
+      }
     } else if (ext.subscribed) {
-      toggleExtension(ext.id);
+      try {
+        await toggleExtension(ext.id);
+      } catch (error) {
+        toast.error("Extension update failed", {
+          description:
+            error instanceof Error ? error.message : "Please try again.",
+        });
+      }
     } else {
       selectedExtension = ext;
       paymentModalOpen = true;

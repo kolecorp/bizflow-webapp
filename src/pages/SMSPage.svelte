@@ -427,32 +427,36 @@
               recipients: payload.recipients ?? [payload.to],
             }),
           },
-        },
         );
         if (!response.ok) throw new Error("The provider rejected the message.");
         const result = await response.json().catch(() => ({}));
         recentMessages = [
-        {
-          to:
-            payload.mode === "single"
-              ? payload.to
-              : `Bulk (${payload.recipientsCount} recipients)`,
-          message: payload.message,
-          status: result.status ?? "Pending",
-          time: "Just now",
-        },
-        ...recentMessages,
+          {
+            to:
+              payload.mode === "single"
+                ? payload.to
+                : `Bulk (${payload.recipientsCount} recipients)`,
+            message: payload.message,
+            status: result.status ?? "Pending",
+            time: "Just now",
+          },
+          ...recentMessages,
         ];
         sendModalOpen = false;
-        stats[0].value = (parseInt(stats[0].value) + 1).toString();
+        stats[0].value = (
+          parseInt(stats[0].value) + (payload.recipientsCount ?? 1)
+        ).toString();
         if (result.status === "Delivered")
           stats[1].value = (parseInt(stats[1].value) + 1).toString();
+        else stats[2].value = (parseInt(stats[2].value) + 1).toString();
       } catch (error) {
         toast.error("SMS was not accepted", {
           description:
-            error instanceof Error ? error.message : "The provider rejected the message.",
+            error instanceof Error
+              ? error.message
+              : "The provider rejected the message.",
         });
-        throw error;
+        return;
       }
     }}
   />

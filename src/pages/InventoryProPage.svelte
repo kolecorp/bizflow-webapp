@@ -148,7 +148,11 @@
           type="button"
           onclick={() => {
             const csv = $inventory
-              .map((item) => `${item.name},${item.quantity},${item.unit}`)
+              .map((item) =>
+                [item.name, item.quantity, item.unit]
+                  .map((value) => `"${String(value).replace(/"/g, '""')}"`)
+                  .join(","),
+              )
               .join("\n");
             const blob = new Blob([`Item,Quantity,Unit\n${csv}`], {
               type: "text/csv",
@@ -208,7 +212,11 @@
               <p class="text-xs text-muted-foreground">{adjustment.reason}</p>
             </div>
             <span class="text-sm font-semibold text-foreground"
-              >{adjustment.type === "add" ? "+" : adjustment.type === "remove" ? "-" : ""}{adjustment.quantity}</span
+              >{adjustment.type === "add"
+                ? "+"
+                : adjustment.type === "remove"
+                  ? "-"
+                  : ""}{adjustment.quantity}</span
             >
           </div>
         {/each}

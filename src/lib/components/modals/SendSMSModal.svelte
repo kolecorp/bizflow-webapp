@@ -29,6 +29,7 @@
   let selectedTemplateId = $state<string>("none");
   let message = $state("");
   let isProcessing = $state(false);
+  let confirmationError = $state("");
   let fileInput: HTMLInputElement;
 
   // Derive variables found in message
@@ -81,7 +82,7 @@
     if (mode === "bulk" && (recipients.length === 0 || !message)) return;
 
     isProcessing = true;
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    confirmationError = "";
     try {
       const recipientsCount = mode === "bulk" ? recipients.length : 1;
       await onConfirm({
@@ -96,6 +97,9 @@
       message = "";
       mode = "single";
       selectedTemplateId = "none";
+    } catch (error) {
+      confirmationError =
+        error instanceof Error ? error.message : "Unable to send SMS.";
     } finally {
       isProcessing = false;
     }
@@ -282,12 +286,15 @@
       <Button
         onclick={handleConfirm}
         disabled={isProcessing ||
-          (mode === "single" ? !to : !bulkInput) ||
+          (mode === "single" ? !to : parseRecipients(bulkInput).length === 0) ||
           !message}
       >
         {isProcessing ? "Sending..." : "Send Message"}
         {#if !isProcessing}<Send class="ml-2 h-4 w-4" />{/if}
       </Button>
+      {#if confirmationError}
+        <p class="w-full text-xs text-destructive">{confirmationError}</p>
+      {/if}
     </Dialog.Footer>
   </Dialog.Content>
 </Dialog.Root>

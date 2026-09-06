@@ -101,14 +101,32 @@
   async function changeRole(event: Event) {
     const value = (event.currentTarget as HTMLSelectElement).value;
     if (member && $teamRoles.includes(value)) {
-      await updateMemberRole(member.id, value);
-      member = getTeamMember(member.id);
+      const previousRole = member.role;
+      try {
+        await updateMemberRole(member.id, value);
+        member = getTeamMember(member.id);
+      } catch (error) {
+        member = { ...member, role: previousRole };
+        toast.error("Could not update member role", {
+          description:
+            error instanceof Error ? error.message : "Please try again.",
+        });
+      }
     }
   }
 
   async function remove() {
-    if (member) await removeMember(member.id, member.status === "Invited");
-    goto("/team");
+    if (!member) return;
+    try {
+      await removeMember(member.id, member.status === "Invited");
+      goto("/team");
+    } catch (error) {
+      member = getTeamMember(member.id);
+      toast.error("Could not remove team member", {
+        description:
+          error instanceof Error ? error.message : "Please try again.",
+      });
+    }
   }
 </script>
 

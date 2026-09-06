@@ -260,6 +260,8 @@ export async function loadCurrentUser(accessTokenOverride?: string) {
         {
           method: "POST",
         },
+        undefined,
+        true,
       );
       if (!refreshed.accessToken) throw error;
       if (get(authStore).accessToken !== accessToken) throw error;

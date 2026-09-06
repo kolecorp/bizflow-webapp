@@ -107,7 +107,15 @@
 
   async function changeRole(id: string, value: string) {
     if ($teamRoles.includes(value)) {
-      await updateMemberRole(id, value);
+      try {
+        await updateMemberRole(id, value);
+      } catch (error) {
+        await loadTeam();
+        toast.error("Could not update member role", {
+          description:
+            error instanceof Error ? error.message : "Please try again.",
+        });
+      }
     }
   }
 
@@ -350,10 +358,23 @@
                   type="button"
                   aria-label={`Remove ${member.name}`}
                   title={`Remove ${member.name}`}
-                  onclick={(event) => (
-                    event.stopPropagation(),
-                    removeMember(member.id, member.status === "Invited")
-                  )}
+                  onclick={async (event) => {
+                    event.stopPropagation();
+                    try {
+                      await removeMember(
+                        member.id,
+                        member.status === "Invited",
+                      );
+                    } catch (error) {
+                      await loadTeam();
+                      toast.error("Could not remove team member", {
+                        description:
+                          error instanceof Error
+                            ? error.message
+                            : "Please try again.",
+                      });
+                    }
+                  }}
                   class="rounded-md p-2 text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive"
                   ><Trash2 class="h-4 w-4" /></button
                 >

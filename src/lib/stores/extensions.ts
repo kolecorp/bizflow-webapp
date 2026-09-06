@@ -481,7 +481,7 @@ export async function syncExtensions(user: AuthUser | null) {
           .filter((item: any) => item && item.isInstalled === true)
           .map((item: any) => item.extension)
           .filter((id: unknown): id is string => typeof id === "string");
-        if (installed.length > 0) installedExtensionIds.set(installed);
+        installedExtensionIds.set(installed);
       }
     }
   } catch (error) {

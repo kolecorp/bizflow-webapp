@@ -23,6 +23,7 @@
   let teamSize = "1-5 people";
   let services = "Printing and documents";
   let loading = false;
+  let invitationSubmitting = false;
   let currentStep = 1;
   let inviteName = "";
   let inviteEmail = "";
@@ -46,12 +47,14 @@
 
   async function addInvite(event: SubmitEvent) {
     event.preventDefault();
+    if (invitationSubmitting) return;
     inviteError = "";
     if (!inviteName.trim() || !inviteEmail.trim()) {
       inviteError = "Add a name and email address, or skip this step.";
       return;
     }
     try {
+      invitationSubmitting = true;
       const onboardingComplete = await finishOnboarding(false);
       if (!onboardingComplete) return;
       await inviteMember({
@@ -65,6 +68,8 @@
         description:
           error instanceof Error ? error.message : "Unable to send invitation.",
       });
+    } finally {
+      invitationSubmitting = false;
     }
   }
 
@@ -338,7 +343,10 @@
                   {inviteError}
                 </p>{/if}
               <div class="mt-3 flex flex-col gap-3 sm:flex-row">
-                <Button type="submit" disabled={loading} class="flex-1"
+                <Button
+                  type="submit"
+                  disabled={loading || invitationSubmitting}
+                  class="flex-1"
                   >{loading
                     ? "Opening your workspace..."
                     : "Send invite & open workspace"}<ArrowRight
@@ -348,7 +356,7 @@
                 <Button
                   type="button"
                   variant="outline"
-                  disabled={loading}
+                  disabled={loading || invitationSubmitting}
                   onclick={() => finishOnboarding()}
                   class="flex-1">Skip for now</Button
                 >

@@ -41,7 +41,10 @@
           event.action ?? event.description ?? event.type ?? "Workspace action",
         status: event.status ?? "Success",
         date: event.createdAt ?? event.timestamp ?? event.date,
-        actor: event.actor?.name ?? event.user?.name ?? event.actor ?? "System",
+        actor:
+          (typeof event.actor?.name === "string" && event.actor.name) ||
+          (typeof event.user?.name === "string" && event.user.name) ||
+          "System",
         tags: Array.isArray(event.tags) ? event.tags : [],
       }));
     } catch {
@@ -201,7 +204,10 @@
                 {activity.actor}
               </td>
               <td class="px-4 py-4 text-muted-foreground text-xs"
-                >{activity.date}</td
+                >{activity.date &&
+                !Number.isNaN(new Date(activity.date).getTime())
+                  ? new Date(activity.date).toLocaleString()
+                  : "—"}</td
               >
               <td class="px-4 py-4 text-right">
                 <button
