@@ -18,6 +18,17 @@ function readInitial(): boolean {
 function createSidebarStore() {
   const { subscribe, set, update } = writable<boolean>(readInitial());
 
+  if (typeof window !== "undefined") {
+    const mediaQuery = window.matchMedia("(max-width: 1023px)");
+    mediaQuery.addEventListener("change", (event) => {
+      if (event.matches) {
+        set(false);
+      } else {
+        set(window.localStorage.getItem(DESKTOP_STORAGE_KEY) !== "false");
+      }
+    });
+  }
+
   subscribe((open) => {
     if (typeof window !== "undefined" && !isMobileViewport()) {
       window.localStorage.setItem(DESKTOP_STORAGE_KEY, String(open));

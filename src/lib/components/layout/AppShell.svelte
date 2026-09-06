@@ -70,7 +70,9 @@
   class:sidebar-closed={!$sidebar}
   class="app-layout min-h-screen bg-background text-foreground"
 >
-  <AppSidebar activePath={page.url.pathname} />
+  <div class="app-sidebar-container" inert={!$sidebar}>
+    <AppSidebar activePath={page.url.pathname} />
+  </div>
   <button
     type="button"
     class="app-sidebar-backdrop"

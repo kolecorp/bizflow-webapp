@@ -132,7 +132,7 @@
       >
       <Button
         onclick={handleConfirm}
-        disabled={isProcessing || !code || !label}
+        disabled={isProcessing || !code.trim() || !label.trim()}
       >
         {isProcessing ? "Saving..." : "Add to Tree"}
       </Button>

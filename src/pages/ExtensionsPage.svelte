@@ -17,19 +17,12 @@
     AlertTriangle,
   } from "@lucide/svelte";
   import ExtensionPaymentSheet from "$lib/components/modals/ExtensionPaymentSheet.svelte";
-  import { onMount } from "svelte";
-  import { authStore } from "$lib/stores/auth";
-  import { syncExtensions } from "$lib/stores/extensions";
   import { toast } from "svelte-sonner";
 
   let paymentModalOpen = $state(false);
   let selectedExtension = $state<Extension | null>(null);
   let searchQuery = $state("");
   let activeTab = $state<"browse" | "installed">("browse");
-
-  onMount(() => {
-    void syncExtensions($authStore.user);
-  });
 
   async function handleExtensionClick(ext: Extension) {
     if (ext.status === "active") {

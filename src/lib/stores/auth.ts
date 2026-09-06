@@ -397,6 +397,8 @@ export function initializeAuth() {
       setSession({ ...initialState, authReady: true });
     } else if (get(authStore).accessToken === tokenAtStart) {
       setSession({ ...get(authStore), authReady: true });
+    } else if (get(authStore).isAuthenticated && !get(authStore).authReady) {
+      setSession({ ...get(authStore), authReady: true });
     }
   });
 }
@@ -413,7 +415,7 @@ export async function signIn(input: LoginInput) {
 
   const nextState = toSessionPayload(payload);
   setSession(nextState);
-  await loadCurrentUser(nextState.accessToken);
+  await loadCurrentUser(nextState.accessToken!);
   return nextState;
 }
 
@@ -429,7 +431,7 @@ export async function signUp(input: RegisterInput) {
 
   const nextState = toSessionPayload(payload);
   setSession(nextState);
-  await loadCurrentUser(nextState.accessToken);
+  await loadCurrentUser(nextState.accessToken!);
   return nextState;
 }
 

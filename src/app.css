@@ -805,7 +805,7 @@
       width: 75%;
     }
 
-    .app-layout > .app-sidebar {
+    .app-layout > .app-sidebar-container {
       position: fixed;
       inset: 0 auto 0 0;
       z-index: 30;
@@ -877,7 +877,7 @@
       box-shadow 220ms ease;
   }
 
-  .sidebar-closed > .app-sidebar {
+  .sidebar-closed > .app-sidebar-container > .app-sidebar {
     transform: translateX(-100%);
     box-shadow: none;
     pointer-events: none;
@@ -924,7 +924,7 @@
       margin-left: 0;
     }
 
-    .app-layout > .app-sidebar {
+    .app-layout > .app-sidebar-container {
       position: fixed;
       inset: 0 auto 0 0;
       z-index: 50;

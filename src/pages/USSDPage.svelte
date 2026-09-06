@@ -6,6 +6,7 @@
   import { authStore } from "$lib/stores/auth";
   import { toast } from "svelte-sonner";
   import { onMount } from "svelte";
+  import { onMount } from "svelte";
   import {
     Hash,
     Terminal,
@@ -23,6 +24,8 @@
 
   let connected = $state(false);
   let isConnecting = $state(false);
+  let configurationLoading = $state(true);
+  let requestVersion = 0;
   let shortCode = $state("");
   let apiKey = $state("");
   let provider = $state("Africa's Talking");
@@ -35,6 +38,34 @@
   const providers = ["Africa's Talking", "Infobip", "Termii"];
   const API_BASE_URL =
     import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000/api/v1";
+
+  onMount(() => void loadConfiguration());
+
+  async function loadConfiguration() {
+    const currentRequest = ++requestVersion;
+    try {
+      const response = await fetch(`${API_BASE_URL}/ussd/config`, {
+        headers: { Authorization: `Bearer ${$authStore.accessToken}` },
+        credentials: "include",
+      });
+      if (response.status === 404) return;
+      if (!response.ok) throw new Error("Unable to load USSD configuration.");
+      const config = await response.json();
+      if (currentRequest !== requestVersion) return;
+      provider = config.provider ?? provider;
+      shortCode = config.shortCode ?? "";
+      connected = Boolean(
+        config.connected ?? config.isConnected ?? config.shortCode,
+      );
+    } catch (error) {
+      toast.error("Unable to load USSD configuration", {
+        description:
+          error instanceof Error ? error.message : "Please try again.",
+      });
+    } finally {
+      if (currentRequest === requestVersion) configurationLoading = false;
+    }
+  }
 
   onMount(() => {
     void loadConfiguration();
@@ -124,6 +155,7 @@
   ];
 
   async function connect() {
+    const currentRequest = ++requestVersion;
     isConnecting = true;
     try {
       const response = await fetch(`${API_BASE_URL}/ussd/connect`, {
@@ -136,6 +168,7 @@
         body: JSON.stringify({ provider, shortCode, apiKey }),
       });
       if (!response.ok) throw new Error("USSD provider connection failed.");
+      if (currentRequest !== requestVersion) return;
       connected = true;
     } catch (error) {
       toast.error("Unable to connect USSD provider", {
@@ -268,7 +301,10 @@
           <button
             type="button"
             onclick={connect}
-            disabled={isConnecting || !apiKey || !shortCode}
+            disabled={configurationLoading ||
+              isConnecting ||
+              !apiKey ||
+              !shortCode}
             class="btn-app-primary w-full mt-2"
           >
             {isConnecting ? "Connecting…" : "Connect & Activate"}

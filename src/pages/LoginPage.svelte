@@ -246,13 +246,15 @@
             >
           </div>
 
-          <div class="mt-6 surface-muted p-4 text-xs text-muted-foreground">
-            <p class="mb-2 font-semibold text-foreground">Demo access</p>
-            {#if import.meta.env.DEV}<div class="space-y-1 font-mono">
+          {#if import.meta.env.DEV}
+            <div class="mt-6 surface-muted p-4 text-xs text-muted-foreground">
+              <p class="mb-2 font-semibold text-foreground">Demo access</p>
+              <div class="space-y-1 font-mono">
                 <p>{demoEmail}</p>
                 <p>{demoPassword}</p>
-              </div>{/if}
-          </div>
+              </div>
+            </div>
+          {/if}
         </div>
       </div>
     </div>

@@ -31,7 +31,7 @@
   <AppLoadingSkeleton />
 {:else if $authStore.sessionExpired}
   <!-- SessionExpiredModal is mounted by the root layout. -->
-{:else if $authStore.isAuthenticated && $authStore.permissionsLoaded}
+{:else if $authStore.isAuthenticated && $authStore.permissionsLoaded && $extensionsLoaded}
   {@render children?.()}
 {:else if $authStore.isAuthenticated}
   <AppLoadingSkeleton />

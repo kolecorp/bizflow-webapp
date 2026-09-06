@@ -122,6 +122,8 @@
   let showPublishPanel = $state(false);
   let builderMenuElement: HTMLDivElement;
   let publishPanelElement: HTMLDivElement;
+  let builderMenuTrigger: HTMLButtonElement;
+  let publishPanelTrigger: HTMLButtonElement;
 
   // Publish settings
   let publishMethod = $state<"bizflow" | "gas" | "html" | "custom">("bizflow");
@@ -132,13 +134,23 @@
   let seoDescription = $state("");
   let isPublishing = $state(false);
 
+  function closeBuilderMenu() {
+    showBuilderMenu = false;
+    queueMicrotask(() => builderMenuTrigger?.focus());
+  }
+
+  function closePublishPanel() {
+    showPublishPanel = false;
+    queueMicrotask(() => publishPanelTrigger?.focus());
+  }
+
   $effect(() => {
     if (showBuilderMenu) queueMicrotask(() => builderMenuElement?.focus());
     if (showPublishPanel) queueMicrotask(() => publishPanelElement?.focus());
   });
 
   function startBuilderTour() {
-    showBuilderMenu = false;
+    closeBuilderMenu();
     const steps = tourConfigurations["/extensions/marketing/builder"];
     if (steps) startTour(steps);
   }
@@ -148,11 +160,8 @@
       toast.error("Apps Script URL is required");
       return;
     }
-    if (
-      publishMethod === "custom" &&
-      (!customDomain.trim() || !publishSlug.trim())
-    ) {
-      toast.error("Custom domain and publish slug are required");
+    if (publishMethod === "custom" && !customDomain.trim()) {
+      toast.error("Custom domain is required");
       return;
     }
     if (publishMethod === "html") {
@@ -164,7 +173,7 @@
     await new Promise((r) => setTimeout(r, 1400));
     published = true;
     isPublishing = false;
-    showPublishPanel = false;
+    closePublishPanel();
   }
   let workspaceFonts = $state<string[]>(["Inter", "Roboto"]);
 
@@ -675,6 +684,7 @@
 
       <button
         type="button"
+        bind:this={publishPanelTrigger}
         onclick={() => (showPublishPanel = true)}
         class="builder-publish shrink-0 ml-2"
       >
@@ -685,6 +695,7 @@
       <!-- Builder hamburger menu trigger -->
       <button
         type="button"
+        bind:this={builderMenuTrigger}
         class="builder-icon-btn"
         title="More options"
         onclick={() => (showBuilderMenu = !showBuilderMenu)}
@@ -1192,7 +1203,7 @@
     class="fixed inset-0"
     style="z-index: 9998;"
     role="presentation"
-    onclick={() => (showBuilderMenu = false)}
+    onclick={closeBuilderMenu}
   ></div>
 
   <!-- Floating menu -->
@@ -1201,7 +1212,7 @@
     class="builder-floating-menu"
     role="menu"
     tabindex="-1"
-    onkeydown={(event) => event.key === "Escape" && (showBuilderMenu = false)}
+    onkeydown={(event) => event.key === "Escape" && closeBuilderMenu()}
   >
     <div class="builder-floating-menu__header">
       <WandSparkles class="size-3.5 text-primary" />
@@ -1231,7 +1242,7 @@
         role="menuitem"
         class="builder-floating-menu__item"
         onclick={() => {
-          showBuilderMenu = false;
+          closeBuilderMenu();
           showShortcuts = true;
         }}
       >
@@ -1251,7 +1262,7 @@
         role="menuitem"
         class="builder-floating-menu__item"
         onclick={() => {
-          showBuilderMenu = false;
+          closeBuilderMenu();
           showAiModal = true;
         }}
       >
@@ -1278,7 +1289,7 @@
         role="menuitem"
         class="builder-floating-menu__item"
         onclick={() => {
-          showBuilderMenu = false;
+          closeBuilderMenu();
           previewOpen = true;
           previewViewport = viewport;
         }}
@@ -1299,7 +1310,7 @@
         role="menuitem"
         class="builder-floating-menu__item"
         onclick={() => {
-          showBuilderMenu = false;
+          closeBuilderMenu();
           resetView();
         }}
       >
@@ -1323,7 +1334,7 @@
     class="fixed inset-0"
     style="z-index: 9998;"
     role="presentation"
-    onclick={() => (showPublishPanel = false)}
+    onclick={closePublishPanel}
   ></div>
   <div
     bind:this={publishPanelElement}
@@ -1331,7 +1342,7 @@
     role="dialog"
     aria-label="Publish settings"
     tabindex="-1"
-    onkeydown={(event) => event.key === "Escape" && (showPublishPanel = false)}
+    onkeydown={(event) => event.key === "Escape" && closePublishPanel()}
   >
     <!-- Panel header -->
     <div class="publish-panel__header">
@@ -1346,7 +1357,7 @@
       </div>
       <button
         type="button"
-        onclick={() => (showPublishPanel = false)}
+        onclick={closePublishPanel}
         class="publish-panel__close"
         aria-label="Close">✕</button
       >
@@ -1535,7 +1546,7 @@
       <button
         type="button"
         onclick={() => {
-          showPublishPanel = false;
+          closePublishPanel();
           previewOpen = true;
           previewViewport = viewport;
         }}

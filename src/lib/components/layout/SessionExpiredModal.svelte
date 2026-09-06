@@ -42,6 +42,8 @@
       overlayClass="session-expired-overlay"
       class="z-60 w-full max-w-md overflow-hidden rounded-2xl border border-primary/20 bg-background/95 p-7 text-foreground shadow-2xl shadow-primary/10 sm:p-9"
       showCloseButton={false}
+      onInteractOutside={(event) => event.preventDefault()}
+      onEscapeKeyDown={(event) => event.preventDefault()}
     >
       <div class="mb-7 flex items-center gap-3">
         <div
@@ -104,10 +106,14 @@
 
 <style>
   :global(.session-expired-overlay) {
-    background: color-mix(
-      in srgb,
-      var(--background) 34%,
-      transparent
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      transparent 18%,
+      color-mix(in srgb, var(--background) 34%, transparent) 38%,
+      color-mix(in srgb, var(--background) 34%, transparent) 62%,
+      transparent 82%,
+      transparent 100%
     ) !important;
     backdrop-filter: blur(2px);
   }
@@ -131,8 +137,8 @@
     top: 0;
     background: linear-gradient(
       to bottom,
-      color-mix(in srgb, var(--background) 48%, transparent),
-      transparent
+      transparent,
+      color-mix(in srgb, var(--background) 34%, transparent)
     );
   }
 
@@ -140,8 +146,8 @@
     bottom: 0;
     background: linear-gradient(
       to top,
-      color-mix(in srgb, var(--background) 48%, transparent),
-      transparent
+      transparent,
+      color-mix(in srgb, var(--background) 34%, transparent)
     );
   }
 </style>
