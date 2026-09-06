@@ -80,7 +80,12 @@
   }
 
   async function savePermissions() {
-    if (!member || member.status !== "Active" || member.role !== "STAFF")
+    if (
+      !member ||
+      member.status !== "Active" ||
+      member.role !== "STAFF" ||
+      permissionError
+    )
       return;
     permissionsSaving = true;
     try {
@@ -232,7 +237,9 @@
             <Button
               type="button"
               onclick={savePermissions}
-              disabled={permissionsLoading || permissionsSaving}
+              disabled={permissionsLoading ||
+                permissionsSaving ||
+                !!permissionError}
             >
               {#if permissionsSaving}<div
                   class="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"

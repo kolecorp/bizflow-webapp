@@ -99,7 +99,7 @@ export async function inviteMember(input: {
       await loadTeam(); // Reload to get the new pending invitation
       return true;
     } else {
-      const err = await res.json();
+      const err = await res.json().catch(() => ({}));
       throw new Error(err.message || "Failed to send invitation");
     }
   } catch (error) {
@@ -210,7 +210,7 @@ export async function acceptInvite(
     });
 
     if (!res.ok) {
-      const err = await res.json();
+      const err = await res.json().catch(() => ({}));
       throw new Error(err.message || "Failed to accept invitation");
     }
     return await res.json();

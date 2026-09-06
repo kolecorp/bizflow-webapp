@@ -487,7 +487,7 @@
               ? error.message
               : "The provider rejected the message.",
         });
-        return;
+        throw error;
       }
     }}
   />

@@ -11,6 +11,7 @@
   import { SYSTEM_FONTS } from "$lib/data/google-fonts";
   import PreviewCanvas from "$lib/components/builder/PreviewCanvas.svelte";
   import AiDesignModal from "$lib/components/builder/AiDesignModal.svelte";
+  import { toast } from "svelte-sonner";
   import {
     createNewElement,
     type CanvasElement,
@@ -119,6 +120,8 @@
   let rightTab = $state<"inspector" | "layers">("inspector");
   let showBuilderMenu = $state(false);
   let showPublishPanel = $state(false);
+  let builderMenuElement: HTMLDivElement;
+  let publishPanelElement: HTMLDivElement;
 
   // Publish settings
   let publishMethod = $state<"bizflow" | "gas" | "html" | "custom">("bizflow");
@@ -129,6 +132,11 @@
   let seoDescription = $state("");
   let isPublishing = $state(false);
 
+  $effect(() => {
+    if (showBuilderMenu) queueMicrotask(() => builderMenuElement?.focus());
+    if (showPublishPanel) queueMicrotask(() => publishPanelElement?.focus());
+  });
+
   function startBuilderTour() {
     showBuilderMenu = false;
     const steps = tourConfigurations["/extensions/marketing/builder"];
@@ -136,10 +144,25 @@
   }
 
   async function handlePublish() {
+    if (publishMethod === "gas" && !gasScriptUrl.trim()) {
+      toast.error("Apps Script URL is required");
+      return;
+    }
+    if (
+      publishMethod === "custom" &&
+      (!customDomain.trim() || !publishSlug.trim())
+    ) {
+      toast.error("Custom domain and publish slug are required");
+      return;
+    }
+    if (publishMethod === "html") {
+      toast.info("HTML export is not available yet");
+      return;
+    }
     isPublishing = true;
     // Simulate publish
     await new Promise((r) => setTimeout(r, 1400));
-    published = publishMethod === "html" ? false : true;
+    published = true;
     isPublishing = false;
     showPublishPanel = false;
   }
@@ -1173,7 +1196,13 @@
   ></div>
 
   <!-- Floating menu -->
-  <div class="builder-floating-menu" role="menu">
+  <div
+    bind:this={builderMenuElement}
+    class="builder-floating-menu"
+    role="menu"
+    tabindex="-1"
+    onkeydown={(event) => event.key === "Escape" && (showBuilderMenu = false)}
+  >
     <div class="builder-floating-menu__header">
       <WandSparkles class="size-3.5 text-primary" />
       <span>MK Builder</span>
@@ -1296,7 +1325,14 @@
     role="presentation"
     onclick={() => (showPublishPanel = false)}
   ></div>
-  <div class="publish-panel" role="dialog" aria-label="Publish settings">
+  <div
+    bind:this={publishPanelElement}
+    class="publish-panel"
+    role="dialog"
+    aria-label="Publish settings"
+    tabindex="-1"
+    onkeydown={(event) => event.key === "Escape" && (showPublishPanel = false)}
+  >
     <!-- Panel header -->
     <div class="publish-panel__header">
       <div class="publish-panel__header-left">

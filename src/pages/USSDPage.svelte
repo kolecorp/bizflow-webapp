@@ -5,6 +5,7 @@
   import PasswordInput from "$lib/components/ui/password-input.svelte";
   import { authStore } from "$lib/stores/auth";
   import { toast } from "svelte-sonner";
+  import { onMount } from "svelte";
   import {
     Hash,
     Terminal,
@@ -34,6 +35,32 @@
   const providers = ["Africa's Talking", "Infobip", "Termii"];
   const API_BASE_URL =
     import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000/api/v1";
+
+  onMount(() => {
+    void loadConfiguration();
+  });
+
+  async function loadConfiguration() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/ussd/config`, {
+        headers: { Authorization: `Bearer ${$authStore.accessToken}` },
+        credentials: "include",
+      });
+      if (response.status === 404) return;
+      if (!response.ok) throw new Error("Unable to load USSD configuration.");
+      const config = await response.json();
+      provider = config.provider ?? provider;
+      shortCode = config.shortCode ?? "";
+      connected = Boolean(
+        config.connected ?? config.isConnected ?? config.shortCode,
+      );
+    } catch (error) {
+      toast.error("Unable to load USSD configuration", {
+        description:
+          error instanceof Error ? error.message : "Please try again.",
+      });
+    }
+  }
 
   const recentSessions = [
     {
@@ -135,6 +162,24 @@
       toast.success("USSD settings saved");
     } catch (error) {
       toast.error("Unable to save USSD settings", {
+        description:
+          error instanceof Error ? error.message : "Please try again.",
+      });
+    }
+  }
+
+  async function disconnect() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/ussd/disconnect`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${$authStore.accessToken}` },
+        credentials: "include",
+      });
+      if (!response.ok)
+        throw new Error("USSD provider could not be disconnected.");
+      connected = false;
+    } catch (error) {
+      toast.error("Unable to disconnect USSD provider", {
         description:
           error instanceof Error ? error.message : "Please try again.",
       });
@@ -452,7 +497,7 @@
           >
           <button
             type="button"
-            onclick={() => (connected = false)}
+            onclick={disconnect}
             class="btn-app-secondary text-sm">Disconnect</button
           >
         </div>

@@ -3,7 +3,11 @@
   import { Button } from "$lib/components/ui/button";
   import { ListTree, Plus, X } from "@lucide/svelte";
 
-  let { open = false, onOpenChange, onConfirm } = $props<{
+  let {
+    open = false,
+    onOpenChange,
+    onConfirm,
+  } = $props<{
     open: boolean;
     onOpenChange: (isOpen: boolean) => void;
     onConfirm: (code: string, label: string, subItems: string[]) => void;
@@ -15,11 +19,15 @@
   let isProcessing = $state(false);
 
   function handleConfirm() {
-    if (!code || !label) return;
+    if (!/^\d+$/.test(code.trim()) || !label.trim()) return;
     isProcessing = true;
     setTimeout(() => {
       isProcessing = false;
-      onConfirm(code, label, subItems.filter(s => s.trim() !== ""));
+      onConfirm(
+        code.trim(),
+        label.trim(),
+        subItems.filter((s) => s.trim() !== ""),
+      );
       code = "";
       label = "";
       subItems = [""];
@@ -53,7 +61,7 @@
         <label class="block w-24 shrink-0 text-sm font-medium">
           Menu Code
           <input
-            type="number"
+            type="text"
             bind:value={code}
             placeholder="e.g. 5"
             class="mt-2 w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm shadow-sm font-mono"
@@ -75,17 +83,25 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm font-semibold text-foreground">Sub-menu Items</p>
-            <p class="text-[11px] text-muted-foreground mt-0.5">Optional nested choices for users.</p>
+            <p class="text-[11px] text-muted-foreground mt-0.5">
+              Optional nested choices for users.
+            </p>
           </div>
-          <button type="button" onclick={addSubItem} class="btn-app-secondary px-3 py-1.5 text-xs h-auto">
+          <button
+            type="button"
+            onclick={addSubItem}
+            class="btn-app-secondary px-3 py-1.5 text-xs h-auto"
+          >
             <Plus class="h-3.5 w-3.5" /> Add
           </button>
         </div>
-        
+
         <div class="space-y-2.5 pt-2">
           {#each subItems as item, i}
             <div class="flex items-center gap-2 relative group">
-              <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-background border border-border font-mono text-xs font-bold text-muted-foreground">
+              <div
+                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-background border border-border font-mono text-xs font-bold text-muted-foreground"
+              >
                 {i + 1}.
               </div>
               <input
@@ -109,8 +125,15 @@
     </div>
 
     <Dialog.Footer class="gap-2 border-t-0 bg-transparent p-0 pt-2 sm:gap-0">
-      <Button variant="outline" onclick={() => onOpenChange(false)} disabled={isProcessing}>Cancel</Button>
-      <Button onclick={handleConfirm} disabled={isProcessing || !code || !label}>
+      <Button
+        variant="outline"
+        onclick={() => onOpenChange(false)}
+        disabled={isProcessing}>Cancel</Button
+      >
+      <Button
+        onclick={handleConfirm}
+        disabled={isProcessing || !code || !label}
+      >
         {isProcessing ? "Saving..." : "Add to Tree"}
       </Button>
     </Dialog.Footer>

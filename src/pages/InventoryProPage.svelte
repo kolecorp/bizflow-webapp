@@ -161,8 +161,10 @@
             const link = document.createElement("a");
             link.href = url;
             link.download = "inventory-report.csv";
+            document.body.appendChild(link);
             link.click();
-            URL.revokeObjectURL(url);
+            link.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 0);
           }}
           class="w-full rounded-lg border border-border/60 bg-background/80 px-3 py-2.5 text-left text-sm text-foreground hover:bg-muted"
         >

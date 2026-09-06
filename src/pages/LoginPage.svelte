@@ -26,8 +26,9 @@
   ];
 
   const demoPassword = "SecurePass1!";
-  let email = "owner@acme.test";
-  let password = demoPassword;
+  const demoEmail = "owner@acme.test";
+  let email = import.meta.env.DEV ? demoEmail : "";
+  let password = import.meta.env.DEV ? demoPassword : "";
   let loading = false;
 
   async function handleSubmit() {
@@ -247,10 +248,10 @@
 
           <div class="mt-6 surface-muted p-4 text-xs text-muted-foreground">
             <p class="mb-2 font-semibold text-foreground">Demo access</p>
-            <div class="space-y-1 font-mono">
-              <p>manager@cafe.io</p>
-              <p>{demoPassword}</p>
-            </div>
+            {#if import.meta.env.DEV}<div class="space-y-1 font-mono">
+                <p>{demoEmail}</p>
+                <p>{demoPassword}</p>
+              </div>{/if}
           </div>
         </div>
       </div>

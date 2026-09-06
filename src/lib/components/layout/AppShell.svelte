@@ -44,6 +44,7 @@
     "/extensions/reports": "Scheduled Reports",
     "/extensions/whatsapp/business": "WhatsApp Business",
     "/extensions/whatsapp/customers": "WhatsApp Customers",
+    "/extensions/telegram": "Telegram",
   };
 
   const pageTitle = $derived.by(() => {
@@ -64,32 +65,21 @@
   <title>{pageTitle} — Bizflow</title>
 </svelte:head>
 
-{#if $sidebar}
-  <div class="app-layout min-h-screen bg-background text-foreground">
-    <AppSidebar activePath={page.url.pathname} />
-    <div class="app-main min-w-0">
-      <AppHeader
-        title={$authStore.user?.name ?? "Manager"}
-        subtitle={$authStore.user?.role ?? "Operations"}
-        onLogout={handleSignOut}
-        onToggleSidebar={() => sidebar.toggle()}
-        sidebarOpen={$sidebar}
-      />
-      <main
-        class="app-shell min-h-[calc(100vh-50px)] bg-background text-foreground"
-      >
-        <div
-          class="dashboard-content dashboard-content--sidebar-open mx-auto w-full max-w-400 space-y-6 px-4 pb-12 pt-6 sm:px-6 lg:px-8"
-        >
-          {@render children?.()}
-        </div>
-      </main>
-      <AIAssistantShell />
-      <SettingsModal />
-    </div>
-  </div>
-{:else}
-  <div class="app-main min-h-screen bg-background text-foreground">
+<div
+  class:sidebar-open={$sidebar}
+  class:sidebar-closed={!$sidebar}
+  class="app-layout min-h-screen bg-background text-foreground"
+>
+  <AppSidebar activePath={page.url.pathname} />
+  <button
+    type="button"
+    class="app-sidebar-backdrop"
+    aria-label="Close sidebar"
+    aria-hidden={!$sidebar}
+    tabindex={$sidebar ? 0 : -1}
+    onclick={() => sidebar.close()}
+  ></button>
+  <div class="app-main min-w-0 min-h-screen">
     <AppHeader
       title={$authStore.user?.name ?? "Manager"}
       subtitle={$authStore.user?.role ?? "Operations"}
@@ -100,13 +90,14 @@
     <main
       class="app-shell min-h-[calc(100vh-50px)] bg-background text-foreground"
     >
-      <AIAssistantShell />
-      <SettingsModal />
       <div
-        class="dashboard-content dashboard-content--sidebar-closed mx-auto w-full min-w-0 space-y-6 px-4 pb-12 pt-6 sm:px-6 lg:px-8"
+        class:dashboard-content--sidebar-closed={!$sidebar}
+        class="dashboard-content mx-auto w-full max-w-400 space-y-6 px-4 pb-12 pt-6 sm:px-6 lg:px-8"
       >
         {@render children?.()}
       </div>
     </main>
+    <AIAssistantShell />
+    <SettingsModal />
   </div>
-{/if}
+</div>

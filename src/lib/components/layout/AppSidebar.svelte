@@ -13,7 +13,9 @@
     ChevronsUpDown,
     HelpCircle,
     Bell,
+    X,
   } from "@lucide/svelte";
+  import { sidebar } from "$lib/stores/sidebar";
   import NoiseOverlay from "$lib/components/landing/NoiseOverlay.svelte";
   import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
   import BetaPill from "$lib/components/ui/beta-pill.svelte";
@@ -95,6 +97,14 @@
         Operations workspace
       </p>
     </div>
+    <button
+      type="button"
+      class="app-sidebar__close ml-auto inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border bg-background text-foreground"
+      aria-label="Close sidebar"
+      onclick={() => sidebar.close()}
+    >
+      <X class="h-4 w-4" />
+    </button>
   </div>
 
   <div

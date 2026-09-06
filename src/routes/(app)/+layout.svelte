@@ -3,6 +3,7 @@
   import { page } from "$app/state";
   import { authStore } from "$lib/stores/auth";
   import { hasPermission } from "$lib/stores/permissions";
+  import { extensionsLoaded } from "$lib/stores/extensions";
   import { permissionForPath } from "$lib/config/navigation";
   import AppLoadingSkeleton from "$lib/components/layout/AppLoadingSkeleton.svelte";
 
@@ -17,7 +18,7 @@
       return;
     }
 
-    if (!$authStore.permissionsLoaded) return;
+    if (!$authStore.permissionsLoaded || !$extensionsLoaded) return;
 
     const required = permissionForPath(page.url.pathname);
     if (required && !hasPermission(required)) {

@@ -1,8 +1,12 @@
 @import "tailwindcss";
 
 @keyframes loading-slide {
-  0% { transform: translateX(-120%); }
-  100% { transform: translateX(420%); }
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(420%);
+  }
 }
 @import "tw-animate-css";
 @import "shadcn-svelte/tailwind.css";
@@ -174,7 +178,8 @@
   /* Shared scrollbar treatment for every scrollable surface. */
   * {
     scrollbar-width: thin;
-    scrollbar-color: color-mix(in srgb, var(--primary) 72%, var(--muted)) transparent;
+    scrollbar-color: color-mix(in srgb, var(--primary) 72%, var(--muted))
+      transparent;
   }
 
   *::-webkit-scrollbar {
@@ -745,6 +750,38 @@
 
   .app-main {
     min-width: 0;
+    position: relative;
+    transition:
+      margin-left 280ms cubic-bezier(0.22, 1, 0.36, 1),
+      width 280ms cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: margin-left, width;
+  }
+
+  .app-sidebar-backdrop {
+    position: fixed;
+    inset: 0 0 0 248px;
+    z-index: 40;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    animation: app-sidebar-fade-in 220ms ease both;
+    display: none;
+  }
+
+  .sidebar-closed .app-sidebar-backdrop {
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    animation: none;
+  }
+
+  @keyframes app-sidebar-fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 
   .dashboard-content {
@@ -765,7 +802,7 @@
     }
 
     .dashboard-content--sidebar-closed {
-      width: 70%;
+      width: 75%;
     }
 
     .app-layout > .app-sidebar {
@@ -779,7 +816,13 @@
     }
 
     .app-layout > .app-main {
+      margin-left: 0;
+      width: 100%;
+    }
+
+    .sidebar-open > .app-main {
       margin-left: 248px;
+      width: calc(100% - 248px);
     }
   }
 
@@ -828,6 +871,20 @@
     overflow: hidden;
     background: var(--background);
     border-radius: 0;
+    transform: translateX(0);
+    transition:
+      transform 220ms ease,
+      box-shadow 220ms ease;
+  }
+
+  .sidebar-closed > .app-sidebar {
+    transform: translateX(-100%);
+    box-shadow: none;
+    pointer-events: none;
+  }
+
+  .app-sidebar__close {
+    display: none;
   }
 
   .app-sidebar__glow {
@@ -844,18 +901,65 @@
     opacity: 0.75;
     filter: blur(22px);
     z-index: 1;
+    transition: opacity 220ms ease;
+  }
+
+  .sidebar-closed .app-sidebar__glow {
+    opacity: 0;
   }
 
   @media (max-width: 1023px) {
     .app-layout {
       display: block;
+      overflow-x: hidden;
+    }
+
+    .app-main {
+      transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: transform;
+    }
+
+    .app-layout > .app-main {
+      width: 100%;
+      margin-left: 0;
     }
 
     .app-layout > .app-sidebar {
-      position: static;
+      position: fixed;
+      inset: 0 auto 0 0;
+      z-index: 50;
+      width: 75vw;
+      height: 100dvh;
+      min-height: 100dvh;
+      overflow: hidden;
+      box-shadow: 0 1rem 3rem
+        color-mix(in srgb, var(--foreground) 18%, transparent);
+    }
+
+    .app-sidebar-backdrop {
+      inset: 0 0 0 75vw;
+      display: block;
+    }
+
+    .sidebar-open > .app-main {
+      margin-left: 0;
       width: 100%;
-      height: auto;
-      min-height: auto;
+      min-width: 100%;
+      transform: translateX(75vw);
+    }
+
+    .app-sidebar__close {
+      display: inline-flex;
+    }
+
+    .app-layout > .app-main .app-header,
+    .app-layout > .app-main .app-shell {
+      width: 100%;
+    }
+
+    .app-main > .app-header,
+    .app-main > .app-shell {
+      transition: width 220ms ease;
     }
   }
 
@@ -906,7 +1010,8 @@
 
   .glow-stat-card__inner {
     @apply relative z-1 overflow-hidden rounded-xl border border-border/60 bg-card;
-    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--foreground) 4%, transparent);
+    box-shadow: inset 0 1px 0
+      color-mix(in srgb, var(--foreground) 4%, transparent);
   }
 
   .glow-stat-card__inner::before {

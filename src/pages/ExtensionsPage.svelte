@@ -57,10 +57,17 @@
   }
 
   async function handlePaymentConfirm() {
-    if (selectedExtension) {
-      await subscribeExtension(selectedExtension.id);
+    try {
+      if (selectedExtension) {
+        await subscribeExtension(selectedExtension.id);
+      }
+      paymentModalOpen = false;
+    } catch (error) {
+      toast.error("Extension subscription failed", {
+        description:
+          error instanceof Error ? error.message : "Please try again.",
+      });
     }
-    paymentModalOpen = false;
   }
 
   // Search filter

@@ -172,7 +172,7 @@ function normalizeUser(
     name: input.name ?? (email ? email.split("@")[0] : "Workspace user"),
     email,
     role: input.role ?? "STAFF",
-    businessId: input.businessId ?? null,
+    businessId: input.businessId ?? input.business?.id ?? null,
     business: input.business ?? null,
   };
 }
@@ -218,7 +218,9 @@ async function requestJson<T>(
       }
     }
 
-    throw new Error(message);
+    const error = new Error(message) as Error & { status?: number };
+    error.status = response.status;
+    throw error;
   }
 
   if (response.status === 204) {
@@ -273,7 +275,10 @@ export async function loadCurrentUser(accessTokenOverride?: string) {
         accessToken,
       );
     } catch (refreshError) {
-      if (get(authStore).accessToken === accessToken) {
+      if (
+        get(authStore).accessToken === accessToken &&
+        (refreshError as { status?: number })?.status === 401
+      ) {
         expireSession();
       }
       throw refreshError;
@@ -382,11 +387,16 @@ export function initializeAuth() {
   setSession(saved);
 
   const tokenAtStart = saved.accessToken;
-  void loadCurrentUser(tokenAtStart).catch(() => {
+  void loadCurrentUser(tokenAtStart).catch((error) => {
     // Only wipe the session if the token hasn't been replaced by a new
     // signUp / signIn that happened while this request was in-flight.
-    if (get(authStore).accessToken === tokenAtStart) {
+    if (
+      get(authStore).accessToken === tokenAtStart &&
+      (error as { status?: number })?.status === 401
+    ) {
       setSession({ ...initialState, authReady: true });
+    } else if (get(authStore).accessToken === tokenAtStart) {
+      setSession({ ...get(authStore), authReady: true });
     }
   });
 }

@@ -3,7 +3,11 @@
   import { Button } from "$lib/components/ui/button";
   import { FileText, Zap } from "@lucide/svelte";
 
-  let { open = false, onOpenChange, onConfirm } = $props<{
+  let {
+    open = false,
+    onOpenChange,
+    onConfirm,
+  } = $props<{
     open: boolean;
     onOpenChange: (isOpen: boolean) => void;
     onConfirm: (name: string, trigger: string, preview: string) => void;
@@ -19,7 +23,7 @@
     "On Order Shipped",
     "Low Stock Alert",
     "Custom API",
-    "Scheduled Daily"
+    "Scheduled Daily",
   ];
 
   function handleConfirm() {
@@ -82,16 +86,35 @@
           class="mt-2 w-full rounded-xl border border-border bg-background px-4 py-3 text-sm shadow-sm resize-none font-mono text-xs"
         ></textarea>
         <div class="mt-2 flex gap-2">
-          <span class="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground cursor-pointer hover:bg-primary/20" onclick={() => preview += "{name}"}>name</span>
-          <span class="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground cursor-pointer hover:bg-primary/20" onclick={() => preview += "{amount}"}>amount</span>
-          <span class="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground cursor-pointer hover:bg-primary/20" onclick={() => preview += "{date}"}>date</span>
+          <button
+            type="button"
+            class="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground cursor-pointer hover:bg-primary/20"
+            onclick={() => (preview += "{name}")}>name</button
+          >
+          <button
+            type="button"
+            class="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground cursor-pointer hover:bg-primary/20"
+            onclick={() => (preview += "{amount}")}>amount</button
+          >
+          <button
+            type="button"
+            class="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground cursor-pointer hover:bg-primary/20"
+            onclick={() => (preview += "{date}")}>date</button
+          >
         </div>
       </label>
     </div>
 
     <Dialog.Footer class="gap-2 border-t-0 bg-transparent p-0 pt-2 sm:gap-0">
-      <Button variant="outline" onclick={() => onOpenChange(false)} disabled={isProcessing}>Cancel</Button>
-      <Button onclick={handleConfirm} disabled={isProcessing || !name || !preview}>
+      <Button
+        variant="outline"
+        onclick={() => onOpenChange(false)}
+        disabled={isProcessing}>Cancel</Button
+      >
+      <Button
+        onclick={handleConfirm}
+        disabled={isProcessing || !name || !preview}
+      >
         {isProcessing ? "Saving..." : "Save Template"}
       </Button>
     </Dialog.Footer>
