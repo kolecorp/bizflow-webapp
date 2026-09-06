@@ -4,6 +4,8 @@
   import SendSMSModal from "$lib/components/modals/SendSMSModal.svelte";
   import NewSMSTemplateModal from "$lib/components/modals/NewSMSTemplateModal.svelte";
   import PasswordInput from "$lib/components/ui/password-input.svelte";
+  import { authStore } from "$lib/stores/auth";
+  import { toast } from "svelte-sonner";
   import {
     Mail,
     Send,
@@ -64,26 +66,31 @@
 
   let templates = $state([
     {
+      id: "sms-template-transaction-receipt",
       name: "Transaction Receipt",
       trigger: "On payment",
       preview: "Your payment of {amount} was received. Ref: {ref}.",
     },
     {
+      id: "sms-template-low-stock-alert",
       name: "Low Stock Alert",
       trigger: "Stock < threshold",
       preview: "Alert: {product} stock is low ({qty} remaining).",
     },
     {
+      id: "sms-template-wallet-balance-alert",
       name: "Wallet Balance Alert",
       trigger: "Balance < ₦500",
       preview: "Your wallet balance is ₦{balance}. Fund now to continue.",
     },
     {
+      id: "sms-template-daily-sales-summary",
       name: "Daily Sales Summary",
       trigger: "Daily 7PM",
       preview: "Today's sales: {count} transactions totalling ₦{amount}.",
     },
     {
+      id: "sms-template-appointment-reminder",
       name: "Appointment Reminder",
       trigger: "1hr before",
       preview: "Reminder: Your appointment is at {time} today.",
@@ -97,12 +104,31 @@
     { label: "Balance (Units)", value: "1,200" },
   ]);
 
-  function connect() {
+  async function connect() {
     isConnecting = true;
-    setTimeout(() => {
-      isConnecting = false;
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000/api/v1"}/sms/connect`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${$authStore.accessToken}`,
+          },
+          credentials: "include",
+          body: JSON.stringify({ provider, senderId, apiKey }),
+        },
+      );
+      if (!response.ok) throw new Error("SMS provider connection failed.");
       connected = true;
-    }, 1000);
+    } catch (error) {
+      toast.error("Unable to connect SMS provider", {
+        description:
+          error instanceof Error ? error.message : "Please try again.",
+      });
+    } finally {
+      isConnecting = false;
+    }
   }
 </script>
 
@@ -385,23 +411,49 @@
     open={sendModalOpen}
     onOpenChange={(open) => (sendModalOpen = open)}
     {templates}
-    onConfirm={(payload) => {
-      recentMessages = [
+    onConfirm={async (payload) => {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000/api/v1"}/sms/messages`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${$authStore.accessToken}`,
+            },
+            credentials: "include",
+            body: JSON.stringify({
+              ...payload,
+              recipients: payload.recipients ?? [payload.to],
+            }),
+          },
+        },
+        );
+        if (!response.ok) throw new Error("The provider rejected the message.");
+        const result = await response.json().catch(() => ({}));
+        recentMessages = [
         {
           to:
             payload.mode === "single"
               ? payload.to
               : `Bulk (${payload.recipientsCount} recipients)`,
           message: payload.message,
-          status: "Delivered",
+          status: result.status ?? "Pending",
           time: "Just now",
         },
         ...recentMessages,
-      ];
-      sendModalOpen = false;
-      // Increment sent count
-      stats[0].value = (parseInt(stats[0].value) + 1).toString();
-      stats[1].value = (parseInt(stats[1].value) + 1).toString();
+        ];
+        sendModalOpen = false;
+        stats[0].value = (parseInt(stats[0].value) + 1).toString();
+        if (result.status === "Delivered")
+          stats[1].value = (parseInt(stats[1].value) + 1).toString();
+      } catch (error) {
+        toast.error("SMS was not accepted", {
+          description:
+            error instanceof Error ? error.message : "The provider rejected the message.",
+        });
+        throw error;
+      }
     }}
   />
 
@@ -409,7 +461,10 @@
     open={templateModalOpen}
     onOpenChange={(open) => (templateModalOpen = open)}
     onConfirm={(name, trigger, preview) => {
-      templates = [{ name, trigger, preview }, ...templates];
+      templates = [
+        { id: `sms-template-${Date.now()}`, name, trigger, preview },
+        ...templates,
+      ];
       templateModalOpen = false;
     }}
   />

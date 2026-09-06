@@ -1,7 +1,5 @@
-import type { Permission } from "$lib/stores/permissions";
 import { get } from "svelte/store";
 import { extensionNavItems } from "$lib/stores/extensions";
-import { hasPermission } from "$lib/stores/permissions";
 import type { Component } from "svelte";
 import {
   LayoutGrid,
@@ -143,15 +141,14 @@ export function permissionForPath(path: string): Permission | null {
     const extensionItem = get(extensionNavItems).find(
       (item) => path === item.path || path.startsWith(`${item.path}/`),
     );
+    if (extensionItem) return extensionItem.permission;
     if (
-      !extensionItem ||
-      !hasPermission(extensionItem.permission as Permission)
+      path === "/extensions/wallet" ||
+      path.startsWith("/extensions/wallet/")
     ) {
-      return "extensions.manage";
+      return "wallet.view";
     }
-  }
-  if (path === "/extensions/wallet" || path.startsWith("/extensions/wallet/")) {
-    return "wallet.view";
+    return "extensions.manage";
   }
   return null;
 }

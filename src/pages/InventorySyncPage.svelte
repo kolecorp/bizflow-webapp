@@ -5,7 +5,7 @@
   import { extensions } from "$lib/stores/extensions";
   import { PackageCheck } from "@lucide/svelte";
 
-  let extension = $derived($extensions.find((e) => e.id === "inventory-sync"));
+  let extension = $derived($extensions.find((e) => e.id === "INVENTORY_PRO"));
 </script>
 
 <AppShell>

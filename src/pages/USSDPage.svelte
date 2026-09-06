@@ -3,6 +3,8 @@
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import AddUSSDMenuModal from "$lib/components/modals/AddUSSDMenuModal.svelte";
   import PasswordInput from "$lib/components/ui/password-input.svelte";
+  import { authStore } from "$lib/stores/auth";
+  import { toast } from "svelte-sonner";
   import {
     Hash,
     Terminal,
@@ -30,6 +32,8 @@
   let menuModalOpen = $state(false);
 
   const providers = ["Africa's Talking", "Infobip", "Termii"];
+  const API_BASE_URL =
+    import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000/api/v1";
 
   const recentSessions = [
     {
@@ -92,12 +96,71 @@
     { label: "Avg Duration", value: "48s" },
   ];
 
-  function connect() {
+  async function connect() {
     isConnecting = true;
-    setTimeout(() => {
-      isConnecting = false;
+    try {
+      const response = await fetch(`${API_BASE_URL}/ussd/connect`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${$authStore.accessToken}`,
+        },
+        credentials: "include",
+        body: JSON.stringify({ provider, shortCode, apiKey }),
+      });
+      if (!response.ok) throw new Error("USSD provider connection failed.");
       connected = true;
-    }, 1000);
+    } catch (error) {
+      toast.error("Unable to connect USSD provider", {
+        description:
+          error instanceof Error ? error.message : "Please try again.",
+      });
+    } finally {
+      isConnecting = false;
+    }
+  }
+
+  async function saveChanges() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/ussd/config`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${$authStore.accessToken}`,
+        },
+        credentials: "include",
+        body: JSON.stringify({ provider, shortCode }),
+      });
+      if (!response.ok) throw new Error("USSD configuration was not saved.");
+      toast.success("USSD settings saved");
+    } catch (error) {
+      toast.error("Unable to save USSD settings", {
+        description:
+          error instanceof Error ? error.message : "Please try again.",
+      });
+    }
+  }
+
+  async function createMenu(code: string, label: string, subItems: string[]) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/ussd/menus`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${$authStore.accessToken}`,
+        },
+        credentials: "include",
+        body: JSON.stringify({ code, label, subItems }),
+      });
+      if (!response.ok) throw new Error("USSD menu was not saved.");
+      menuItems = [...menuItems, { code, label, subItems }];
+      menuModalOpen = false;
+    } catch (error) {
+      toast.error("Unable to create menu", {
+        description:
+          error instanceof Error ? error.message : "Please try again.",
+      });
+    }
   }
 </script>
 
@@ -382,8 +445,10 @@
           </label>
         </div>
         <div class="flex gap-3 pt-2">
-          <button type="button" class="btn-app-primary text-sm"
-            >Save Changes</button
+          <button
+            type="button"
+            onclick={saveChanges}
+            class="btn-app-primary text-sm">Save Changes</button
           >
           <button
             type="button"
@@ -398,9 +463,6 @@
   <AddUSSDMenuModal
     open={menuModalOpen}
     onOpenChange={(open) => (menuModalOpen = open)}
-    onConfirm={(code, label, subItems) => {
-      menuItems = [...menuItems, { code, label, subItems }];
-      menuModalOpen = false;
-    }}
+    onConfirm={createMenu}
   />
 </AppShell>

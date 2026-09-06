@@ -293,7 +293,7 @@ Success response:
 
 Refresh access token using refresh token cookie.
 
-Auth: cookie `refreshToken` (guarded by `RefreshTokenGuard`)
+Auth: cookie `refresh-token` (guarded by `RefreshTokenGuard`)
 
 Success response: same as auth success response, with a fresh `accessToken` and `refreshToken`.
 
@@ -308,7 +308,7 @@ Notes:
 
 Logout current session by invalidating the active refresh token.
 
-Auth: cookie `refreshToken`
+Auth: cookie `refresh-token`
 
 Success response:
 
@@ -669,7 +669,7 @@ This is the app root and not the main consumer-facing endpoint.
 # Security notes
 
 - Access token: JWT bearer token.
-- Refresh token: cookie named `refreshToken`.
+- Refresh token: cookie named `refresh-token`.
 - Protected endpoints require a valid bearer token unless specifically using refresh-token cookie routes.
 - Passwords require strong password policy:
   - minimum 8 chars

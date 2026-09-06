@@ -10,41 +10,44 @@
     MoreHorizontal,
     User,
   } from "@lucide/svelte";
+  import { onMount } from "svelte";
+  import { authStore } from "$lib/stores/auth";
 
-  const activities = [
-    {
-      id: "ACT-001",
-      action: "New transaction recorded",
-      status: "Success",
-      date: "Today, 10:45 AM",
-      actor: "Jane Doe",
-      tags: ["Sales", "₦5,000"],
-    },
-    {
-      id: "ACT-002",
-      action: "Low stock alert: A4 Paper",
-      status: "Warning",
-      date: "Today, 09:12 AM",
-      actor: "System",
-      tags: ["Inventory", "System"],
-    },
-    {
-      id: "ACT-003",
-      action: "Extension activated: Wallet",
-      status: "Success",
-      date: "Yesterday",
-      actor: "Admin",
-      tags: ["System", "Billing"],
-    },
-    {
-      id: "ACT-004",
-      action: "Refund processed",
-      status: "Pending",
-      date: "Yesterday",
-      actor: "Jane Doe",
-      tags: ["Sales", "₦1,500"],
-    },
-  ];
+  const API_BASE_URL =
+    import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000/api/v1";
+  let activities = $state<any[]>([]);
+  let loadError = $state("");
+
+  onMount(() => void loadActivities());
+
+  async function loadActivities() {
+    loadError = "";
+    try {
+      const response = await fetch(`${API_BASE_URL}/audit`, {
+        headers: $authStore.accessToken
+          ? { Authorization: `Bearer ${$authStore.accessToken}` }
+          : {},
+        credentials: "include",
+      });
+      if (!response.ok) {
+        loadError = "Unable to load workspace activity.";
+        return;
+      }
+      const payload = await response.json();
+      const rows = Array.isArray(payload) ? payload : payload?.data;
+      activities = (Array.isArray(rows) ? rows : []).map((event: any) => ({
+        id: event.id ?? event.reference ?? "AUDIT",
+        action:
+          event.action ?? event.description ?? event.type ?? "Workspace action",
+        status: event.status ?? "Success",
+        date: event.createdAt ?? event.timestamp ?? event.date,
+        actor: event.actor?.name ?? event.user?.name ?? event.actor ?? "System",
+        tags: Array.isArray(event.tags) ? event.tags : [],
+      }));
+    } catch {
+      loadError = "Unable to load workspace activity.";
+    }
+  }
 
   function getStatusClass(status: string) {
     switch (status) {
@@ -84,7 +87,11 @@
       <p
         class="mt-2 font-heading text-3xl font-black tracking-[-0.06em] text-foreground"
       >
-        24
+        {activities.filter(
+          (activity) =>
+            new Date(activity.date).toDateString() ===
+            new Date().toDateString(),
+        ).length}
       </p>
       <p class="mt-1 text-xs text-muted-foreground">Across the workspace</p>
     </div>
@@ -117,6 +124,11 @@
   </div>
 
   <div class="surface-panel overflow-hidden">
+    {#if loadError}
+      <p class="border-b border-border/60 px-6 py-4 text-sm text-destructive">
+        {loadError}
+      </p>
+    {/if}
     <div
       class="flex items-center justify-between border-b border-border/60 px-6 py-5"
     >
@@ -154,13 +166,17 @@
         <tbody>
           {#each activities as activity}
             {@const StatusIcon = getStatusIcon(activity.status)}
-            <tr class="border-b border-border/40 hover:bg-muted/30 group transition">
+            <tr
+              class="border-b border-border/40 hover:bg-muted/30 group transition"
+            >
               <td class="px-6 py-4 font-mono text-xs text-muted-foreground"
                 >{activity.id}</td
               >
               <td class="px-4 py-4">
                 <div class="flex flex-wrap items-center gap-2">
-                  <span class="font-medium text-foreground">{activity.action}</span>
+                  <span class="font-medium text-foreground"
+                    >{activity.action}</span
+                  >
                   {#each activity.tags as tag}
                     <span
                       class="rounded-md border border-border/60 bg-muted/60 px-2 py-1 text-[10px] font-medium text-muted-foreground"
@@ -184,7 +200,9 @@
                 <User class="h-3.5 w-3.5" />
                 {activity.actor}
               </td>
-              <td class="px-4 py-4 text-muted-foreground text-xs">{activity.date}</td>
+              <td class="px-4 py-4 text-muted-foreground text-xs"
+                >{activity.date}</td
+              >
               <td class="px-4 py-4 text-right">
                 <button
                   type="button"

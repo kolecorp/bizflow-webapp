@@ -55,7 +55,9 @@
   });
 
   let visibleExtensionItems = $derived(
-    extensionItems.filter((item) => hasPermission(item.permission as Permission)),
+    extensionItems.filter((item) =>
+      hasPermission(item.permission as Permission),
+    ),
   );
 
   function navigate(path: string) {
@@ -100,40 +102,42 @@
   >
     <!-- Core sections -->
     {#each [...coreSections.entries()] as [section, items]}
-      {@const visibleItems = items.filter((item) => canAccess(userRole, item.permission))}
+      {@const visibleItems = items.filter((item) =>
+        canAccess(userRole, item.permission),
+      )}
       {#if visibleItems.length > 0}
-      <div class="app-sidebar__section">
-        <div
-          class="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground"
-        >
-          {section}
-        </div>
-        <div class="space-y-0.5">
-          {#each visibleItems as item}
-            <button
-              type="button"
-              onclick={() => navigate(item.path)}
-              class={`app-sidebar__item flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-left text-sm font-medium transition ${
-                isNavActive(item.path, activePath)
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:bg-muted/70 hover:text-foreground"
-              }`}
-            >
-              <span class="flex items-center gap-3 min-w-0">
-                <item.icon class="h-4 w-4 shrink-0" />
-                <span class="truncate">{item.label}</span>
-              </span>
-              {#if item.badge}
-                <span
-                  class="rounded-md bg-background/70 px-1.5 py-0.5 text-[10px] font-semibold text-primary"
-                >
-                  {item.badge}
+        <div class="app-sidebar__section">
+          <div
+            class="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground"
+          >
+            {section}
+          </div>
+          <div class="space-y-0.5">
+            {#each visibleItems as item}
+              <button
+                type="button"
+                onclick={() => navigate(item.path)}
+                class={`app-sidebar__item flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-left text-sm font-medium transition ${
+                  isNavActive(item.path, activePath)
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-muted/70 hover:text-foreground"
+                }`}
+              >
+                <span class="flex items-center gap-3 min-w-0">
+                  <item.icon class="h-4 w-4 shrink-0" />
+                  <span class="truncate">{item.label}</span>
                 </span>
-              {/if}
-            </button>
-          {/each}
+                {#if item.badge}
+                  <span
+                    class="rounded-md bg-background/70 px-1.5 py-0.5 text-[10px] font-semibold text-primary"
+                  >
+                    {item.badge}
+                  </span>
+                {/if}
+              </button>
+            {/each}
+          </div>
         </div>
-      </div>
       {/if}
     {/each}
 
@@ -226,7 +230,10 @@
             <Bell class="h-4 w-4 text-muted-foreground" />
             Notifications
           </DropdownMenu.Item>
-          <DropdownMenu.Item class="gap-2.5 rounded-lg py-2">
+          <DropdownMenu.Item
+            class="gap-2.5 rounded-lg py-2"
+            onclick={() => navigate("/support")}
+          >
             <HelpCircle class="h-4 w-4 text-muted-foreground" />
             Help & Support
           </DropdownMenu.Item>

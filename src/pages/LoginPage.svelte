@@ -25,8 +25,9 @@
     "Sales insights",
   ];
 
+  const demoPassword = "SecurePass1!";
   let email = "owner@acme.test";
-  let password = "SecurePass1!";
+  let password = demoPassword;
   let loading = false;
 
   async function handleSubmit() {
@@ -248,7 +249,7 @@
             <p class="mb-2 font-semibold text-foreground">Demo access</p>
             <div class="space-y-1 font-mono">
               <p>manager@cafe.io</p>
-              <p>password123</p>
+              <p>{demoPassword}</p>
             </div>
           </div>
         </div>

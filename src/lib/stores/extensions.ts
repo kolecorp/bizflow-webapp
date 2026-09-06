@@ -476,11 +476,13 @@ export async function syncExtensions(user: AuthUser | null) {
           }
         });
       });
-      installedExtensionIds.set(
-        data
-          .filter((item: any) => item.isInstalled)
-          .map((item: any) => item.extension),
-      );
+      if (Array.isArray(data)) {
+        const installed = data
+          .filter((item: any) => item && item.isInstalled === true)
+          .map((item: any) => item.extension)
+          .filter((id: unknown): id is string => typeof id === "string");
+        if (installed.length > 0) installedExtensionIds.set(installed);
+      }
     }
   } catch (error) {
     console.error("Failed to sync extensions", error);
@@ -551,11 +553,12 @@ export async function toggleExtension(id: string) {
     );
   } catch (error) {
     console.error("Failed to toggle extension", error);
+    throw error;
   }
 }
 
-export function subscribeExtension(id: string) {
-  toggleExtension(id); // For now, subscription is just an install action
+export async function subscribeExtension(id: string) {
+  return toggleExtension(id); // For now, subscription is just an install action
 }
 
 export function getDaysRemaining(expiresAt?: string): number | null {
@@ -603,10 +606,11 @@ export async function grantStaffExtensionAccess(
         headers: { ...getAuthHeader() },
       },
     );
+    handleUnauthorized(response);
     if (!response.ok) throw new Error("Failed to grant extension access");
     staffAccessMap.update((map) => ({
       ...map,
-      [extensionId]: [...(map[extensionId] ?? []), userId],
+      [extensionId]: Array.from(new Set([...(map[extensionId] ?? []), userId])),
     }));
   } catch (error) {
     console.error(error);
@@ -627,6 +631,7 @@ export async function revokeStaffExtensionAccess(
         headers: { ...getAuthHeader() },
       },
     );
+    handleUnauthorized(response);
     if (!response.ok) throw new Error("Failed to revoke extension access");
     staffAccessMap.update((map) => ({
       ...map,

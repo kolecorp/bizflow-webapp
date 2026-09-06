@@ -5,7 +5,9 @@
   import { extensions } from "$lib/stores/extensions";
   import { BarChart3 } from "@lucide/svelte";
 
-  let extension = $derived($extensions.find((e) => e.id === "analytics"));
+  let extension = $derived(
+    $extensions.find((e) => e.id === "ADVANCED_ANALYTICS"),
+  );
 </script>
 
 <AppShell>

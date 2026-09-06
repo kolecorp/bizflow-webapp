@@ -30,6 +30,17 @@
   let inviteError = "";
 
   function continueToInvite() {
+    if (
+      !businessName.trim() ||
+      !businessType.trim() ||
+      !address.trim() ||
+      !city.trim()
+    ) {
+      toast.error("Complete your business profile", {
+        description: "Business name, type, address, and city are required.",
+      });
+      return;
+    }
     currentStep = 2;
   }
 
@@ -40,14 +51,15 @@
       inviteError = "Add a name and email address, or skip this step.";
       return;
     }
-    initializeTeam($authStore.user, businessName);
     try {
+      const onboardingComplete = await finishOnboarding(false);
+      if (!onboardingComplete) return;
       await inviteMember({
         name: inviteName.trim(),
         email: inviteEmail.trim(),
         role: inviteRole,
       });
-      await finishOnboarding();
+      goto("/dashboard");
     } catch (error) {
       toast.error("Invitation failed", {
         description:
@@ -56,7 +68,7 @@
     }
   }
 
-  async function finishOnboarding() {
+  async function finishOnboarding(navigateAfter = true): Promise<boolean> {
     loading = true;
 
     try {
@@ -71,7 +83,8 @@
       });
 
       initializeTeam($authStore.user, businessName);
-      goto("/dashboard");
+      if (navigateAfter) goto("/dashboard");
+      return true;
     } catch (error) {
       const message =
         error instanceof Error
@@ -80,6 +93,7 @@
       toast.error("Workspace setup failed", {
         description: message,
       });
+      return false;
     } finally {
       loading = false;
     }
@@ -335,7 +349,7 @@
                   type="button"
                   variant="outline"
                   disabled={loading}
-                  onclick={finishOnboarding}
+                  onclick={() => finishOnboarding()}
                   class="flex-1">Skip for now</Button
                 >
               </div>

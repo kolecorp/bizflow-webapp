@@ -14,7 +14,7 @@
     TrendingUp,
   } from "@lucide/svelte";
 
-  let extension = $derived($extensions.find((e) => e.id === "inventory-pro"));
+  let extension = $derived($extensions.find((e) => e.id === "INVENTORY_PRO"));
   let recentAdjustments = $derived($stockAdjustments.slice(0, 4));
 </script>
 
@@ -138,21 +138,38 @@
         Quick actions
       </p>
       <div class="mt-4 space-y-2">
-        <div
-          class="rounded-lg border border-border/60 bg-background/80 px-3 py-2.5 text-sm text-foreground"
+        <a
+          href="/extensions/inventory"
+          class="block rounded-lg border border-border/60 bg-background/80 px-3 py-2.5 text-sm text-foreground hover:bg-muted"
         >
           Review low stock list
-        </div>
-        <div
-          class="rounded-lg border border-border/60 bg-background/80 px-3 py-2.5 text-sm text-foreground"
+        </a>
+        <button
+          type="button"
+          onclick={() => {
+            const csv = $inventory
+              .map((item) => `${item.name},${item.quantity},${item.unit}`)
+              .join("\n");
+            const blob = new Blob([`Item,Quantity,Unit\n${csv}`], {
+              type: "text/csv",
+            });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = "inventory-report.csv";
+            link.click();
+            URL.revokeObjectURL(url);
+          }}
+          class="w-full rounded-lg border border-border/60 bg-background/80 px-3 py-2.5 text-left text-sm text-foreground hover:bg-muted"
         >
           Export current stock report
-        </div>
-        <div
-          class="rounded-lg border border-border/60 bg-background/80 px-3 py-2.5 text-sm text-foreground"
+        </button>
+        <a
+          href="/transactions"
+          class="block rounded-lg border border-border/60 bg-background/80 px-3 py-2.5 text-sm text-foreground hover:bg-muted"
         >
           Check pending adjustments
-        </div>
+        </a>
       </div>
     </aside>
   </div>
@@ -169,13 +186,13 @@
           Stock adjustments
         </h3>
       </div>
-      <button
-        type="button"
+      <a
+        href="/transactions"
         class="inline-flex items-center gap-2 rounded-lg border border-border/60 bg-background px-3 py-1.5 text-xs font-medium text-foreground"
       >
         View log
         <ArrowUpRight class="h-3.5 w-3.5" />
-      </button>
+      </a>
     </div>
 
     <div class="mt-5 space-y-2">
@@ -191,7 +208,7 @@
               <p class="text-xs text-muted-foreground">{adjustment.reason}</p>
             </div>
             <span class="text-sm font-semibold text-foreground"
-              >{adjustment.delta > 0 ? "+" : ""}{adjustment.delta}</span
+              >{adjustment.type === "add" ? "+" : adjustment.type === "remove" ? "-" : ""}{adjustment.quantity}</span
             >
           </div>
         {/each}

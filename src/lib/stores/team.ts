@@ -47,10 +47,15 @@ export async function loadTeam() {
       headers: { ...getAuthHeader() },
     });
     if (res.ok) {
-      const data = await res.json();
+      const responseData = await res.json();
+      const data = responseData?.data ?? responseData;
+      const memberRows = Array.isArray(data?.members) ? data.members : [];
+      const invitationRows = Array.isArray(data?.pendingInvitations)
+        ? data.pendingInvitations
+        : [];
 
       const mappedMembers: TeamMember[] = [
-        ...data.members.map((m: any) => ({
+        ...memberRows.map((m: any) => ({
           id: m.id,
           name: m.name,
           email: m.email,
@@ -58,7 +63,7 @@ export async function loadTeam() {
           status: "Active",
           joinedAt: m.createdAt,
         })),
-        ...data.pendingInvitations.map((inv: any) => ({
+        ...invitationRows.map((inv: any) => ({
           id: inv.id, // we use invitation ID as temporary ID
           name: "Pending...",
           email: inv.email,
@@ -105,33 +110,38 @@ export async function inviteMember(input: {
 
 export async function removeMember(id: string, isInvitation: boolean = false) {
   try {
-    if (isInvitation) {
-      await fetch(`${API_BASE_URL}/team/invitations/${id}`, {
-        method: "DELETE",
-        headers: { ...getAuthHeader() },
-      });
-    } else {
-      await fetch(`${API_BASE_URL}/team/members/${id}`, {
-        method: "DELETE",
-        headers: { ...getAuthHeader() },
-      });
-    }
+    const response = isInvitation
+      ? await fetch(`${API_BASE_URL}/team/invitations/${id}`, {
+          method: "DELETE",
+          headers: { ...getAuthHeader() },
+        })
+      : await fetch(`${API_BASE_URL}/team/members/${id}`, {
+          method: "DELETE",
+          headers: { ...getAuthHeader() },
+        });
+    if (!response.ok)
+      throw new Error(
+        `Failed to remove ${isInvitation ? "invitation" : "member"}`,
+      );
     await loadTeam();
   } catch (error) {
     console.error("Failed to remove member", error);
+    throw error;
   }
 }
 
 export async function updateMemberRole(id: string, role: string) {
   try {
-    await fetch(`${API_BASE_URL}/team/members/${id}/role`, {
+    const response = await fetch(`${API_BASE_URL}/team/members/${id}/role`, {
       method: "PATCH",
       headers: { ...getAuthHeader(), "Content-Type": "application/json" },
       body: JSON.stringify({ role: role.toUpperCase() }),
     });
+    if (!response.ok) throw new Error("Failed to update member role");
     await loadTeam();
   } catch (error) {
     console.error("Failed to update member role", error);
+    throw error;
   }
 }
 

@@ -139,7 +139,7 @@
     isPublishing = true;
     // Simulate publish
     await new Promise((r) => setTimeout(r, 1400));
-    published = true;
+    published = publishMethod === "html" ? false : true;
     isPublishing = false;
     showPublishPanel = false;
   }
@@ -293,13 +293,18 @@
   }
 
   const loadedCanvasFonts = new Set<string>();
-  
+
   function loadCanvasFont(family: string) {
-    if (!family || loadedCanvasFonts.has(family) || SYSTEM_FONTS.some(f => f.family === family)) return;
+    if (
+      !family ||
+      loadedCanvasFonts.has(family) ||
+      SYSTEM_FONTS.some((f) => f.family === family)
+    )
+      return;
     loadedCanvasFonts.add(family);
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = `https://fonts.googleapis.com/css2?family=${family.replace(/ /g, '+')}:wght@300;400;500;600;700&display=swap`;
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = `https://fonts.googleapis.com/css2?family=${family.replace(/ /g, "+")}:wght@300;400;500;600;700&display=swap`;
     document.head.appendChild(link);
   }
 
@@ -647,7 +652,7 @@
 
       <button
         type="button"
-        onclick={() => showPublishPanel = true}
+        onclick={() => (showPublishPanel = true)}
         class="builder-publish shrink-0 ml-2"
       >
         {published ? "Published" : "Publish"}
@@ -1168,10 +1173,7 @@
   ></div>
 
   <!-- Floating menu -->
-  <div
-    class="builder-floating-menu"
-    role="menu"
-  >
+  <div class="builder-floating-menu" role="menu">
     <div class="builder-floating-menu__header">
       <WandSparkles class="size-3.5 text-primary" />
       <span>MK Builder</span>
@@ -1189,7 +1191,9 @@
         </span>
         <span class="builder-floating-menu__item-body">
           <span class="builder-floating-menu__item-label">Page Tour</span>
-          <span class="builder-floating-menu__item-desc">Guided walkthrough of the builder</span>
+          <span class="builder-floating-menu__item-desc"
+            >Guided walkthrough of the builder</span
+          >
         </span>
       </button>
 
@@ -1197,13 +1201,18 @@
         type="button"
         role="menuitem"
         class="builder-floating-menu__item"
-        onclick={() => { showBuilderMenu = false; showShortcuts = true; }}
+        onclick={() => {
+          showBuilderMenu = false;
+          showShortcuts = true;
+        }}
       >
         <span class="builder-floating-menu__item-icon">
           <Keyboard class="size-4" />
         </span>
         <span class="builder-floating-menu__item-body">
-          <span class="builder-floating-menu__item-label">Keyboard Shortcuts</span>
+          <span class="builder-floating-menu__item-label"
+            >Keyboard Shortcuts</span
+          >
           <span class="builder-floating-menu__item-desc">View all hotkeys</span>
         </span>
       </button>
@@ -1212,14 +1221,21 @@
         type="button"
         role="menuitem"
         class="builder-floating-menu__item"
-        onclick={() => { showBuilderMenu = false; showAiModal = true; }}
+        onclick={() => {
+          showBuilderMenu = false;
+          showAiModal = true;
+        }}
       >
         <span class="builder-floating-menu__item-icon">
           <WandSparkles class="size-4" />
         </span>
         <span class="builder-floating-menu__item-body">
-          <span class="builder-floating-menu__item-label">AI Design Generator</span>
-          <span class="builder-floating-menu__item-desc">Generate a layout with AI</span>
+          <span class="builder-floating-menu__item-label"
+            >AI Design Generator</span
+          >
+          <span class="builder-floating-menu__item-desc"
+            >Generate a layout with AI</span
+          >
         </span>
         <span class="builder-floating-menu__badge">NEW</span>
       </button>
@@ -1232,14 +1248,20 @@
         type="button"
         role="menuitem"
         class="builder-floating-menu__item"
-        onclick={() => { showBuilderMenu = false; previewOpen = true; previewViewport = viewport; }}
+        onclick={() => {
+          showBuilderMenu = false;
+          previewOpen = true;
+          previewViewport = viewport;
+        }}
       >
         <span class="builder-floating-menu__item-icon">
           <Eye class="size-4" />
         </span>
         <span class="builder-floating-menu__item-body">
           <span class="builder-floating-menu__item-label">Preview Page</span>
-          <span class="builder-floating-menu__item-desc">See how your page looks live</span>
+          <span class="builder-floating-menu__item-desc"
+            >See how your page looks live</span
+          >
         </span>
       </button>
 
@@ -1247,14 +1269,19 @@
         type="button"
         role="menuitem"
         class="builder-floating-menu__item"
-        onclick={() => { showBuilderMenu = false; resetView(); }}
+        onclick={() => {
+          showBuilderMenu = false;
+          resetView();
+        }}
       >
         <span class="builder-floating-menu__item-icon">
           <RotateCcw class="size-4" />
         </span>
         <span class="builder-floating-menu__item-body">
           <span class="builder-floating-menu__item-label">Reset View</span>
-          <span class="builder-floating-menu__item-desc">Snap canvas back to 100%</span>
+          <span class="builder-floating-menu__item-desc"
+            >Snap canvas back to 100%</span
+          >
         </span>
       </button>
     </div>
@@ -1285,8 +1312,8 @@
         type="button"
         onclick={() => (showPublishPanel = false)}
         class="publish-panel__close"
-        aria-label="Close"
-      >✕</button>
+        aria-label="Close">✕</button
+      >
     </div>
 
     <div class="publish-panel__body">
@@ -1296,53 +1323,85 @@
         <div class="publish-panel__method-grid">
           <button
             type="button"
-            class="publish-method-card {publishMethod === 'bizflow' ? 'is-active' : ''}"
-            onclick={() => (publishMethod = 'bizflow')}
+            class="publish-method-card {publishMethod === 'bizflow'
+              ? 'is-active'
+              : ''}"
+            onclick={() => (publishMethod = "bizflow")}
           >
-            <div class="publish-method-card__icon"><Globe class="size-5" /></div>
+            <div class="publish-method-card__icon">
+              <Globe class="size-5" />
+            </div>
             <p class="publish-method-card__name">Bizflow Hosting</p>
-            <p class="publish-method-card__desc">Hosted on Bizflow's CDN with a free subdomain</p>
-            {#if publishMethod === 'bizflow'}<span class="publish-method-card__check"><Check class="size-3" /></span>{/if}
+            <p class="publish-method-card__desc">
+              Hosted on Bizflow's CDN with a free subdomain
+            </p>
+            {#if publishMethod === "bizflow"}<span
+                class="publish-method-card__check"
+                ><Check class="size-3" /></span
+              >{/if}
           </button>
 
           <button
             type="button"
-            class="publish-method-card {publishMethod === 'gas' ? 'is-active' : ''}"
-            onclick={() => (publishMethod = 'gas')}
+            class="publish-method-card {publishMethod === 'gas'
+              ? 'is-active'
+              : ''}"
+            onclick={() => (publishMethod = "gas")}
           >
-            <div class="publish-method-card__icon"><Code2 class="size-5" /></div>
+            <div class="publish-method-card__icon">
+              <Code2 class="size-5" />
+            </div>
             <p class="publish-method-card__name">Google Apps Script</p>
-            <p class="publish-method-card__desc">Self-host on your personal GAS URL, powered by our API</p>
-            {#if publishMethod === 'gas'}<span class="publish-method-card__check"><Check class="size-3" /></span>{/if}
+            <p class="publish-method-card__desc">
+              Self-host on your personal GAS URL, powered by our API
+            </p>
+            {#if publishMethod === "gas"}<span
+                class="publish-method-card__check"
+                ><Check class="size-3" /></span
+              >{/if}
           </button>
 
           <button
             type="button"
-            class="publish-method-card {publishMethod === 'html' ? 'is-active' : ''}"
-            onclick={() => (publishMethod = 'html')}
+            class="publish-method-card {publishMethod === 'html'
+              ? 'is-active'
+              : ''}"
+            onclick={() => (publishMethod = "html")}
           >
             <div class="publish-method-card__icon"><Copy class="size-5" /></div>
             <p class="publish-method-card__name">Export HTML</p>
-            <p class="publish-method-card__desc">Download a standalone HTML file to host anywhere</p>
-            {#if publishMethod === 'html'}<span class="publish-method-card__check"><Check class="size-3" /></span>{/if}
+            <p class="publish-method-card__desc">
+              Download a standalone HTML file to host anywhere
+            </p>
+            {#if publishMethod === "html"}<span
+                class="publish-method-card__check"
+                ><Check class="size-3" /></span
+              >{/if}
           </button>
 
           <button
             type="button"
-            class="publish-method-card {publishMethod === 'custom' ? 'is-active' : ''}"
-            onclick={() => (publishMethod = 'custom')}
+            class="publish-method-card {publishMethod === 'custom'
+              ? 'is-active'
+              : ''}"
+            onclick={() => (publishMethod = "custom")}
           >
             <div class="publish-method-card__icon"><Star class="size-5" /></div>
             <p class="publish-method-card__name">Custom Domain</p>
-            <p class="publish-method-card__desc">Connect your own domain via DNS or CNAME record</p>
-            {#if publishMethod === 'custom'}<span class="publish-method-card__check"><Check class="size-3" /></span>{/if}
+            <p class="publish-method-card__desc">
+              Connect your own domain via DNS or CNAME record
+            </p>
+            {#if publishMethod === "custom"}<span
+                class="publish-method-card__check"
+                ><Check class="size-3" /></span
+              >{/if}
           </button>
         </div>
       </div>
 
       <!-- Method-specific settings -->
       <div class="publish-panel__settings">
-        {#if publishMethod === 'bizflow'}
+        {#if publishMethod === "bizflow"}
           <p class="publish-panel__section-label">Page URL</p>
           <div class="publish-url-row">
             <span class="publish-url-prefix">bizflow.page/</span>
@@ -1352,10 +1411,15 @@
               placeholder="my-page"
             />
           </div>
-          <p class="publish-panel__hint">Your page will be live at <strong>bizflow.page/{publishSlug || 'my-page'}</strong></p>
-
-        {:else if publishMethod === 'gas'}
-          <p class="publish-panel__section-label">Your Apps Script Web App URL</p>
+          <p class="publish-panel__hint">
+            Your page will be live at <strong
+              >bizflow.page/{publishSlug || "my-page"}</strong
+            >
+          </p>
+        {:else if publishMethod === "gas"}
+          <p class="publish-panel__section-label">
+            Your Apps Script Web App URL
+          </p>
           <input
             class="publish-field-input"
             bind:value={gasScriptUrl}
@@ -1364,19 +1428,30 @@
           />
           <div class="publish-panel__info-box">
             <Code2 class="size-3.5 shrink-0 mt-0.5" />
-            <p>Deploy a Bizflow GAS adapter in your script editor. Your page content is served from your URL while form submissions and analytics connect back to Bizflow's API.</p>
+            <p>
+              Deploy a Bizflow GAS adapter in your script editor. Your page
+              content is served from your URL while form submissions and
+              analytics connect back to Bizflow's API.
+            </p>
           </div>
-          <a href="https://docs.bizflow.app/gas-hosting" class="publish-panel__link" target="_blank" rel="noopener">
+          <a
+            href="https://docs.bizflow.app/gas-hosting"
+            class="publish-panel__link"
+            target="_blank"
+            rel="noopener"
+          >
             <BookOpen class="size-3.5" /> View GAS setup guide
           </a>
-
-        {:else if publishMethod === 'html'}
+        {:else if publishMethod === "html"}
           <div class="publish-panel__info-box">
             <Globe class="size-3.5 shrink-0 mt-0.5" />
-            <p>Downloads a self-contained HTML file with all styles and content inlined. Form integrations will require the Bizflow embed script to be added manually.</p>
+            <p>
+              Downloads a self-contained HTML file with all styles and content
+              inlined. Form integrations will require the Bizflow embed script
+              to be added manually.
+            </p>
           </div>
-
-        {:else if publishMethod === 'custom'}
+        {:else if publishMethod === "custom"}
           <p class="publish-panel__section-label">Custom Domain</p>
           <input
             class="publish-field-input"
@@ -1386,12 +1461,15 @@
           />
           <div class="publish-panel__info-box">
             <Globe class="size-3.5 shrink-0 mt-0.5" />
-            <p>Add a CNAME record pointing to <strong>pages.bizflow.app</strong> in your DNS settings. SSL is provisioned automatically.</p>
+            <p>
+              Add a CNAME record pointing to <strong>pages.bizflow.app</strong> in
+              your DNS settings. SSL is provisioned automatically.
+            </p>
           </div>
         {/if}
 
         <!-- SEO Settings (shared) -->
-        {#if publishMethod !== 'html'}
+        {#if publishMethod !== "html"}
           <p class="publish-panel__section-label mt-4">SEO & Meta</p>
           <div class="publish-panel__field-row">
             <input
@@ -1420,7 +1498,11 @@
       {/if}
       <button
         type="button"
-        onclick={() => { showPublishPanel = false; previewOpen = true; previewViewport = viewport; }}
+        onclick={() => {
+          showPublishPanel = false;
+          previewOpen = true;
+          previewViewport = viewport;
+        }}
         class="publish-panel__preview-btn"
       >
         <Eye class="size-4" /> Preview first
@@ -1433,10 +1515,10 @@
       >
         {#if isPublishing}
           <span class="publish-spinner"></span> Publishing…
-        {:else if publishMethod === 'html'}
+        {:else if publishMethod === "html"}
           <Copy class="size-4" /> Export HTML
         {:else}
-          <Rocket class="size-4" /> {published ? 'Update' : 'Publish Now'}
+          <Rocket class="size-4" /> {published ? "Update" : "Publish Now"}
         {/if}
       </button>
     </div>
@@ -1573,20 +1655,32 @@
             />
           </div>
           <!-- Theme Toggle -->
-          <div class="flex items-center justify-between pt-2 border-t border-border">
+          <div
+            class="flex items-center justify-between pt-2 border-t border-border"
+          >
             <div>
               <p class="text-sm font-medium">Builder Theme</p>
-              <p class="text-xs text-muted-foreground mt-0.5">Switch between light and dark mode.</p>
+              <p class="text-xs text-muted-foreground mt-0.5">
+                Switch between light and dark mode.
+              </p>
             </div>
             <button
               type="button"
               onclick={toggleMode}
-              class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors {mode.current === 'dark' ? 'bg-primary' : 'bg-muted'} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors {mode.current ===
+              'dark'
+                ? 'bg-primary'
+                : 'bg-muted'} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               role="switch"
-              aria-checked={mode.current === 'dark'}
+              aria-checked={mode.current === "dark"}
               aria-label="Toggle theme"
             >
-              <span class="pointer-events-none inline-block size-5 rounded-full bg-white shadow-lg transition-transform {mode.current === 'dark' ? 'translate-x-5' : 'translate-x-0'}"></span>
+              <span
+                class="pointer-events-none inline-block size-5 rounded-full bg-white shadow-lg transition-transform {mode.current ===
+                'dark'
+                  ? 'translate-x-5'
+                  : 'translate-x-0'}"
+              ></span>
             </button>
           </div>
         </div>
@@ -2010,14 +2104,20 @@
     background-color: var(--card);
     color: var(--card-foreground);
     box-shadow:
-      0 4px 6px -1px rgba(0,0,0,0.12),
-      0 16px 40px -4px rgba(0,0,0,0.25);
+      0 4px 6px -1px rgba(0, 0, 0, 0.12),
+      0 16px 40px -4px rgba(0, 0, 0, 0.25);
     overflow: hidden;
     animation: menu-in 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   }
   @keyframes menu-in {
-    from { opacity: 0; transform: translateY(-6px) scale(0.97); }
-    to   { opacity: 1; transform: translateY(0)    scale(1); }
+    from {
+      opacity: 0;
+      transform: translateY(-6px) scale(0.97);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
   }
   .builder-floating-menu__header {
     display: flex;
@@ -2577,15 +2677,19 @@
     width: 400px;
     background-color: var(--card);
     color: var(--card-foreground);
-    box-shadow: -4px 0 24px rgba(0,0,0,0.15);
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
     animation: slide-in-right 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     display: flex;
     flex-direction: column;
     border-left: 1px solid var(--border);
   }
   @keyframes slide-in-right {
-    from { transform: translateX(100%); }
-    to { transform: translateX(0); }
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: translateX(0);
+    }
   }
   .publish-panel__body {
     flex: 1;
@@ -2795,7 +2899,9 @@
     text-decoration: none;
     margin-top: 0.25rem;
   }
-  .publish-panel__link:hover { text-decoration: underline; }
+  .publish-panel__link:hover {
+    text-decoration: underline;
+  }
   .publish-panel__field-row {
     display: flex;
     flex-direction: column;
@@ -2831,8 +2937,13 @@
     animation: pulse 1.5s infinite;
   }
   @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.4;
+    }
   }
   .publish-panel__preview-btn {
     display: inline-flex;
@@ -2879,10 +2990,14 @@
   .publish-spinner {
     width: 14px;
     height: 14px;
-    border: 2px solid rgba(255,255,255,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.3);
     border-top-color: #fff;
     border-radius: 50%;
     animation: spin 0.7s linear infinite;
   }
-  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
 </style>

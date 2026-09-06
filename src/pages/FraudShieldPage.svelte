@@ -5,7 +5,7 @@
   import { extensions } from "$lib/stores/extensions";
   import { ShieldCheck } from "@lucide/svelte";
 
-  let extension = $derived($extensions.find((e) => e.id === "fraud-shield"));
+  let extension = $derived($extensions.find((e) => e.id === "FRAUD_SHIELD"));
 </script>
 
 <AppShell>

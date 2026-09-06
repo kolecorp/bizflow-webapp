@@ -11,12 +11,15 @@
   } from "@lucide/svelte";
   import FundWalletModal from "$lib/components/modals/FundWalletModal.svelte";
   import CustomerBalancesModal from "$lib/components/modals/CustomerBalancesModal.svelte";
+  import { authStore } from "$lib/stores/auth";
+  import { toast } from "svelte-sonner";
 
   let fundWalletModalOpen = $state(false);
   let customerBalancesModalOpen = $state(false);
   let provider = $state("Monnify");
   let connected = $state(false);
   let fundingAmount = $state(10000);
+  let fundingError = $state("");
   const history = [
     ["Funded business wallet", "Monnify", "+₦50,000", "Today"],
     ["Customer wallet purchase", "Ibrahim · MTN Data", "-₦750", "Today"],
@@ -206,7 +209,29 @@
   open={fundWalletModalOpen}
   onOpenChange={(isOpen) => (fundWalletModalOpen = isOpen)}
   onConfirm={(amount, method) => {
-    fundWalletModalOpen = false;
+    void (async () => {
+      fundingError = "";
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000/api/v1"}/wallet/fund`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${$authStore.accessToken}`,
+            },
+            credentials: "include",
+            body: JSON.stringify({ amount, method }),
+          },
+        );
+        if (!response.ok) throw new Error("Funding request was not accepted.");
+        fundWalletModalOpen = false;
+      } catch (error) {
+        fundingError =
+          error instanceof Error ? error.message : "Funding request failed.";
+        toast.error("Unable to fund wallet", { description: fundingError });
+      }
+    })();
   }}
 />
 

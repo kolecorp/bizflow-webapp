@@ -96,7 +96,6 @@ function persist(state: AuthState) {
   const snapshot = {
     ...state,
     accessToken: state.sessionExpired ? null : state.accessToken,
-    refreshToken: state.sessionExpired ? null : state.refreshToken,
     user: state.user ? { ...state.user } : null,
   };
 
@@ -162,14 +161,16 @@ export function handleUnauthorized(response: Response): void {
 function normalizeUser(
   input: Partial<AuthUser> | null | undefined,
 ): AuthUser | null {
-  if (!input || !input.id || !input.email) {
+  if (!input?.id || (!input.email && !input.businessId && !input.role)) {
     return null;
   }
 
+  const email = input.email ?? "";
+
   return {
     id: input.id,
-    name: input.name ?? input.email.split("@")[0] ?? "Workspace user",
-    email: input.email,
+    name: input.name ?? (email ? email.split("@")[0] : "Workspace user"),
+    email,
     role: input.role ?? "STAFF",
     businessId: input.businessId ?? null,
     business: input.business ?? null,
@@ -180,6 +181,7 @@ async function requestJson<T>(
   path: string,
   options: RequestInit = {},
   accessToken?: string,
+  suppressUnauthorized = false,
 ): Promise<T> {
   const url = path.startsWith("http") ? path : `${API_BASE_URL}${path}`;
   const headers = new Headers(options.headers ?? {});
@@ -199,7 +201,7 @@ async function requestJson<T>(
   });
 
   if (!response.ok) {
-    handleUnauthorized(response);
+    if (!suppressUnauthorized) handleUnauthorized(response);
     const rawText = await response.text();
     let message = response.statusText || "Request failed";
 
@@ -236,17 +238,45 @@ function getAccessToken() {
 }
 
 export async function loadCurrentUser(accessTokenOverride?: string) {
-  const accessToken = accessTokenOverride ?? getAccessToken();
+  let accessToken = accessTokenOverride ?? getAccessToken();
 
   if (!accessToken) {
     return null;
   }
 
-  const user = await requestJson<AuthUser>(
-    "/auth/me",
-    { method: "GET" },
-    accessToken,
-  );
+  let user: AuthUser;
+  try {
+    user = await requestJson<AuthUser>(
+      "/auth/me",
+      { method: "GET" },
+      accessToken,
+      true,
+    );
+  } catch (error) {
+    if (get(authStore).accessToken !== accessToken) throw error;
+    try {
+      const refreshed = await requestJson<ApiAuthEnvelope>(
+        "/auth/refresh-token",
+        {
+          method: "POST",
+        },
+      );
+      if (!refreshed.accessToken) throw error;
+      if (get(authStore).accessToken !== accessToken) throw error;
+      accessToken = refreshed.accessToken;
+      setSession({ ...get(authStore), accessToken });
+      user = await requestJson<AuthUser>(
+        "/auth/me",
+        { method: "GET" },
+        accessToken,
+      );
+    } catch (refreshError) {
+      if (get(authStore).accessToken === accessToken) {
+        expireSession();
+      }
+      throw refreshError;
+    }
+  }
   const normalized = normalizeUser(user);
 
   if (!normalized) {
@@ -263,6 +293,11 @@ export async function loadCurrentUser(accessTokenOverride?: string) {
     accessToken,
   };
 
+  if (get(authStore).accessToken !== accessToken) {
+    throw new Error(
+      "Authentication session changed while loading the current user.",
+    );
+  }
   setSession(nextState);
   await loadPermissions(accessToken);
   return normalized;
@@ -406,28 +441,8 @@ export async function completeOnboarding(
   );
 
   const current = get(authStore);
-  const hydratedUser = current.user
-    ? {
-        ...current.user,
-        business: current.user.business ?? {
-          id: "business-user-hydration",
-          name: input.businessName,
-          type: input.type,
-        },
-      }
-    : null;
-
-  const nextState: AuthState = {
-    ...current,
-    isAuthenticated: true,
-    user: hydratedUser,
-    accessToken,
-    permissions: current.permissions,
-    permissionsLoaded: current.permissionsLoaded,
-  };
-
-  setSession(nextState);
-  return nextState;
+  await loadCurrentUser(accessToken);
+  return get(authStore);
 }
 
 export async function signOut() {
