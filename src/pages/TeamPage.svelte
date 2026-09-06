@@ -10,6 +10,7 @@
   import { authStore } from "$lib/stores/auth";
   import {
     initializeTeam,
+    loadTeam,
     inviteMember,
     removeMember,
     teamMembers,

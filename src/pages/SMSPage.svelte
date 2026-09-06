@@ -443,12 +443,43 @@
           ...recentMessages,
         ];
         sendModalOpen = false;
-        stats[0].value = (
-          parseInt(stats[0].value) + (payload.recipientsCount ?? 1)
-        ).toString();
-        if (result.status === "Delivered")
-          stats[1].value = (parseInt(stats[1].value) + 1).toString();
-        else stats[2].value = (parseInt(stats[2].value) + 1).toString();
+        const submittedCount = payload.recipientsCount ?? 1;
+        const providerCountValue =
+          result.recipientCount ?? result.recipientsCount;
+        const providerCount = Number(providerCountValue);
+        const recipientCount =
+          providerCountValue != null && Number.isFinite(providerCount)
+            ? providerCount
+            : submittedCount;
+        const deliveredCount = Number(result.deliveredCount);
+        const failedCount = Number(result.failedCount);
+        stats[0].value = (parseInt(stats[0].value) + recipientCount).toString();
+        if (
+          result.deliveredCount != null &&
+          Number.isFinite(deliveredCount) &&
+          deliveredCount >= 0
+        ) {
+          stats[1].value = (
+            parseInt(stats[1].value) + deliveredCount
+          ).toString();
+        } else if (result.status === "Delivered") {
+          stats[1].value = (
+            parseInt(stats[1].value) + recipientCount
+          ).toString();
+        }
+        if (
+          result.failedCount != null &&
+          Number.isFinite(failedCount) &&
+          failedCount > 0
+        ) {
+          stats[2].value = (parseInt(stats[2].value) + failedCount).toString();
+        } else if (
+          ["Failed", "Rejected", "Undelivered"].includes(result.status)
+        ) {
+          stats[2].value = (
+            parseInt(stats[2].value) + recipientCount
+          ).toString();
+        }
       } catch (error) {
         toast.error("SMS was not accepted", {
           description:
