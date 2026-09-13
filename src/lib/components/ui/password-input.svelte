@@ -5,14 +5,16 @@
   import { cn } from "$lib/utils.js";
   import type { HTMLInputAttributes } from "svelte/elements";
 
-  type Props = HTMLInputAttributes & {
+  type Props = Omit<HTMLInputAttributes, "type"> & {
     value?: string;
     class?: string;
+    type?: "text" | "password" | "email" | "number" | "search" | "tel" | "url";
   };
 
   let {
     value = $bindable(),
     class: className,
+    type: _type,
     ...restProps
   }: Props = $props();
 

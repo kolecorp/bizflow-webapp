@@ -15,7 +15,7 @@ export type Permission =
   | "support.manage"
   | "services.view"
   | "services.manage"
-  | "ai-tracking.view"
+  | "audit.view"
   | "settings.view"
   | "settings.profile.edit"
   | "wallet.view"
@@ -50,7 +50,7 @@ const BACKEND_PERMISSION: Partial<Record<Permission, string>> = {
   "computers.transfer": "COMPUTERS_TRANSFER",
   "support.view": "SUPPORT_VIEW",
   "support.manage": "SUPPORT_MANAGE",
-  "ai-tracking.view": "ACTIVITY_VIEW",
+  "audit.view": "ACTIVITY_VIEW",
   "services.manage": "SERVICES_MANAGE",
   "settings.view": "SETTINGS_VIEW",
   "settings.profile.edit": "SETTINGS_PROFILE_EDIT",

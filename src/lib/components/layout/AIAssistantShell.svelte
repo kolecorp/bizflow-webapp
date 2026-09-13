@@ -42,6 +42,18 @@
       (input.includes("pricing") || input.includes("rules"))
     )
       return ["/extensions/vtu/pricing", "Opening VTU Rules & Pricing"];
+    if (
+      input.includes("vtu") &&
+      (input.includes("purchase") || input.includes("buy"))
+    )
+      return ["/extensions/vtu/purchase", "Opening New VTU Purchase"];
+    if (input.includes("vtu") && input.includes("transaction"))
+      return ["/extensions/vtu/transactions", "Opening VTU Transactions"];
+    if (
+      input.includes("vtu") &&
+      (input.includes("provider") || input.includes("setup"))
+    )
+      return ["/extensions/vtu/provider", "Opening VTU Provider Setup"];
     if (input.includes("vtu"))
       return ["/extensions/vtu", "Opening VTU Platform"];
     if (input.includes("sales") || input.includes("revenue"))
@@ -135,7 +147,7 @@
     onclick={(event) => event.target === event.currentTarget && (open = false)}
   >
     <section
-      class="flex h-full w-full max-w-[440px] flex-col overflow-hidden border-l border-border bg-popover text-popover-foreground sm:max-w-[440px]"
+      class="flex h-full w-full max-w-110 flex-col overflow-hidden border-l border-border bg-popover text-popover-foreground sm:max-w-110"
       role="dialog"
       aria-modal="true"
       aria-label="Bizzy workspace"
@@ -277,7 +289,7 @@
             {#each shortcuts as shortcut}<button
                 type="button"
                 onclick={() => runCommand(shortcut.command)}
-                class="flex items-center gap-3 rounded-xl border border-border/60 p-3 text-left transition hover:border-primary/40 hover:bg-primary/[0.04]"
+                class="flex items-center gap-3 rounded-xl border border-border/60 p-3 text-left transition hover:border-primary/40 hover:bg-primary/4"
                 ><span
                   class="flex h-7 w-7 items-center justify-center rounded-lg bg-muted text-xs font-semibold text-primary"
                   >{shortcut.icon}</span

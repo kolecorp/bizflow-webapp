@@ -3,239 +3,308 @@
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
   import {
     ArrowDownLeft,
+    ArrowLeftRight,
     ArrowUpRight,
-    CheckCircle2,
-    CreditCard,
-    Plus,
+    LoaderCircle,
+    RefreshCw,
     WalletCards,
   } from "@lucide/svelte";
-  import FundWalletModal from "$lib/components/modals/FundWalletModal.svelte";
-  import CustomerBalancesModal from "$lib/components/modals/CustomerBalancesModal.svelte";
+  import { onMount } from "svelte";
   import { authStore } from "$lib/stores/auth";
   import { toast } from "svelte-sonner";
 
-  let fundWalletModalOpen = $state(false);
-  let customerBalancesModalOpen = $state(false);
-  let provider = $state("Monnify");
-  let connected = $state(false);
-  let fundingAmount = $state(10000);
-  let fundingError = $state("");
-  const history = [
-    ["Funded business wallet", "Monnify", "+₦50,000", "Today"],
-    ["Customer wallet purchase", "Ibrahim · MTN Data", "-₦750", "Today"],
-    ["Provider settlement", "VTPass", "-₦18,400", "Yesterday"],
-    ["Funded customer wallet", "Flutterwave", "+₦5,000", "Yesterday"],
-  ];
+  type Wallet = {
+    id: string;
+    type: string;
+    currency: string;
+    balance: string | number;
+    status: string;
+  };
+  type LedgerEntry = {
+    id: string;
+    direction: "DEBIT" | "CREDIT";
+    amount: string | number;
+    currency: string;
+    reference: string;
+    createdAt: string;
+  };
+  const apiBase =
+    import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000/api/v1";
+  let wallets = $state<Wallet[]>([]);
+  let selectedWalletId = $state("");
+  let ledger = $state<LedgerEntry[]>([]);
+  let loading = $state(true);
+  let ledgerLoading = $state(false);
+  let transferOpen = $state(false);
+  let transferLoading = $state(false);
+  let error = $state("");
+  let walletLoadInFlight = false;
+  let form = $state({
+    fromType: "MAIN",
+    toType: "VTU_FLOAT",
+    amount: "",
+    reference: "",
+  });
+
+  const money = (value: string | number, currency = "NGN") =>
+    new Intl.NumberFormat("en-NG", {
+      style: "currency",
+      currency,
+      maximumFractionDigits: 2,
+    }).format(Number(value));
+  const label = (value: string) => value.replaceAll("_", " ");
+  const request = async (path: string, init?: RequestInit) => {
+    const response = await fetch(`${apiBase}${path}`, {
+      ...init,
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${$authStore.accessToken}`,
+        ...(init?.headers ?? {}),
+      },
+    });
+    if (!response.ok)
+      throw new Error(
+        (await response.json().catch(() => null))?.message ??
+          "Wallet request failed.",
+      );
+    return response.json();
+  };
+
+  async function loadWallets() {
+    if (walletLoadInFlight) return;
+    walletLoadInFlight = true;
+    loading = true;
+    error = "";
+    try {
+      await request("/wallets/provision", {
+        method: "POST",
+        body: JSON.stringify({ type: "MAIN", currency: "NGN" }),
+      });
+      wallets = await request("/wallets");
+      selectedWalletId ||= wallets[0]?.id ?? "";
+      if (selectedWalletId) await loadLedger(selectedWalletId);
+    } catch (cause) {
+      error =
+        cause instanceof Error ? cause.message : "Unable to load wallets.";
+    } finally {
+      loading = false;
+      walletLoadInFlight = false;
+    }
+  }
+
+  async function loadLedger(walletId: string) {
+    selectedWalletId = walletId;
+    ledgerLoading = true;
+    try {
+      ledger = (await request(`/wallets/${walletId}/ledger?limit=8`)).entries;
+    } catch (cause) {
+      toast.error(
+        cause instanceof Error ? cause.message : "Unable to load ledger.",
+      );
+    } finally {
+      ledgerLoading = false;
+    }
+  }
+
+  async function transfer() {
+    transferLoading = true;
+    try {
+      await request("/wallets/transfer", {
+        method: "POST",
+        body: JSON.stringify(form),
+      });
+      toast.success("Transfer completed");
+      transferOpen = false;
+      form = { ...form, amount: "", reference: "" };
+      await loadWallets();
+    } catch (cause) {
+      toast.error(cause instanceof Error ? cause.message : "Transfer failed.");
+    } finally {
+      transferLoading = false;
+    }
+  }
+
+  onMount(() => {
+    void loadWallets();
+  });
 </script>
 
-<AppShell
-  ><PageHeader
+<AppShell>
+  <PageHeader
     eyebrow="Extension · Payments"
     title="Wallet & payments"
-    description="Keep provider funding, VTU float, and customer balances clear in one place."
+    description="A clear view of every balance, transfer, and ledger movement across your business."
+    infographic="/wallet_infographics.png"
+    infographicAlt="Wallet and payments overview"
   />
   <div class="space-y-6">
-    <div class="grid gap-4 lg:grid-cols-3">
-      <div class="surface-panel relative overflow-hidden p-6">
-        <div
-          class="absolute right-0 top-0 h-24 w-24 rounded-bl-full bg-primary/5"
-          aria-hidden="true"
-        ></div>
-        <div class="relative flex items-start justify-between gap-3">
-          <div>
-            <p class="text-xs font-medium text-muted-foreground">
-              Business wallet
-            </p>
-            <p class="mt-3 font-heading text-3xl font-bold text-foreground">
-              ₦248,600
-            </p>
-            <p class="mt-2 flex items-center gap-1.5 text-xs text-green-600">
-              <CheckCircle2 class="h-3.5 w-3.5" /> Available VTU float
-            </p>
-          </div>
-          <span
-            class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary"
-            ><WalletCards class="h-5 w-5" /></span
-          >
-        </div>
-        <button
-          type="button"
-          class="btn-app-primary mt-5 text-xs"
-          onclick={() => (fundWalletModalOpen = true)}
-          ><Plus class="h-4 w-4" /> Fund business wallet</button
-        >
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <p class="text-sm font-semibold text-foreground">Business wallets</p>
+        <p class="text-sm text-muted-foreground">
+          Balances are separated by purpose and currency.
+        </p>
       </div>
-      <div class="surface-panel p-6">
-        <div class="flex items-start justify-between gap-3">
-          <div>
-            <p class="text-xs font-medium text-muted-foreground">
-              Customer wallets
-            </p>
-            <p class="mt-3 font-heading text-3xl font-bold text-foreground">
-              ₦84,200
-            </p>
-            <p class="mt-2 text-xs text-primary">126 active customers</p>
-          </div>
-          <span
-            class="flex h-10 w-10 items-center justify-center rounded-xl bg-green-500/10 text-green-600"
-            ><ArrowDownLeft class="h-5 w-5" /></span
-          >
-        </div>
+      <div class="flex gap-2">
         <button
+          class="btn-app-secondary text-xs"
           type="button"
-          class="mt-5 text-xs font-semibold text-primary hover:underline"
-          onclick={() => (customerBalancesModalOpen = true)}
-          >View customer balances</button
-        >
-      </div>
-      <div class="surface-panel p-6">
-        <div class="flex items-start justify-between gap-3">
-          <div>
-            <p class="text-xs font-medium text-muted-foreground">
-              Pending transactions
-            </p>
-            <p class="mt-3 font-heading text-3xl font-bold text-foreground">
-              7
-            </p>
-            <p class="mt-2 text-xs text-amber-600">₦12,450 in review</p>
-          </div>
-          <span
-            class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-600"
-            ><ArrowUpRight class="h-5 w-5" /></span
-          >
-        </div>
-        <button
+          onclick={() => void loadWallets()}
+          disabled={loading}><RefreshCw class="h-4 w-4" /> Refresh</button
+        ><button
+          class="btn-app-primary text-xs"
           type="button"
-          class="mt-5 text-xs font-semibold text-primary hover:underline"
-          >Review queue</button
+          onclick={() => (transferOpen = !transferOpen)}
+          ><ArrowLeftRight class="h-4 w-4" /> Transfer funds</button
         >
       </div>
     </div>
-    <div
-      class="grid items-start gap-6 lg:grid-cols-[minmax(300px,0.8fr)_minmax(0,1.2fr)]"
-    >
-      <div class="surface-panel p-6">
-        <div class="flex items-start justify-between">
-          <div>
-            <h2 class="flex items-center gap-2 text-lg font-bold">
-              <CreditCard class="h-5 w-5 text-primary" /> Payment providers
-            </h2>
-            <p class="mt-1 text-sm text-muted-foreground">
-              Connect where customers fund wallets.
-            </p>
-          </div>
-          <CheckCircle2 class="h-5 w-5 text-green-500" />
-        </div>
-        <div class="mt-5 space-y-3">
+
+    {#if transferOpen}
+      <form
+        class="surface-panel grid gap-4 p-5 md:grid-cols-4"
+        onsubmit={(event) => {
+          event.preventDefault();
+          void transfer();
+        }}
+      >
+        <label class="text-xs font-semibold text-muted-foreground"
+          >From<select
+            bind:value={form.fromType}
+            class="mt-2 w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm"
+            ><option>MAIN</option><option>SALES_COLLECTIONS</option><option
+              >VTU_FLOAT</option
+            ><option>ESCROW</option></select
+          ></label
+        >
+        <label class="text-xs font-semibold text-muted-foreground"
+          >To<select
+            bind:value={form.toType}
+            class="mt-2 w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm"
+            ><option>VTU_FLOAT</option><option>MAIN</option><option
+              >ESCROW</option
+            ><option>SALES_COLLECTIONS</option></select
+          ></label
+        >
+        <label class="text-xs font-semibold text-muted-foreground"
+          >Amount<input
+            required
+            pattern={"^\\d+(\\.\\d{1,2})?$"}
+            bind:value={form.amount}
+            placeholder="0.00"
+            class="mt-2 w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm"
+          /></label
+        >
+        <label class="text-xs font-semibold text-muted-foreground"
+          >Reference<input
+            required
+            maxlength="128"
+            bind:value={form.reference}
+            placeholder="e.g. float-setup-001"
+            class="mt-2 w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm"
+          /></label
+        >
+        <button
+          class="btn-app-primary md:col-span-4 md:justify-self-end"
+          type="submit"
+          disabled={transferLoading}
+          >{#if transferLoading}<LoaderCircle class="h-4 w-4 animate-spin" /> Processing{:else}Complete
+            transfer{/if}</button
+        >
+      </form>
+    {/if}
+
+    {#if loading}
+      <div
+        class="surface-panel flex min-h-48 items-center justify-center text-sm text-muted-foreground"
+      >
+        <LoaderCircle class="mr-2 h-4 w-4 animate-spin" /> Loading wallet balances
+      </div>
+    {:else if error}
+      <div class="surface-panel p-6 text-sm text-destructive">{error}</div>
+    {:else}
+      <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {#each wallets as wallet}
           <button
             type="button"
-            onclick={() => (provider = "Monnify")}
-            class={`flex w-full items-center justify-between rounded-xl border p-4 text-left ${provider === "Monnify" ? "border-primary bg-primary/5" : "border-border/60"}`}
-            ><span
-              ><span class="block font-semibold text-foreground">Monnify</span
-              ><span class="block text-xs text-muted-foreground"
-                >Card, transfer, USSD</span
-              ></span
-            ><span class="text-xs font-semibold text-green-600"
-              >{provider === "Monnify" && connected
-                ? "Connected"
-                : "Select"}</span
-            ></button
-          ><button
-            type="button"
-            onclick={() => (provider = "Flutterwave")}
-            class={`flex w-full items-center justify-between rounded-xl border p-4 text-left ${provider === "Flutterwave" ? "border-primary bg-primary/5" : "border-border/60"}`}
-            ><span
-              ><span class="block font-semibold text-foreground"
-                >Flutterwave</span
-              ><span class="block text-xs text-muted-foreground"
-                >Cards and mobile money</span
-              ></span
-            ><span class="text-xs text-muted-foreground">Select</span></button
-          ><label class="mt-4 block text-sm font-medium"
-            >Test amount<input
-              type="number"
-              bind:value={fundingAmount}
-              class="mt-2 w-full rounded-xl border border-border bg-background px-3.5 py-2.5"
-            /></label
-          ><button
-            type="button"
-            onclick={() => (connected = true)}
-            class="btn-app-primary mt-4 w-full"
-            ><WalletCards class="h-4 w-4" />
-            {connected ? "Provider connected" : `Connect ${provider}`}</button
+            class={`surface-panel p-5 text-left transition ${selectedWalletId === wallet.id ? "border-primary ring-1 ring-primary/20" : "hover:border-primary/40"}`}
+            onclick={() => void loadLedger(wallet.id)}
           >
-        </div>
+            <div class="flex items-start justify-between gap-3">
+              <span
+                class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary"
+                ><WalletCards class="h-5 w-5" /></span
+              ><span
+                class="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground"
+                >{wallet.status}</span
+              >
+            </div>
+            <p
+              class="mt-5 text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+            >
+              {label(wallet.type)}
+            </p>
+            <p class="mt-2 font-heading text-2xl font-bold text-foreground">
+              {money(wallet.balance, wallet.currency)}
+            </p>
+            <p class="mt-1 text-xs text-muted-foreground">
+              {wallet.currency} ledger balance
+            </p>
+          </button>
+        {:else}<div
+            class="surface-panel p-8 text-sm text-muted-foreground md:col-span-2 xl:col-span-4"
+          >
+            No wallets have been provisioned for this business yet.
+          </div>{/each}
       </div>
-      <div class="surface-panel p-6">
-        <div class="flex items-center justify-between">
+
+      <div class="surface-panel overflow-hidden">
+        <div
+          class="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 p-5"
+        >
           <div>
-            <h2 class="text-lg font-bold">Transaction history</h2>
+            <h2 class="text-lg font-bold">Ledger activity</h2>
             <p class="mt-1 text-sm text-muted-foreground">
-              Business wallet and customer wallet activity.
+              Append-only financial history for the selected wallet.
             </p>
           </div>
-          <button type="button" class="text-sm font-medium text-primary"
-            >Export</button
+          {#if selectedWalletId}<span
+              class="rounded-full bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground"
+              >{ledger.length} recent entries</span
+            >{/if}
+        </div>
+        {#if ledgerLoading}<div class="p-8 text-sm text-muted-foreground">
+            Loading ledger...
+          </div>{:else if ledger.length === 0}<div
+            class="p-8 text-sm text-muted-foreground"
           >
-        </div>
-        <div class="mt-5 space-y-2">
-          {#each history as item}<div
-              class="flex items-center gap-3 rounded-xl border border-border/60 p-3"
-            >
-              <span
-                class={`flex h-9 w-9 items-center justify-center rounded-lg ${item[2].startsWith("+") ? "bg-green-500/10 text-green-600" : "bg-amber-500/10 text-amber-600"}`}
-                >{#if item[2].startsWith("+")}<ArrowDownLeft
-                    class="h-4 w-4"
-                  />{:else}<ArrowUpRight class="h-4 w-4" />{/if}</span
-              ><span class="min-w-0 flex-1"
-                ><span class="block text-sm font-medium text-foreground"
-                  >{item[0]}</span
-                ><span class="block truncate text-xs text-muted-foreground"
-                  >{item[1]} · {item[3]}</span
-                ></span
-              ><span
-                class={`text-sm font-semibold ${item[2].startsWith("+") ? "text-green-600" : "text-foreground"}`}
-                >{item[2]}</span
+            No ledger activity for this wallet yet.
+          </div>{:else}<div class="divide-y divide-border/60">
+            {#each ledger as entry}<div
+                class="flex items-center gap-3 px-5 py-4"
               >
-            </div>{/each}
-        </div>
+                <span
+                  class={`flex h-9 w-9 items-center justify-center rounded-lg ${entry.direction === "CREDIT" ? "bg-green-500/10 text-green-600" : "bg-amber-500/10 text-amber-600"}`}
+                  >{#if entry.direction === "CREDIT"}<ArrowDownLeft
+                      class="h-4 w-4"
+                    />{:else}<ArrowUpRight class="h-4 w-4" />{/if}</span
+                ><span class="min-w-0 flex-1"
+                  ><span class="block text-sm font-semibold"
+                    >{entry.reference}</span
+                  ><span class="block text-xs text-muted-foreground"
+                    >{new Date(entry.createdAt).toLocaleString()}</span
+                  ></span
+                ><span
+                  class={`text-sm font-bold ${entry.direction === "CREDIT" ? "text-green-600" : "text-foreground"}`}
+                  >{entry.direction === "CREDIT" ? "+" : "-"}{money(
+                    entry.amount,
+                    entry.currency,
+                  )}</span
+                >
+              </div>{/each}
+          </div>{/if}
       </div>
-    </div>
+    {/if}
   </div>
 </AppShell>
-
-<FundWalletModal
-  open={fundWalletModalOpen}
-  onOpenChange={(isOpen) => (fundWalletModalOpen = isOpen)}
-  onConfirm={(amount, method) => {
-    void (async () => {
-      fundingError = "";
-      try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000/api/v1"}/wallet/fund`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${$authStore.accessToken}`,
-            },
-            credentials: "include",
-            body: JSON.stringify({ amount, method }),
-          },
-        );
-        if (!response.ok) throw new Error("Funding request was not accepted.");
-        fundWalletModalOpen = false;
-      } catch (error) {
-        fundingError =
-          error instanceof Error ? error.message : "Funding request failed.";
-        toast.error("Unable to fund wallet", { description: fundingError });
-      }
-    })();
-  }}
-/>
-
-<CustomerBalancesModal
-  open={customerBalancesModalOpen}
-  onOpenChange={(isOpen) => (customerBalancesModalOpen = isOpen)}
-/>

@@ -13,13 +13,87 @@
     Monitor,
   } from "@lucide/svelte";
   import { mode, setMode } from "mode-watcher";
+  import { authStore, loadCurrentUser } from "$lib/stores/auth";
+  import { toast } from "svelte-sonner";
 
   let open = $derived($modals.settings);
   let activeSection = $derived($modals.settingsSection);
   let density = $state("Comfortable");
-  let businessName = $state("Cafe Bloom");
+  let businessName = $state($authStore.user?.business?.name ?? "");
+  let userName = $state($authStore.user?.name ?? "");
+  let city = $state($authStore.user?.business?.city ?? "");
+  let country = $state($authStore.user?.business?.country ?? "");
+  let saving = $state(false);
+  let currentPassword = $state("");
+  let newPassword = $state("");
+  let notifySales = $state(true);
+  let notifyStock = $state(true);
+  let notifyTeam = $state(true);
   function handleOpenChange(value: boolean) {
     if (!value) modals.closeSettings();
+  }
+
+  async function request(path: string, body: unknown) {
+    const response = await fetch(
+      `${import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000/api/v1"}${path}`,
+      {
+        method: "PATCH",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${$authStore.accessToken}`,
+        },
+        body: JSON.stringify(body),
+      },
+    );
+    if (!response.ok)
+      throw new Error(
+        (await response.json().catch(() => null))?.message ??
+          "Unable to save settings.",
+      );
+    return response.json();
+  }
+
+  async function saveProfile() {
+    saving = true;
+    try {
+      await request("/businesses/profile", { businessName, city, country });
+      await request("/auth/profile", { name: userName });
+      await loadCurrentUser();
+      toast.success("Profile updated");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Unable to save profile.",
+      );
+    } finally {
+      saving = false;
+    }
+  }
+
+  async function savePassword() {
+    saving = true;
+    try {
+      await request("/auth/change-password", { currentPassword, newPassword });
+      currentPassword = "";
+      newPassword = "";
+      toast.success("Password updated");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Unable to update password.",
+      );
+    } finally {
+      saving = false;
+    }
+  }
+
+  function saveNotifications() {
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(
+        "bizflow-notification-preferences",
+        JSON.stringify({ notifySales, notifyStock, notifyTeam }),
+      );
+    }
+    toast.success("Notification preferences saved");
   }
 </script>
 
@@ -58,10 +132,35 @@
             The identity your team sees across Bizflow.
           </p>
           <label class="mt-5 block text-sm font-medium text-foreground"
+            >Your name<input
+              bind:value={userName}
+              class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+            /></label
+          ><label class="mt-4 block text-sm font-medium text-foreground"
             >Business name<input
               bind:value={businessName}
               class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
             /></label
+          >
+          <div class="mt-4 grid gap-3 sm:grid-cols-2">
+            <label class="text-sm font-medium text-foreground"
+              >City<input
+                bind:value={city}
+                class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+              /></label
+            ><label class="text-sm font-medium text-foreground"
+              >Country<input
+                bind:value={country}
+                class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+              /></label
+            >
+          </div>
+          <button
+            type="button"
+            class="btn-app-primary mt-5"
+            disabled={saving}
+            onclick={() => void saveProfile()}
+            >{saving ? "Saving..." : "Save profile"}</button
           >
           <div
             class="mt-4 flex items-center justify-between rounded-lg border border-border/60 bg-background p-3"
@@ -70,7 +169,7 @@
               ><span class="block text-sm font-medium text-foreground"
                 >Business logo</span
               ><span class="block text-xs text-muted-foreground"
-                >Cafe Bloom logo</span
+                >{businessName || "Business"} logo</span
               ></span
             ><button type="button" class="text-xs font-semibold text-primary"
               >Change</button
@@ -107,6 +206,107 @@
               class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
               ><option>Comfortable</option><option>Compact</option></select
             ></label
+          >
+        {:else if activeSection === "notifications"}
+          <h3 class="font-heading text-base font-bold text-foreground">
+            Notifications
+          </h3>
+          <p class="mt-1 text-xs text-muted-foreground">
+            Choose which operational events appear in your workspace alerts.
+          </p>
+          <div class="mt-5 space-y-3">
+            <label
+              class="flex items-center justify-between gap-4 rounded-lg border border-border/60 bg-background p-3 text-sm"
+              ><span
+                ><span class="block font-medium text-foreground"
+                  >Sales activity</span
+                ><span class="block text-xs text-muted-foreground"
+                  >New transactions and daily sales updates</span
+                ></span
+              ><input
+                type="checkbox"
+                bind:checked={notifySales}
+                class="size-4 accent-primary"
+              /></label
+            >
+            <label
+              class="flex items-center justify-between gap-4 rounded-lg border border-border/60 bg-background p-3 text-sm"
+              ><span
+                ><span class="block font-medium text-foreground"
+                  >Stock alerts</span
+                ><span class="block text-xs text-muted-foreground"
+                  >Low inventory and adjustment activity</span
+                ></span
+              ><input
+                type="checkbox"
+                bind:checked={notifyStock}
+                class="size-4 accent-primary"
+              /></label
+            >
+            <label
+              class="flex items-center justify-between gap-4 rounded-lg border border-border/60 bg-background p-3 text-sm"
+              ><span
+                ><span class="block font-medium text-foreground"
+                  >Team activity</span
+                ><span class="block text-xs text-muted-foreground"
+                  >Invitations and access changes</span
+                ></span
+              ><input
+                type="checkbox"
+                bind:checked={notifyTeam}
+                class="size-4 accent-primary"
+              /></label
+            >
+          </div>
+          <button
+            type="button"
+            class="btn-app-primary mt-5"
+            onclick={saveNotifications}>Save notification settings</button
+          >
+        {:else if activeSection === "team"}
+          <h3 class="font-heading text-base font-bold text-foreground">
+            Team & roles
+          </h3>
+          <p class="mt-1 text-sm text-muted-foreground">
+            Manage members, invitations, roles, and permissions in the dedicated
+            team workspace.
+          </p>
+          <button
+            type="button"
+            class="btn-app-primary mt-5"
+            onclick={() => {
+              modals.closeSettings();
+              window.location.href = "/team";
+            }}>Open team workspace</button
+          >
+        {:else if activeSection === "security"}
+          <h3 class="font-heading text-base font-bold text-foreground">
+            Security
+          </h3>
+          <p class="mt-1 text-xs text-muted-foreground">
+            Update the password for your Bizflow account.
+          </p>
+          <label class="mt-5 block text-sm font-medium text-foreground"
+            >Current password<input
+              type="password"
+              bind:value={currentPassword}
+              class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+            /></label
+          >
+          <label class="mt-4 block text-sm font-medium text-foreground"
+            >New password<input
+              type="password"
+              minlength="8"
+              bind:value={newPassword}
+              class="mt-2 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+            /></label
+          >
+          <button
+            type="button"
+            class="btn-app-primary mt-5"
+            disabled={saving || !currentPassword || newPassword.length < 8}
+            onclick={() => void savePassword()}
+            >{saving ? "Updating..." : "Update password"}</button
           >
         {:else}
           <h3 class="font-heading text-base font-bold text-foreground">

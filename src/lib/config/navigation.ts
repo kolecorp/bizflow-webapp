@@ -1,5 +1,6 @@
 import { get } from "svelte/store";
 import { extensionNavItems } from "$lib/stores/extensions";
+import type { Permission } from "$lib/stores/permissions";
 import type { Component } from "svelte";
 import {
   LayoutGrid,
@@ -61,9 +62,9 @@ export const appNavItems: NavItem[] = [
   },
   {
     label: "Activity Log",
-    path: "/ai-tracking",
+    path: "/audit",
     icon: TerminalSquare,
-    permission: "ai-tracking.view",
+    permission: "audit.view",
     section: "Workspace",
   },
   {
@@ -127,8 +128,8 @@ export function permissionForPath(path: string): Permission | null {
   if (path === "/support" || path.startsWith("/support/")) {
     return "support.view";
   }
-  if (path === "/ai-tracking" || path.startsWith("/ai-tracking/")) {
-    return "ai-tracking.view";
+  if (path === "/audit" || path.startsWith("/audit/")) {
+    return "audit.view";
   }
   if (path === "/settings" || path.startsWith("/settings/")) {
     return "settings.view";
@@ -148,7 +149,7 @@ export function permissionForPath(path: string): Permission | null {
     ) {
       return "wallet.view";
     }
-    return "extensions.manage";
+    return "dashboard.view";
   }
   return null;
 }

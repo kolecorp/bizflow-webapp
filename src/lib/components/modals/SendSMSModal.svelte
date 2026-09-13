@@ -11,6 +11,12 @@
     message: string;
   };
 
+  type Template = {
+    id: string;
+    name: string;
+    preview?: string;
+  };
+
   let {
     open = false,
     onOpenChange,
@@ -20,7 +26,7 @@
     open: boolean;
     onOpenChange: (isOpen: boolean) => void;
     onConfirm: (payload: SMSPayload) => void | Promise<void>;
-    templates?: any[];
+    templates?: Template[];
   }>();
 
   let mode = $state<"single" | "bulk">("single");
@@ -39,7 +45,7 @@
 
   function handleTemplateChange() {
     if (selectedTemplateId === "none") return;
-    const tmpl = templates.find((t) => t.id === selectedTemplateId);
+    const tmpl = templates.find((t: Template) => t.id === selectedTemplateId);
     if (tmpl) {
       message = tmpl.preview || "";
     }
@@ -204,7 +210,7 @@
               class="w-full appearance-none rounded-xl border border-border bg-background py-2.5 pl-9 pr-4 text-sm shadow-sm transition focus:border-primary focus:ring-1 focus:ring-primary/20"
             >
               <option value="none">-- Select a Template --</option>
-              {#each templates as t}
+              {#each templates as t (t.id)}
                 <option value={t.id}>{t.name}</option>
               {/each}
             </select>

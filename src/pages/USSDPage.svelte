@@ -6,7 +6,6 @@
   import { authStore } from "$lib/stores/auth";
   import { toast } from "svelte-sonner";
   import { onMount } from "svelte";
-  import { onMount } from "svelte";
   import {
     Hash,
     Terminal,
@@ -64,32 +63,6 @@
       });
     } finally {
       if (currentRequest === requestVersion) configurationLoading = false;
-    }
-  }
-
-  onMount(() => {
-    void loadConfiguration();
-  });
-
-  async function loadConfiguration() {
-    try {
-      const response = await fetch(`${API_BASE_URL}/ussd/config`, {
-        headers: { Authorization: `Bearer ${$authStore.accessToken}` },
-        credentials: "include",
-      });
-      if (response.status === 404) return;
-      if (!response.ok) throw new Error("Unable to load USSD configuration.");
-      const config = await response.json();
-      provider = config.provider ?? provider;
-      shortCode = config.shortCode ?? "";
-      connected = Boolean(
-        config.connected ?? config.isConnected ?? config.shortCode,
-      );
-    } catch (error) {
-      toast.error("Unable to load USSD configuration", {
-        description:
-          error instanceof Error ? error.message : "Please try again.",
-      });
     }
   }
 

@@ -2,10 +2,12 @@ import { writable, derived, get } from "svelte/store";
 import { browser } from "$app/environment";
 import type { Component } from "svelte";
 import { authStore, handleUnauthorized, type AuthUser } from "$lib/stores/auth";
+import type { Permission } from "$lib/stores/permissions";
 import {
   Printer,
   Monitor,
   MessageCircle,
+  Send,
   Smartphone,
   Zap,
   Settings2,
@@ -20,7 +22,6 @@ import {
   BarChart3,
   ShieldCheck,
   QrCode,
-  Package,
   CalendarClock,
   Globe,
 } from "@lucide/svelte";
@@ -37,13 +38,14 @@ export interface Extension {
   icon: Component<{ class?: string }>;
   status: ExtensionStatus;
   category: "channels" | "operations" | "automation" | "analytics";
+  infographic?: string;
   connected?: boolean;
   connectionData?: Record<string, unknown>;
   navItems?: {
     label: string;
     path: string;
     icon: Component<{ class?: string }>;
-    permission: string;
+    permission: Permission;
     badge?: string;
   }[];
   serverRendered?: boolean;
@@ -92,6 +94,26 @@ const defaultExtensions: Extension[] = [
       },
     ],
     price: "₦2,500/mo",
+    subscribed: false,
+  },
+  {
+    id: "TELEGRAM",
+    name: "Telegram",
+    description:
+      "Plan Telegram bots and Mini Apps that connect conversations to your business workflows.",
+    icon: Send,
+    status: "inactive",
+    category: "channels",
+    serverRendered: true,
+    navItems: [
+      {
+        label: "Telegram",
+        path: "/extensions/telegram",
+        icon: Send,
+        permission: "dashboard.view",
+      },
+    ],
+    price: "Free",
     subscribed: false,
   },
   {
@@ -169,6 +191,7 @@ const defaultExtensions: Extension[] = [
     icon: SmartphoneNfc,
     status: "inactive",
     category: "operations",
+    infographic: "/vtu_infographics.png",
     serverRendered: true,
     navItems: [
       {
@@ -189,6 +212,7 @@ const defaultExtensions: Extension[] = [
     icon: WalletCards,
     status: "active", // Always active basic wallet
     category: "operations",
+    infographic: "/wallet_infographics.png",
     serverRendered: true,
     navItems: [
       {
@@ -265,26 +289,6 @@ const defaultExtensions: Extension[] = [
     subscribed: true,
   },
   {
-    id: "INVENTORY_PRO",
-    name: "Inventory Pro",
-    description:
-      "Advanced stock management with barcode scanning, batch tracking, low-stock alerts.",
-    icon: Package,
-    status: "inactive",
-    category: "operations",
-    serverRendered: true,
-    navItems: [
-      {
-        label: "Inventory Pro",
-        path: "/extensions/inventory",
-        icon: Package,
-        permission: "dashboard.view",
-      },
-    ],
-    price: "₦4,500/mo",
-    subscribed: false,
-  },
-  {
     id: "QR_PAYMENTS",
     name: "QR Code Payments",
     description:
@@ -313,6 +317,7 @@ const defaultExtensions: Extension[] = [
     icon: Megaphone,
     status: "inactive",
     category: "automation",
+    infographic: "/marketing_infographics.png",
     serverRendered: true,
     navItems: [
       {
@@ -433,9 +438,12 @@ export async function syncExtensions(user: AuthUser | null) {
 
     // Determine which endpoint to call based on role
     const endpoint = isOwnerOrAdmin ? "/extensions" : "/extensions/me";
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 8000);
     const res = await fetch(`${API_BASE_URL}${endpoint}`, {
       headers: { ...getAuthHeader() },
-    });
+      signal: controller.signal,
+    }).finally(() => window.clearTimeout(timeout));
     handleUnauthorized(res);
 
     if (res.ok) {

@@ -67,7 +67,7 @@
   }
 </script>
 
-<aside class="app-sidebar flex h-[calc(100vh-50px)] min-h-144 flex-col">
+<aside class="app-sidebar flex h-screen min-h-144 flex-col">
   <NoiseOverlay intensity="light" />
   <div class="app-sidebar__glow" aria-hidden="true"></div>
   <div

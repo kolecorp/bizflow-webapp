@@ -47,10 +47,16 @@
     eyebrow="Extension · Marketing"
     title="Marketing studio"
     description="Turn ads into leads, conversations, and sales with connected campaigns for your business."
+    infographic="/marketing_infographics.png"
+    infographicAlt="Marketing Studio campaign and conversion overview"
     ><svelte:fragment slot="actions"
-      ><a href="/extensions/marketing/builder" class="btn-app-primary"
-        ><Plus class="h-4 w-4" /> Create campaign</a
-      ></svelte:fragment
+      ><div class="flex flex-wrap items-center gap-2">
+        <a href="/extensions/marketing/builder" class="btn-app-secondary"
+          ><MousePointerClick class="h-4 w-4" /> Open builder</a
+        ><a href="/extensions/marketing/builder" class="btn-app-primary"
+          ><Plus class="h-4 w-4" /> Create campaign</a
+        >
+      </div></svelte:fragment
     ></PageHeader
   >
   <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -93,7 +99,7 @@
       >
     </div>
     <div class="overflow-x-auto">
-      <table class="w-full min-w-[800px] text-left text-sm">
+      <table class="w-full min-w-200 text-left text-sm">
         <thead class="bg-muted/30 text-xs text-muted-foreground"
           ><tr
             ><th class="p-4 font-medium">Campaign</th><th

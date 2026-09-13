@@ -52,7 +52,7 @@
       title: "Work smarter",
       detail:
         "Use automation and AI to reduce repetitive work and make faster decisions.",
-      items: ["Workflow automation", "AI tracking", "Activity insights"],
+      items: ["Workflow automation", "Audit logs", "Activity insights"],
     },
   ];
 

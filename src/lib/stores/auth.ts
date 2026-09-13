@@ -7,6 +7,12 @@ export interface AuthBusiness {
   id: string;
   name: string;
   type?: string;
+  streetAddress?: string;
+  city?: string;
+  country?: string;
+  teamSize?: string;
+  primaryService?: string;
+  taxId?: string;
 }
 
 export interface AuthUser {
@@ -261,6 +267,10 @@ export async function loadCurrentUser(accessTokenOverride?: string) {
         "/auth/refresh-token",
         {
           method: "POST",
+          body: JSON.stringify({
+            refreshToken:
+              get(authStore).refreshToken ?? readSession()?.refreshToken,
+          }),
         },
         undefined,
         true,
@@ -454,8 +464,31 @@ export async function completeOnboarding(
     accessToken,
   );
 
-  const current = get(authStore);
-  await loadCurrentUser(accessToken);
+  // The signup token was issued before a business existed, so its JWT has no
+  // businessId. Rotate it after onboarding so RBAC sees the new tenant.
+  const refreshToken = get(authStore).refreshToken;
+  if (refreshToken) {
+    const refreshed = await requestJson<ApiAuthEnvelope>(
+      "/auth/refresh-token",
+      {
+        method: "POST",
+        body: JSON.stringify({ refreshToken }),
+      },
+      undefined,
+      true,
+    );
+    if (!refreshed.accessToken) {
+      throw new Error("Unable to refresh your session after onboarding.");
+    }
+    setSession({
+      ...get(authStore),
+      accessToken: refreshed.accessToken,
+      refreshToken: refreshed.refreshToken ?? refreshToken,
+    });
+    await loadCurrentUser(refreshed.accessToken);
+  } else {
+    await loadCurrentUser(accessToken);
+  }
   return get(authStore);
 }
 

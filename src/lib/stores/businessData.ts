@@ -1,4 +1,6 @@
-import { writable, derived } from "svelte/store";
+import { browser } from "$app/environment";
+import { get, writable, derived } from "svelte/store";
+import { authStore } from "$lib/stores/auth";
 import type {
   Computer,
   DiscoveredPrinter,
@@ -35,6 +37,98 @@ function createBusinessStore() {
   const discoveredPrinters = writable<DiscoveredPrinter[]>(seedDiscovered);
   const pairingCode = writable<string | null>(null);
   const agentSearching = writable(false);
+  let operationalLoad: Promise<void> | null = null;
+
+  const apiBase =
+    import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000/api/v1";
+  async function api(path: string, init?: RequestInit) {
+    const token = get(authStore).accessToken;
+    const response = await fetch(`${apiBase}${path}`, {
+      ...init,
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(init?.headers ?? {}),
+      },
+    });
+    if (!response.ok)
+      throw new Error(
+        (await response.json().catch(() => null))?.message ??
+          "Operational request failed.",
+      );
+    return response.json();
+  }
+
+  async function syncOperationalData() {
+    if (!browser || !get(authStore).isAuthenticated || operationalLoad)
+      return operationalLoad;
+    operationalLoad = Promise.all([
+      api("/services"),
+      api("/inventory"),
+      api("/inventory/adjustments"),
+      api("/transactions"),
+    ])
+      .then(([serviceRows, inventoryRows, adjustmentRows, transactionRows]) => {
+        services.set(
+          serviceRows.map((item: any) => ({
+            ...item,
+            price: Number(item.price),
+          })),
+        );
+        inventory.set(
+          inventoryRows.map((item: any) => ({
+            ...item,
+            quantity: Number(item.quantity),
+            minQuantity: Number(item.minQuantity),
+            costPerUnit:
+              item.costPerUnit == null ? undefined : Number(item.costPerUnit),
+            lastCounted: item.lastCounted?.slice(0, 10),
+          })),
+        );
+        stockAdjustments.set(
+          adjustmentRows.map((row: any) => ({
+            id: row.id,
+            itemId: row.itemId,
+            itemName: row.item.name,
+            type: row.type.toLowerCase(),
+            quantity: row.quantity,
+            reason: row.reason,
+            date: row.createdAt.slice(0, 10),
+            time: new Date(row.createdAt).toLocaleTimeString("en-NG", {
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: true,
+            }),
+            by: row.byUserId ?? "Staff",
+          })),
+        );
+        transactions.set(
+          transactionRows.map((row: any) => {
+            const date = row.createdAt.slice(0, 10);
+            return {
+              id: row.id,
+              service: row.service?.name ?? "General service",
+              customer: row.customer,
+              amount: Number(row.amount),
+              date,
+              description: row.description,
+              time: new Date(row.createdAt).toLocaleTimeString("en-NG", {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+              }),
+              recordedBy: row.recordedBy?.name ?? "Staff",
+              recordedById: row.recordedById,
+            };
+          }),
+        );
+      })
+      .finally(() => {
+        operationalLoad = null;
+      });
+    return operationalLoad;
+  }
 
   const todayTransactions = derived(transactions, ($tx) =>
     $tx.filter((t) => t.date === today),
@@ -60,7 +154,17 @@ function createBusinessStore() {
       id: `tx-${Date.now()}`,
       time,
     };
-    transactions.update((list) => [tx, ...list]);
+    void api("/transactions", {
+      method: "POST",
+      body: JSON.stringify({
+        serviceId: get(services).find(
+          (service) => service.name === input.service,
+        )?.id,
+        customer: input.customer,
+        amount: input.amount,
+        description: input.description,
+      }),
+    }).then(() => syncOperationalData());
     return tx;
   }
 
@@ -69,7 +173,9 @@ function createBusinessStore() {
       ...input,
       id: `service-${Date.now()}`,
     };
-    services.update((list) => [...list, service]);
+    void api("/services", { method: "POST", body: JSON.stringify(input) }).then(
+      () => syncOperationalData(),
+    );
     return service;
   }
 
@@ -77,28 +183,33 @@ function createBusinessStore() {
     id: string,
     changes: Partial<Omit<ServiceCatalogItem, "id">>,
   ) {
-    services.update((list) =>
-      list.map((service) =>
-        service.id === id ? { ...service, ...changes } : service,
-      ),
-    );
+    void api(`/services/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(changes),
+    }).then(() => syncOperationalData());
   }
 
   function toggleService(id: string) {
-    services.update((list) =>
-      list.map((service) =>
-        service.id === id ? { ...service, active: !service.active } : service,
-      ),
-    );
+    const service = get(services).find((item) => item.id === id);
+    if (service)
+      void api(`/services/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ active: !service.active }),
+      }).then(() => syncOperationalData());
   }
 
   function deleteService(id: string) {
-    services.update((list) => list.filter((service) => service.id !== id));
+    void api(`/services/${id}`, { method: "DELETE" }).then(() =>
+      syncOperationalData(),
+    );
   }
 
   function addInventoryItem(input: Omit<InventoryItem, "id">) {
     const item: InventoryItem = { ...input, id: `inventory-${Date.now()}` };
-    inventory.update((list) => [...list, item]);
+    void api("/inventory", {
+      method: "POST",
+      body: JSON.stringify(input),
+    }).then(() => syncOperationalData());
     return item;
   }
 
@@ -106,18 +217,22 @@ function createBusinessStore() {
     id: string,
     changes: Partial<Omit<InventoryItem, "id">>,
   ) {
-    inventory.update((list) =>
-      list.map((item) => (item.id === id ? { ...item, ...changes } : item)),
-    );
+    void api(`/inventory/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(changes),
+    }).then(() => syncOperationalData());
   }
 
   function deleteInventoryItem(id: string) {
-    inventory.update((list) => list.filter((item) => item.id !== id));
-    stockAdjustments.update((list) => list.filter((adjustment) => adjustment.itemId !== id));
+    void api(`/inventory/${id}`, { method: "DELETE" }).then(() =>
+      syncOperationalData(),
+    );
   }
 
   function deleteTransaction(id: string) {
-    transactions.update((list) => list.filter((t) => t.id !== id));
+    void api(`/transactions/${id}`, { method: "DELETE" }).then(() =>
+      syncOperationalData(),
+    );
   }
 
   function adjustStock(
@@ -134,6 +249,10 @@ function createBusinessStore() {
       hour12: true,
     });
 
+    void api(`/inventory/${itemId}/adjust`, {
+      method: "POST",
+      body: JSON.stringify({ type, quantity, reason }),
+    }).then(() => syncOperationalData());
     inventory.update((items) => {
       const found = items.find((i) => i.id === itemId);
       const itemName = found?.name ?? "Unknown";
@@ -246,6 +365,7 @@ function createBusinessStore() {
     generatePairingCode,
     simulateAgentSearch,
     connectDiscoveredPrinter,
+    syncOperationalData,
   };
 }
 

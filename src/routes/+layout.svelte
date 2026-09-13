@@ -12,7 +12,6 @@
   import SendFileModal from "$lib/components/modals/SendFileModal.svelte";
   import { Toaster } from "$lib/components/ui/sonner";
   import GlobalTour from "$lib/components/ui/GlobalTour.svelte";
-  import SessionExpiredModal from "$lib/components/layout/SessionExpiredModal.svelte";
 
   let { children } = $props();
 
@@ -43,10 +42,14 @@
 <NewTransactionModal />
 <SendFileModal />
 <GlobalTour />
-<SessionExpiredModal />
 {#if navigating.to}
-  <div class="fixed inset-x-0 top-0 z-[100] h-0.5 overflow-hidden bg-primary/15" aria-hidden="true">
-    <div class="h-full w-1/3 animate-[loading-slide_1s_ease-in-out_infinite] bg-primary"></div>
+  <div
+    class="fixed inset-x-0 top-0 z-100 h-0.5 overflow-hidden bg-primary/15"
+    aria-hidden="true"
+  >
+    <div
+      class="h-full w-1/3 animate-[loading-slide_1s_ease-in-out_infinite] bg-primary"
+    ></div>
   </div>
 {/if}
 {@render children?.()}

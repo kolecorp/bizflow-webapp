@@ -111,7 +111,9 @@
         await updateMemberRole(member.id, value);
         member = getTeamMember(member.id);
       } catch (error) {
-        member = { ...member, role: previousRole };
+        if (member) {
+          member = { ...member, role: previousRole };
+        }
         toast.error("Could not update member role", {
           description:
             error instanceof Error ? error.message : "Please try again.",

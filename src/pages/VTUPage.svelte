@@ -1,354 +1,749 @@
 <script lang="ts">
   import AppShell from "$lib/components/layout/AppShell.svelte";
   import PageHeader from "$lib/components/layout/PageHeader.svelte";
-  import PasswordInput from "$lib/components/ui/password-input.svelte";
+  import { authStore } from "$lib/stores/auth";
+  import { onMount } from "svelte";
+  import { toast } from "svelte-sonner";
   import {
     Activity,
     ArrowRight,
-    Check,
+    Bot,
     CheckCircle2,
-    ChevronRight,
-    CircleDollarSign,
+    CircleAlert,
+    Code2,
     CreditCard,
-    Lightbulb,
+    LoaderCircle,
     PlugZap,
+    RefreshCw,
     ShieldCheck,
-    SmartphoneNfc,
-    Unplug,
+    Smartphone,
     Zap,
   } from "@lucide/svelte";
 
-  let connected = $state(false);
-  let provider = $state("VTPass");
-  let environment = $state("Sandbox");
-  let isTesting = $state(false);
-  let apiUrl = $state("");
-  let apiKey = $state("");
-  let secret = $state("");
+  type Config = {
+    mode: "BIZFLOW_HOSTED" | "BYO";
+    status: string;
+    walletId?: string | null;
+  } | null;
+  type VtuTransaction = {
+    reference: string;
+    productType: string;
+    network?: string;
+    recipient: string;
+    amountCharged: string | number;
+    status: string;
+    mode: string;
+    createdAt: string;
+    message?: string;
+  };
+  const apiBase =
+    import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000/api/v1";
+  let config = $state<Config>(null);
+  let transactions = $state<VtuTransaction[]>([]);
+  let loading = $state(true);
+  let saving = $state(false);
+  let error = $state("");
+  let activePanel = $state<"overview" | "integration" | "purchase">("overview");
+  let setupMode = $state<"BIZFLOW_HOSTED" | "BYO">("BIZFLOW_HOSTED");
+  let integration = $state({
+    baseUrl: "",
+    authScheme: "BEARER",
+    token: "",
+    airtimePath: "/api/topup/airtime",
+    dataPath: "/api/topup/data",
+    billsPath: "/api/topup/bills",
+    pinPath: "/api/topup/pin",
+    recipientField: "recipient",
+    amountField: "amount",
+    networkField: "network",
+  });
+  let purchase = $state({
+    productType: "AIRTIME",
+    network: "MTN",
+    recipient: "",
+    amount: "",
+    reference: "",
+  });
 
   const services = [
-    { name: "Airtime", detail: "All networks", icon: SmartphoneNfc },
-    { name: "Data", detail: "Bundles & plans", icon: Zap },
-    { name: "Electricity", detail: "Bills & meters", icon: Lightbulb },
-    { name: "Cable TV", detail: "DStv, GOtv & StarTimes", icon: CreditCard },
-    { name: "Education pins", detail: "WAEC, JAMB & more", icon: ShieldCheck },
-    {
-      name: "Custom services",
-      detail: "Provider dependent",
-      icon: CircleDollarSign,
-    },
+    { label: "Airtime", detail: "All major networks", icon: Smartphone },
+    { label: "Data", detail: "Bundles and plans", icon: Zap },
+    { label: "Electricity", detail: "Meters and bills", icon: PlugZap },
+    { label: "Cable TV", detail: "DStv, GOtv and more", icon: CreditCard },
   ];
+  const money = (value: string | number) =>
+    `₦${Number(value).toLocaleString("en-NG", { maximumFractionDigits: 2 })}`;
+  const request = async <T,>(path: string, init?: RequestInit) => {
+    const response = await fetch(`${apiBase}${path}`, {
+      ...init,
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${$authStore.accessToken}`,
+        ...(init?.headers ?? {}),
+      },
+    });
+    const rawBody = await response.text();
+    let payload: T | { message?: string } | null = null;
+    if (rawBody.trim()) {
+      try {
+        payload = JSON.parse(rawBody) as T | { message?: string };
+      } catch {
+        payload = null;
+      }
+    }
+    if (!response.ok) {
+      throw new Error(
+        (payload as { message?: string } | null)?.message ??
+          `VTU request failed (${response.status} ${response.statusText}).`,
+      );
+    }
+    return rawBody.trim() ? (payload as T) : null;
+  };
 
-  const transactions = [
-    ["MTN Airtime", "0803•••218", "₦1,000", "Successful"],
-    ["DSTV Compact", "0806•••901", "₦9,000", "Successful"],
-    ["Airtel Data 2GB", "0814•••442", "₦750", "Failed"],
-  ];
-
-  function testConnection() {
-    isTesting = true;
-    setTimeout(() => {
-      isTesting = false;
-      connected = true;
-    }, 900);
+  async function load() {
+    loading = true;
+    error = "";
+    try {
+      const nextConfig = await request<Config>("/vtu/config");
+      const nextTransactions =
+        await request<VtuTransaction[]>("/vtu/transactions");
+      config = nextConfig ?? null;
+      transactions = nextTransactions ?? [];
+      setupMode = config?.mode ?? "BIZFLOW_HOSTED";
+    } catch (cause) {
+      error =
+        cause instanceof Error
+          ? cause.message
+          : "Unable to load VTU workspace.";
+    } finally {
+      loading = false;
+    }
   }
+  async function onboard() {
+    saving = true;
+    try {
+      config = await request<Config>("/vtu/onboard", {
+        method: "POST",
+        body: JSON.stringify({ mode: setupMode }),
+      });
+      toast.success(
+        setupMode === "BYO"
+          ? "Bring-your-own provider mode enabled"
+          : "VTU float wallet provisioned",
+      );
+    } catch (cause) {
+      toast.error(
+        cause instanceof Error ? cause.message : "Unable to start VTU setup.",
+      );
+    } finally {
+      saving = false;
+    }
+  }
+  async function saveIntegration() {
+    saving = true;
+    try {
+      await request("/vtu/integrations", {
+        method: "POST",
+        body: JSON.stringify({
+          baseUrl: integration.baseUrl,
+          authScheme: integration.authScheme,
+          credentials: { token: integration.token },
+          endpointMap: {
+            buyAirtime: {
+              method: "POST",
+              path:
+                integration.airtimePath ||
+                integration.dataPath ||
+                "/api/topup/airtime",
+              requestTemplate: {
+                recipient: integration.recipientField,
+                amount: integration.amountField,
+                network: integration.networkField,
+              },
+              responseMap: {
+                statusPath: "status",
+                successValue: "success",
+                referencePath: "reference",
+                messagePath: "message",
+              },
+            },
+            buyData: {
+              method: "POST",
+              path:
+                integration.dataPath ||
+                integration.airtimePath ||
+                "/api/topup/data",
+              requestTemplate: {
+                recipient: integration.recipientField,
+                amount: integration.amountField,
+                network: integration.networkField,
+              },
+              responseMap: {
+                statusPath: "status",
+                successValue: "success",
+                referencePath: "reference",
+                messagePath: "message",
+              },
+            },
+            buyBills: {
+              method: "POST",
+              path:
+                integration.billsPath ||
+                integration.airtimePath ||
+                "/api/topup/bills",
+              requestTemplate: {
+                recipient: integration.recipientField,
+                amount: integration.amountField,
+                network: integration.networkField,
+              },
+              responseMap: {
+                statusPath: "status",
+                successValue: "success",
+                referencePath: "reference",
+                messagePath: "message",
+              },
+            },
+            sellPin: {
+              method: "POST",
+              path:
+                integration.pinPath ||
+                integration.airtimePath ||
+                "/api/topup/pin",
+              requestTemplate: {
+                recipient: integration.recipientField,
+                amount: integration.amountField,
+                network: integration.networkField,
+              },
+              responseMap: {
+                statusPath: "status",
+                successValue: "success",
+                referencePath: "reference",
+                messagePath: "message",
+              },
+            },
+          },
+        }),
+      });
+      config = await request<Config>("/vtu/config");
+      toast.success("Provider configuration saved");
+      activePanel = "overview";
+    } catch (cause) {
+      toast.error(
+        cause instanceof Error ? cause.message : "Unable to save provider.",
+      );
+    } finally {
+      saving = false;
+    }
+  }
+  async function buy() {
+    saving = true;
+    try {
+      const reference = purchase.reference || `vtu-${Date.now()}`;
+      await request("/vtu/purchase", {
+        method: "POST",
+        body: JSON.stringify({ ...purchase, reference }),
+      });
+      toast.success("VTU request submitted");
+      purchase = { ...purchase, recipient: "", amount: "", reference: "" };
+      transactions =
+        (await request<VtuTransaction[]>("/vtu/transactions")) ?? [];
+      activePanel = "overview";
+    } catch (cause) {
+      toast.error(
+        cause instanceof Error
+          ? cause.message
+          : "Unable to submit VTU purchase.",
+      );
+    } finally {
+      saving = false;
+    }
+  }
+  onMount(() => {
+    void load();
+  });
 </script>
 
 <AppShell>
   <PageHeader
     eyebrow="Extension · VTU"
     title="VTU platform"
-    description="Sell airtime, data, bills and digital services through Bizflow, WhatsApp and your campaign pages."
+    description="A provider-agnostic control room for airtime, data, bills, pricing, and fulfillment."
   />
-
-  {#if !connected}
-    <div
-      class="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]"
+  <nav
+    class="flex flex-wrap gap-2 border-b border-border/60 pb-4"
+    aria-label="VTU workspace"
+  >
+    <a
+      href="/extensions/vtu"
+      class="rounded-lg bg-primary/10 px-3 py-2 text-xs font-semibold text-primary"
+      >Overview</a
     >
-      <section class="surface-panel overflow-hidden p-0">
-        <div class="border-b border-border/60 bg-muted/20 px-7 py-6">
-          <div class="flex items-start justify-between gap-4">
-            <div>
-              <p
-                class="text-[10px] font-semibold uppercase tracking-[0.2em] text-primary"
-              >
-                Provider setup
-              </p>
-              <h2 class="mt-2 font-heading text-2xl font-bold text-foreground">
-                Connect a VTU provider
-              </h2>
-              <p class="mt-2 max-w-lg text-sm text-muted-foreground">
-                Your provider supplies the services and float. Bizflow handles
-                pricing, orders, wallets and customer delivery.
-              </p>
-            </div>
-            <div
-              class="hidden h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary sm:flex"
-            >
-              <PlugZap class="h-5 w-5" />
-            </div>
-          </div>
-        </div>
-        <div class="p-7">
-          <div class="grid gap-4 sm:grid-cols-2">
-            <label class="text-sm font-medium text-foreground"
-              >Provider<select
-                bind:value={provider}
-                class="mt-2 w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm"
-                ><option>VTPass</option><option>Reloadly</option><option
-                  >Baxi</option
-                ><option>Custom Provider</option></select
-              ></label
-            >
-            <label class="text-sm font-medium text-foreground"
-              >Environment<select
-                bind:value={environment}
-                class="mt-2 w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm"
-                ><option>Sandbox</option><option>Production</option></select
-              ></label
-            >
-            {#if provider === "Custom Provider"}<label
-                class="text-sm font-medium text-foreground sm:col-span-2"
-                >API URL<input
-                  bind:value={apiUrl}
-                  placeholder="https://api.provider.com/v1"
-                  class="mt-2 w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm"
-                /></label
-              >{/if}
-            <label class="text-sm font-medium text-foreground"
-              >API key<PasswordInput
-                bind:value={apiKey}
-                placeholder="Enter API key"
-                class="mt-2 w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm"
-              /></label
-            >
-            <label class="text-sm font-medium text-foreground"
-              >Secret / API token<PasswordInput
-                bind:value={secret}
-                placeholder="Enter secret token"
-                class="mt-2 w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm"
-              /></label
-            >
-          </div>
-          <div
-            class="mt-6 flex flex-col gap-4 border-t border-border/60 pt-5 sm:flex-row sm:items-center sm:justify-between"
-          >
-            <p class="max-w-sm text-xs leading-relaxed text-muted-foreground">
-              Start in Sandbox while you test. Your credentials are encrypted
-              and never shown after saving.
-            </p>
-            <button
-              type="button"
-              onclick={testConnection}
-              disabled={isTesting}
-              class="btn-app-primary shrink-0 disabled:opacity-60"
-              ><PlugZap class="h-4 w-4" />{isTesting
-                ? "Testing connection..."
-                : "Test connection"}</button
-            >
-          </div>
-        </div>
-      </section>
-
-      <aside class="space-y-6">
-        <div class="surface-panel p-6">
-          <div class="flex items-center justify-between">
-            <div>
-              <p
-                class="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground"
-              >
-                Provider coverage
-              </p>
-              <h3 class="mt-2 font-heading text-xl font-bold text-foreground">
-                Everything your customers need
-              </h3>
-            </div>
-            <div
-              class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary"
-            >
-              <Zap class="h-5 w-5" />
-            </div>
-          </div>
-          <div class="mt-5 space-y-2">
-            {#each services as service}<div
-                class="flex items-center gap-3 rounded-xl border border-border/60 p-3"
-              >
-                <span
-                  class="flex h-8 w-8 items-center justify-center rounded-lg bg-muted/70 text-primary"
-                  ><svelte:component
-                    this={service.icon}
-                    class="h-4 w-4"
-                  /></span
-                ><span class="flex-1"
-                  ><span class="block text-sm font-medium text-foreground"
-                    >{service.name}</span
-                  ><span class="block text-xs text-muted-foreground"
-                    >{service.detail}</span
-                  ></span
-                ><Check class="h-4 w-4 text-green-500" />
-              </div>{/each}
-          </div>
-        </div>
-        <div class="rounded-2xl border border-primary/20 bg-primary/5 p-5">
-          <p
-            class="flex items-center gap-2 text-sm font-semibold text-foreground"
-          >
-            <ShieldCheck class="h-4 w-4 text-primary" /> Built for reliable fulfilment
-          </p>
-          <p class="mt-2 text-xs leading-relaxed text-muted-foreground">
-            One connection powers your store, customer wallets, WhatsApp bot and
-            marketing campaigns. You can change providers later.
-          </p>
-        </div>
-      </aside>
+    <a
+      href="/extensions/vtu/provider"
+      class="rounded-lg px-3 py-2 text-xs font-semibold text-muted-foreground hover:bg-muted hover:text-foreground"
+      >Provider setup</a
+    >
+    <a
+      href="/extensions/vtu/purchase"
+      class="rounded-lg px-3 py-2 text-xs font-semibold text-muted-foreground hover:bg-muted hover:text-foreground"
+      >New purchase</a
+    >
+    <a
+      href="/extensions/vtu/transactions"
+      class="rounded-lg px-3 py-2 text-xs font-semibold text-muted-foreground hover:bg-muted hover:text-foreground"
+      >Transactions</a
+    >
+    <a
+      href="/extensions/vtu/pricing"
+      class="rounded-lg px-3 py-2 text-xs font-semibold text-muted-foreground hover:bg-muted hover:text-foreground"
+      >Pricing</a
+    >
+  </nav>
+  {#if loading}<div
+      class="surface-panel flex min-h-64 items-center justify-center text-sm text-muted-foreground"
+    >
+      <LoaderCircle class="mr-2 h-4 w-4 animate-spin" /> Loading VTU workspace
+    </div>
+  {:else if error}<div
+      class="surface-panel flex items-center gap-3 p-6 text-sm text-destructive"
+    >
+      <CircleAlert class="h-5 w-5" />{error}<button
+        type="button"
+        class="ml-auto text-primary"
+        onclick={() => void load()}><RefreshCw class="h-4 w-4" /></button
+      >
     </div>
   {:else}
     <div class="space-y-6">
-      <div
-        class="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-green-500/20 bg-green-500/5 p-5"
-      >
-        <div class="flex items-center gap-3">
-          <span
-            class="flex h-10 w-10 items-center justify-center rounded-xl bg-green-500/10 text-green-600"
-            ><CheckCircle2 class="h-5 w-5" /></span
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p class="text-sm font-semibold text-foreground">VTU workspace</p>
+          <p class="mt-1 text-sm text-muted-foreground">
+            Your channels stay the same while the provider can change
+            underneath.
+          </p>
+        </div>
+        <div class="flex gap-2">
+          <button
+            type="button"
+            class="btn-app-secondary text-xs"
+            onclick={() => void load()}
+            ><RefreshCw class="h-4 w-4" /> Refresh</button
+          ><button
+            type="button"
+            class="btn-app-primary text-xs"
+            onclick={() => (activePanel = "purchase")}
+            ><Zap class="h-4 w-4" /> New purchase</button
           >
-          <div>
-            <p class="font-semibold text-foreground">{provider} is connected</p>
-            <p class="text-xs text-muted-foreground">
-              {environment} environment · Services synced just now
-            </p>
+        </div>
+      </div>
+      <div class="grid gap-4 md:grid-cols-3">
+        <div class="surface-panel p-5">
+          <p class="text-xs text-muted-foreground">Active mode</p>
+          <p class="mt-2 font-heading text-xl font-bold">
+            {config?.mode === "BYO"
+              ? "Bring your provider"
+              : config?.mode === "BIZFLOW_HOSTED"
+                ? "BizFlow hosted"
+                : "Not configured"}
+          </p>
+          <p class="mt-1 text-xs text-muted-foreground">
+            {config?.status ?? "Choose a setup path"}
+          </p>
+        </div>
+        <div class="surface-panel p-5">
+          <p class="text-xs text-muted-foreground">Fulfillment layer</p>
+          <p class="mt-2 font-heading text-xl font-bold">
+            {config?.mode === "BYO" ? "Your API" : "Provider seam"}
+          </p>
+          <p class="mt-1 text-xs text-muted-foreground">
+            Normalized into one purchase flow
+          </p>
+        </div>
+        <div class="surface-panel p-5">
+          <p class="text-xs text-muted-foreground">Recent requests</p>
+          <p class="mt-2 font-heading text-xl font-bold">
+            {transactions.length}
+          </p>
+          <p class="mt-1 text-xs text-muted-foreground">
+            Last 100 workspace requests
+          </p>
+        </div>
+      </div>
+      <div class="grid gap-6 xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
+        <section class="surface-panel p-6">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <p
+                class="text-[10px] font-bold uppercase tracking-[0.18em] text-primary"
+              >
+                Setup path
+              </p>
+              <h2 class="mt-2 font-heading text-xl font-bold">
+                Choose your provider model
+              </h2>
+              <p class="mt-2 text-sm leading-6 text-muted-foreground">
+                You can connect a VTpass-style aggregator later, or route
+                fulfillment to your own API without changing the customer
+                experience.
+              </p>
+            </div>
+            <ShieldCheck class="h-5 w-5 text-primary" />
           </div>
-        </div>
-        <button
-          type="button"
-          class="btn-app-secondary text-sm"
-          onclick={() => (connected = false)}
-          ><PlugZap class="h-4 w-4" /> Change provider</button
-        >
-      </div>
-      <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <div class="surface-panel p-5">
-          <p class="text-xs text-muted-foreground">Transactions this month</p>
-          <p class="mt-2 font-heading text-2xl font-bold text-foreground">
-            1,284
-          </p>
-          <p class="mt-1 text-xs text-green-600">+12.8% vs last month</p>
-        </div>
-        <div class="surface-panel p-5">
-          <p class="text-xs text-muted-foreground">Success rate</p>
-          <p class="mt-2 font-heading text-2xl font-bold text-foreground">
-            96.7%
-          </p>
-          <p class="mt-1 text-xs text-muted-foreground">1,242 successful</p>
-        </div>
-        <div class="surface-panel p-5">
-          <p class="text-xs text-muted-foreground">Revenue / profit</p>
-          <p class="mt-2 font-heading text-2xl font-bold text-foreground">
-            ₦38,460
-          </p>
-          <p class="mt-1 text-xs text-green-600">₦12,840 profit</p>
-        </div>
-        <div class="surface-panel p-5">
-          <p class="text-xs text-muted-foreground">Customer wallets</p>
-          <p class="mt-2 font-heading text-2xl font-bold text-foreground">
-            ₦84,200
-          </p>
-          <p class="mt-1 text-xs text-primary">126 active wallets</p>
-        </div>
-      </div>
-      <div class="grid gap-6 xl:grid-cols-[0.8fr_1.2fr]">
+          <div class="mt-5 space-y-3">
+            <button
+              type="button"
+              class={`w-full rounded-xl border p-4 text-left ${setupMode === "BIZFLOW_HOSTED" ? "border-primary bg-primary/5" : "border-border/60"}`}
+              onclick={() => (setupMode = "BIZFLOW_HOSTED")}
+              ><span class="flex items-center gap-3"
+                ><span
+                  class="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary"
+                  ><Bot class="h-4 w-4" /></span
+                ><span
+                  ><span class="block text-sm font-semibold"
+                    >BizFlow hosted</span
+                  ><span class="block text-xs text-muted-foreground"
+                    >Use BizFlow's future upstream adapter and VTU float wallet.</span
+                  ></span
+                ></span
+              ></button
+            ><button
+              type="button"
+              class={`w-full rounded-xl border p-4 text-left ${setupMode === "BYO" ? "border-primary bg-primary/5" : "border-border/60"}`}
+              onclick={() => (setupMode = "BYO")}
+              ><span class="flex items-center gap-3"
+                ><span
+                  class="flex h-9 w-9 items-center justify-center rounded-lg bg-sky-500/10 text-sky-600"
+                  ><Code2 class="h-4 w-4" /></span
+                ><span
+                  ><span class="block text-sm font-semibold"
+                    >Bring your own provider</span
+                  ><span class="block text-xs text-muted-foreground"
+                    >Map your API once. BizFlow handles orchestration and
+                    reporting.</span
+                  ></span
+                ></span
+              ></button
+            >
+          </div>
+          {#if config?.mode !== setupMode || !config}<button
+              type="button"
+              class="btn-app-primary mt-5 w-full"
+              disabled={saving}
+              onclick={() => void onboard()}
+              >{saving ? "Saving..." : "Use this setup path"}<ArrowRight
+                class="h-4 w-4"
+              /></button
+            >{:else}<div
+              class="mt-5 flex items-center gap-2 rounded-lg bg-emerald-500/10 p-3 text-xs font-semibold text-emerald-700 dark:text-emerald-400"
+            >
+              <CheckCircle2 class="h-4 w-4" /> Setup path active
+            </div>{/if}<button
+            type="button"
+            class="mt-3 w-full text-xs font-semibold text-primary"
+            onclick={() => (activePanel = "integration")}
+            >Configure provider mapping</button
+          >
+        </section>
         <section class="surface-panel p-6">
           <div class="flex items-start justify-between">
             <div>
               <p
-                class="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground"
+                class="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground"
               >
-                Catalog
+                Product coverage
               </p>
-              <h2
-                class="mt-2 flex items-center gap-2 text-lg font-bold text-foreground"
-              >
-                <Zap class="h-5 w-5 text-primary" /> Available services
+              <h2 class="mt-2 font-heading text-xl font-bold">
+                One front door, many providers
               </h2>
             </div>
-            <a
-              href="/extensions/vtu/pricing"
-              class="text-xs font-semibold text-primary">Manage pricing</a
-            >
+            <Activity class="h-5 w-5 text-primary" />
           </div>
-          <div class="mt-5 grid grid-cols-2 gap-2">
+          <div class="mt-5 grid gap-3 sm:grid-cols-2">
             {#each services as service}<div
-                class="rounded-xl border border-border/60 p-3"
+                class="rounded-xl border border-border/60 p-4"
               >
-                <p class="text-sm font-medium text-foreground">
-                  {service.name}
-                </p>
+                <svelte:component
+                  this={service.icon}
+                  class="h-5 w-5 text-primary"
+                />
+                <p class="mt-4 text-sm font-semibold">{service.label}</p>
                 <p class="mt-1 text-xs text-muted-foreground">
                   {service.detail}
                 </p>
               </div>{/each}
           </div>
-          <a
-            href="/extensions/vtu/pricing"
-            class="mt-5 flex items-center justify-between rounded-xl bg-primary/5 p-3 text-sm font-medium text-primary"
-            >Configure rules & pricing <ChevronRight class="h-4 w-4" /></a
+          <div
+            class="mt-5 rounded-xl bg-muted/40 p-4 text-xs leading-6 text-muted-foreground"
           >
+            The API boundary is intentionally abstract: a future VTpass, MTN,
+            Airtel, JED, or custom adapter can plug into the same registry and
+            normalized result contract.
+          </div>
         </section>
-        <section class="surface-panel p-6">
-          <div class="flex items-start justify-between">
+      </div>
+      {#if activePanel === "integration"}<section class="surface-panel p-6">
+          <div class="flex items-start justify-between gap-4">
             <div>
               <p
-                class="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground"
+                class="text-[10px] font-bold uppercase tracking-[0.2em] text-primary"
               >
-                Activity
+                Provider integration
               </p>
-              <h2
-                class="mt-2 flex items-center gap-2 text-lg font-bold text-foreground"
-              >
-                <Activity class="h-5 w-5 text-primary" /> Recent transactions
+              <h2 class="mt-2 font-heading text-xl font-bold">
+                Provider contract
               </h2>
+              <p class="mt-1 text-sm text-muted-foreground">
+                Configure your upstream VTU provider once and keep airtime,
+                data, utilities, and PIN operations behind a single normalized
+                API.
+              </p>
             </div>
             <button
               type="button"
-              class="text-xs font-semibold text-primary"
-              onclick={() => (window.location.href = "/transactions")}
-              >View all</button
+              class="text-sm text-muted-foreground"
+              onclick={() => (activePanel = "overview")}>Close</button
             >
           </div>
-          <div class="mt-5 overflow-x-auto">
-            <table class="w-full min-w-[520px] text-left text-sm">
-              <thead class="text-xs text-muted-foreground"
-                ><tr
-                  ><th class="pb-3 font-medium">Service</th><th
-                    class="pb-3 font-medium">Customer</th
-                  ><th class="pb-3 font-medium">Amount</th><th
-                    class="pb-3 font-medium">Status</th
-                  ></tr
-                ></thead
-              ><tbody
-                >{#each transactions as transaction}<tr
-                    class="border-t border-border/60"
-                    ><td class="py-3 text-foreground">{transaction[0]}</td><td
-                      class="py-3 font-mono text-xs text-muted-foreground"
-                      >{transaction[1]}</td
-                    ><td class="py-3 text-foreground">{transaction[2]}</td><td
-                      class={`py-3 text-xs font-semibold ${transaction[3] === "Successful" ? "text-green-600" : "text-red-500"}`}
-                      >{transaction[3]}</td
-                    ></tr
-                  >{/each}</tbody
+
+          <div class="mt-6 grid gap-4 md:grid-cols-4">
+            <div class="rounded-2xl border border-border/60 bg-muted/20 p-4">
+              <p
+                class="text-[10px] uppercase tracking-[0.18em] text-muted-foreground"
               >
-            </table>
+                Mode
+              </p>
+              <p class="mt-3 text-lg font-bold text-foreground">
+                {setupMode === "BYO" ? "BYO" : "Hosted"}
+              </p>
+            </div>
+            <div class="rounded-2xl border border-border/60 bg-muted/20 p-4">
+              <p
+                class="text-[10px] uppercase tracking-[0.18em] text-muted-foreground"
+              >
+                Products
+              </p>
+              <p class="mt-3 text-lg font-bold text-foreground">4 mapped</p>
+            </div>
+            <div class="rounded-2xl border border-border/60 bg-muted/20 p-4">
+              <p
+                class="text-[10px] uppercase tracking-[0.18em] text-muted-foreground"
+              >
+                Contract
+              </p>
+              <p class="mt-3 text-lg font-bold text-foreground">Live</p>
+            </div>
+            <div class="rounded-2xl border border-border/60 bg-muted/20 p-4">
+              <p
+                class="text-[10px] uppercase tracking-[0.18em] text-muted-foreground"
+              >
+                Status
+              </p>
+              <p class="mt-3 text-lg font-bold text-emerald-600">Ready</p>
+            </div>
           </div>
-        </section>
-      </div>
-      <div class="flex justify-end border-t border-border/60 pt-2">
-        <button
-          type="button"
-          onclick={() => (connected = false)}
-          class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-red-500 hover:bg-red-500/10"
-          ><Unplug class="h-4 w-4" /> Disconnect provider</button
+
+          <div class="mt-6 grid gap-4 md:grid-cols-2">
+            <label class="text-sm font-medium"
+              >Base URL<input
+                required
+                bind:value={integration.baseUrl}
+                placeholder="https://provider.example"
+                class="mt-2 w-full rounded-xl border border-border bg-background px-3 py-2.5"
+              /></label
+            ><label class="text-sm font-medium"
+              >Auth scheme<select
+                bind:value={integration.authScheme}
+                class="mt-2 w-full rounded-xl border border-border bg-background px-3 py-2.5"
+                ><option>BEARER</option><option>API_KEY_HEADER</option><option
+                  >BASIC</option
+                ></select
+              ></label
+            ><label class="text-sm font-medium md:col-span-2"
+              >Credential token<input
+                required
+                type="password"
+                bind:value={integration.token}
+                class="mt-2 w-full rounded-xl border border-border bg-background px-3 py-2.5"
+              /></label
+            >
+          </div>
+
+          <div class="mt-8">
+            <div class="mb-3 flex items-center justify-between">
+              <p
+                class="text-[10px] font-bold uppercase tracking-[0.2em] text-primary"
+              >
+                Endpoint matrix
+              </p>
+              <span
+                class="rounded-full border border-primary/20 bg-primary/5 px-2.5 py-1 text-[10px] font-semibold text-primary"
+                >4 product routes</span
+              >
+            </div>
+            <div class="grid gap-4 md:grid-cols-2">
+              <label class="text-sm font-medium"
+                >Airtime endpoint<input
+                  bind:value={integration.airtimePath}
+                  placeholder="/api/topup/airtime"
+                  class="mt-2 w-full rounded-xl border border-border bg-background px-3 py-2.5"
+                /></label
+              ><label class="text-sm font-medium"
+                >Data endpoint<input
+                  bind:value={integration.dataPath}
+                  placeholder="/api/topup/data"
+                  class="mt-2 w-full rounded-xl border border-border bg-background px-3 py-2.5"
+                /></label
+              ><label class="text-sm font-medium"
+                >Bills endpoint<input
+                  bind:value={integration.billsPath}
+                  placeholder="/api/topup/bills"
+                  class="mt-2 w-full rounded-xl border border-border bg-background px-3 py-2.5"
+                /></label
+              ><label class="text-sm font-medium"
+                >PIN endpoint<input
+                  bind:value={integration.pinPath}
+                  placeholder="/api/topup/pin"
+                  class="mt-2 w-full rounded-xl border border-border bg-background px-3 py-2.5"
+                /></label
+              >
+            </div>
+          </div>
+
+          <div class="mt-8 rounded-2xl border border-border/60 bg-muted/20 p-4">
+            <p
+              class="text-[10px] font-bold uppercase tracking-[0.2em] text-primary"
+            >
+              Field mapping
+            </p>
+            <div class="mt-4 grid gap-4 md:grid-cols-3">
+              <label class="text-sm font-medium"
+                >Recipient field<input
+                  bind:value={integration.recipientField}
+                  placeholder="recipient"
+                  class="mt-2 w-full rounded-xl border border-border bg-background px-3 py-2.5"
+                /></label
+              ><label class="text-sm font-medium"
+                >Amount field<input
+                  bind:value={integration.amountField}
+                  placeholder="amount"
+                  class="mt-2 w-full rounded-xl border border-border bg-background px-3 py-2.5"
+                /></label
+              ><label class="text-sm font-medium"
+                >Network field<input
+                  bind:value={integration.networkField}
+                  placeholder="network"
+                  class="mt-2 w-full rounded-xl border border-border bg-background px-3 py-2.5"
+                /></label
+              >
+            </div>
+          </div>
+
+          <button
+            type="button"
+            class="btn-app-primary mt-6"
+            disabled={saving}
+            onclick={() => void saveIntegration()}
+            ><PlugZap class="h-4 w-4" />{saving
+              ? "Saving..."
+              : "Save provider contract"}</button
+          >
+        </section>{/if}
+      {#if activePanel === "purchase"}<section class="surface-panel p-6">
+          <div>
+            <h2 class="font-heading text-xl font-bold">New VTU purchase</h2>
+            <p class="mt-1 text-sm text-muted-foreground">
+              The same purchase shape can be called by REST, WhatsApp, Telegram,
+              or future channels.
+            </p>
+          </div>
+          <div class="mt-5 grid gap-4 md:grid-cols-2">
+            <label class="text-sm font-medium"
+              >Product<select
+                bind:value={purchase.productType}
+                class="mt-2 w-full rounded-xl border border-border bg-background px-3 py-2.5"
+                ><option>AIRTIME</option><option>DATA</option><option
+                  >ELECTRICITY</option
+                ><option>CABLE_TV</option><option>EXAM_PIN</option></select
+              ></label
+            ><label class="text-sm font-medium"
+              >Network<input
+                bind:value={purchase.network}
+                placeholder="MTN"
+                class="mt-2 w-full rounded-xl border border-border bg-background px-3 py-2.5"
+              /></label
+            ><label class="text-sm font-medium"
+              >Recipient<input
+                required
+                bind:value={purchase.recipient}
+                placeholder="08012345678"
+                class="mt-2 w-full rounded-xl border border-border bg-background px-3 py-2.5"
+              /></label
+            ><label class="text-sm font-medium"
+              >Amount<input
+                required
+                bind:value={purchase.amount}
+                placeholder="1000.00"
+                class="mt-2 w-full rounded-xl border border-border bg-background px-3 py-2.5"
+              /></label
+            >
+          </div>
+          <div class="mt-5 flex gap-2">
+            <button
+              type="button"
+              class="btn-app-primary"
+              disabled={saving}
+              onclick={() => void buy()}
+              >{saving ? "Submitting..." : "Submit purchase"}</button
+            ><button
+              type="button"
+              class="btn-app-secondary"
+              onclick={() => (activePanel = "overview")}>Cancel</button
+            >
+          </div>
+        </section>{/if}
+      <section class="surface-panel overflow-hidden">
+        <div
+          class="flex items-center justify-between border-b border-border/60 p-5"
         >
-      </div>
+          <div>
+            <h2 class="font-heading text-lg font-bold">Recent VTU requests</h2>
+            <p class="mt-1 text-sm text-muted-foreground">
+              Every request is idempotent and traceable by reference.
+            </p>
+          </div>
+          <span class="text-xs text-muted-foreground"
+            >{transactions.length} records</span
+          >
+        </div>
+        {#if transactions.length === 0}<p
+            class="p-8 text-sm text-muted-foreground"
+          >
+            No VTU requests yet.
+          </p>{:else}<div class="divide-y divide-border/60">
+            {#each transactions.slice(0, 8) as transaction}<div
+                class="flex flex-wrap items-center gap-4 p-4"
+              >
+                <span
+                  class={`flex h-9 w-9 items-center justify-center rounded-lg ${transaction.status === "SUCCESS" ? "bg-emerald-500/10 text-emerald-600" : transaction.status === "FAILED" ? "bg-red-500/10 text-red-600" : "bg-amber-500/10 text-amber-600"}`}
+                  ><Activity class="h-4 w-4" /></span
+                ><span class="min-w-0 flex-1"
+                  ><span class="block text-sm font-semibold"
+                    >{transaction.productType} · {transaction.network ??
+                      "Provider"}</span
+                  ><span class="block text-xs text-muted-foreground"
+                    >{transaction.recipient} · {transaction.reference}</span
+                  ></span
+                ><span class="text-sm font-bold"
+                  >{money(transaction.amountCharged)}</span
+                ><span
+                  class="text-xs font-bold uppercase tracking-wider text-muted-foreground"
+                  >{transaction.status}</span
+                >
+              </div>{/each}
+          </div>{/if}
+      </section>
     </div>
   {/if}
 </AppShell>

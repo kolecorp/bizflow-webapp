@@ -1,5 +1,5 @@
 <script lang="ts">
-  import VTUPage from "../../../../pages/VTUPage.svelte";
+  import VTUOverviewPage from "../../../../pages/VTUOverviewPage.svelte";
 </script>
 
-<VTUPage />
+<VTUOverviewPage />

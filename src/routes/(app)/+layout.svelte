@@ -3,9 +3,9 @@
   import { page } from "$app/state";
   import { authStore } from "$lib/stores/auth";
   import { hasPermission } from "$lib/stores/permissions";
-  import { extensionsLoaded } from "$lib/stores/extensions";
   import { permissionForPath } from "$lib/config/navigation";
   import AppLoadingSkeleton from "$lib/components/layout/AppLoadingSkeleton.svelte";
+  import SessionExpiredModal from "$lib/components/layout/SessionExpiredModal.svelte";
 
   let { children } = $props();
 
@@ -18,7 +18,7 @@
       return;
     }
 
-    if (!$authStore.permissionsLoaded || !$extensionsLoaded) return;
+    if (!$authStore.permissionsLoaded) return;
 
     const required = permissionForPath(page.url.pathname);
     if (required && !hasPermission(required)) {
@@ -30,8 +30,8 @@
 {#if !$authStore.authReady}
   <AppLoadingSkeleton />
 {:else if $authStore.sessionExpired}
-  <!-- SessionExpiredModal is mounted by the root layout. -->
-{:else if $authStore.isAuthenticated && $authStore.permissionsLoaded && $extensionsLoaded}
+  <SessionExpiredModal />
+{:else if $authStore.isAuthenticated && $authStore.permissionsLoaded}
   {@render children?.()}
 {:else if $authStore.isAuthenticated}
   <AppLoadingSkeleton />

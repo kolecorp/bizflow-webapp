@@ -38,12 +38,16 @@
 
   onMount(async () => {
     try {
-      await initializeTeam($authStore.user);
+      await Promise.all([
+        initializeTeam($authStore.user),
+        import("$lib/stores/businessData").then(({ businessData }) =>
+          businessData.syncOperationalData(),
+        ),
+      ]);
     } finally {
       teamLoading = false;
     }
   });
-
 </script>
 
 <AppShell>

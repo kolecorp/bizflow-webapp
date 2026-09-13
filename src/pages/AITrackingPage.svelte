@@ -76,7 +76,7 @@
 <AppShell>
   <PageHeader
     eyebrow="Workspace"
-    title="Activity Log"
+    title="Audit Log"
     description="Track system events, user actions, and business operations."
   />
 

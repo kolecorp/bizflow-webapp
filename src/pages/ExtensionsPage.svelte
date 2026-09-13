@@ -34,7 +34,7 @@
             error instanceof Error ? error.message : "Please try again.",
         });
       }
-    } else if (ext.subscribed) {
+    } else if (ext.subscribed || ext.price === "Free") {
       try {
         await toggleExtension(ext.id);
       } catch (error) {
@@ -115,7 +115,7 @@
       case "active":
         return "Active";
       case "inactive":
-        return "Inactive";
+        return "Available";
       case "coming-soon":
         return "Coming Soon";
     }
@@ -210,9 +210,11 @@
               <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {#each items as ext}
                   <div
-                    class="group rounded-2xl border border-border/60 bg-background p-5 transition hover:border-primary/20 hover:shadow-sm"
+                    class="relative min-h-52 overflow-hidden rounded-xl border border-border/60 bg-background p-4 transition hover:border-primary/20 hover:shadow-sm"
                   >
-                    <div class="flex items-start justify-between mb-3">
+                    <div
+                      class="relative z-10 mb-3 flex items-start justify-between"
+                    >
                       <div
                         class="rounded-xl p-2.5 {categoryColor(ext.category)}"
                       >
@@ -235,7 +237,9 @@
                         {/if}
                       </div>
                     </div>
-                    <div class="flex items-center justify-between mb-1 gap-2">
+                    <div
+                      class="relative z-10 mb-1 flex items-center justify-between gap-2"
+                    >
                       <h4
                         class="font-heading text-base font-bold text-foreground"
                       >
@@ -251,7 +255,7 @@
                       {/if}
                     </div>
                     <p
-                      class="text-xs text-muted-foreground leading-relaxed mb-4"
+                      class="relative z-10 mb-4 text-xs leading-relaxed text-muted-foreground"
                     >
                       {ext.description}
                     </p>
@@ -259,7 +263,8 @@
                       <button
                         type="button"
                         onclick={() => handleExtensionClick(ext)}
-                        class="text-xs font-semibold {ext.status === 'active'
+                        class="relative z-10 text-xs font-semibold {ext.status ===
+                        'active'
                           ? 'text-red-500 hover:text-red-600'
                           : 'text-primary hover:text-primary/80'} transition"
                       >
