@@ -52,7 +52,14 @@
     aiConnector: string;
     enabled: boolean;
     response?: string;
-    actionType?: "reply" | "vtu_airtime" | "vtu_data" | "http_request" | "ai";
+    actionType?:
+      | "reply"
+      | "vtu_airtime"
+      | "vtu_data"
+      | "vtu_pin"
+      | "vtu_status"
+      | "http_request"
+      | "ai";
     actionConfig: {
       method?: string;
       url?: string;
@@ -62,6 +69,34 @@
     nodes?: any[];
     edges?: any[];
   };
+
+  type SupportedActionType =
+    | "reply"
+    | "vtu_airtime"
+    | "vtu_data"
+    | "vtu_pin"
+    | "vtu_status"
+    | "http_request"
+    | "ai";
+
+  function normalizeActionType(value?: string | null): SupportedActionType {
+    const legacyValues = new Set(["none", "custom_flow"]);
+    if (!value || legacyValues.has(value)) return "reply";
+
+    if (
+      value === "reply" ||
+      value === "vtu_airtime" ||
+      value === "vtu_data" ||
+      value === "vtu_pin" ||
+      value === "vtu_status" ||
+      value === "http_request" ||
+      value === "ai"
+    ) {
+      return value;
+    }
+
+    return "reply";
+  }
 
   type InspectorMode = "build" | "test" | "connections";
   type Filter = "all" | "enabled" | "disabled";
@@ -174,11 +209,18 @@
           aiConnector: row.aiConnector ?? "None",
           enabled: row.enabled ?? true,
           response: row.response ?? "",
-          actionType: row.actionType ?? "reply",
+          actionType: normalizeActionType(row.actionType),
           actionConfig: row.actionConfig ?? {},
         }))
       : defaults();
     activeCommandIndex = 0;
+  }
+
+  function sanitizeCommandRows(rows: CommandMapping[]) {
+    return rows.map((row) => ({
+      ...row,
+      actionType: normalizeActionType(row.actionType),
+    }));
   }
 
   async function load() {
@@ -211,7 +253,7 @@
           body: JSON.stringify({
             capabilities: {
               localMode,
-              commandMappings: commandRows,
+              commandMappings: sanitizeCommandRows(commandRows),
               aiConnectors: commandRows
                 .filter((row) => row.aiConnector && row.aiConnector !== "None")
                 .map((row) => ({ name: row.aiConnector, enabled: true })),
@@ -723,7 +765,8 @@
                   rows="5"
                   placeholder="Write the message your customer receives..."
                 ></textarea><small
-                  >Use &#123;&#123; name &#125;&#125; or &#123;&#123; user_id &#125;&#125; to insert values.</small
+                  >Use &#123;&#123; name &#125;&#125; or &#123;&#123; user_id
+                  &#125;&#125; to insert values.</small
                 ></label
               >
             </section>
@@ -1227,7 +1270,11 @@
     height: 14px;
     border-width: 2px;
     border-top-color: var(--primary-foreground);
-    border-left-color: color-mix(in srgb, var(--primary-foreground) 40%, transparent);
+    border-left-color: color-mix(
+      in srgb,
+      var(--primary-foreground) 40%,
+      transparent
+    );
   }
   @keyframes spin {
     to {

@@ -17,30 +17,22 @@
     type CanvasElement,
     type ElementType,
     PRESETS,
-    PALETTE_ITEMS,
   } from "$lib/types/builder";
   import {
-    updateElementInTree,
     handleDndInTree,
     deleteElementInTree,
-    duplicateElementInTree,
     moveElementInTree,
     groupElementsInTree,
-    unparentElementInTree,
     findElementInTree,
   } from "$lib/utils/builderDnd";
   import {
     ArrowLeft,
-    BookOpen,
     Check,
     ChevronDown,
-    ChevronLeft,
     ChevronRight,
     Clock,
-    Code2,
     Copy,
     Eye,
-    Gift,
     Globe,
     HelpCircle,
     Image,
@@ -120,10 +112,10 @@
   let rightTab = $state<"inspector" | "layers">("inspector");
   let showBuilderMenu = $state(false);
   let showPublishPanel = $state(false);
-  let builderMenuElement: HTMLDivElement;
-  let publishPanelElement: HTMLDivElement;
-  let builderMenuTrigger: HTMLButtonElement;
-  let publishPanelTrigger: HTMLButtonElement;
+  let builderMenuElement = $state<HTMLDivElement>();
+  let publishPanelElement = $state<HTMLDivElement>();
+  let builderMenuTrigger = $state<HTMLButtonElement>();
+  let publishPanelTrigger = $state<HTMLButtonElement>();
 
   // Publish settings
   let publishMethod = $state<"bizflow" | "gas" | "html" | "custom">("bizflow");
@@ -517,17 +509,17 @@
     onclick={() => (showPresetConfirm = null)}
     role="dialog"
     aria-modal="true"
+    aria-labelledby="preset-confirm-title"
+    tabindex="-1"
+    onkeydown={(event) => event.key === "Escape" && (showPresetConfirm = null)}
   >
-    <div
-      class="preset-confirm-modal"
-      onclick={(e) => e.stopPropagation()}
-      onkeydown={(e) => e.stopPropagation()}
-      role="document"
-    >
+    <div class="preset-confirm-modal" role="document">
       <div class="mb-4 flex justify-center">
         <LayoutTemplate class="size-10 text-primary" />
       </div>
-      <h3 class="preset-confirm-title">Load "{preset?.name}"?</h3>
+      <h3 id="preset-confirm-title" class="preset-confirm-title">
+        Load "{preset?.name}"?
+      </h3>
       <p class="preset-confirm-desc">
         This will replace your current canvas. This action cannot be undone.
       </p>
@@ -591,7 +583,7 @@
         <input
           bind:value={pageTitle}
           aria-label="Page name"
-          class="min-w-0 max-w-[160px] lg:max-w-[220px] truncate border-0 bg-transparent text-xs font-semibold text-foreground outline-none text-center hover:bg-muted focus:bg-muted rounded px-2 py-1 transition-colors"
+          class="min-w-0 max-w-40 lg:max-w-55 truncate border-0 bg-transparent text-xs font-semibold text-foreground outline-none text-center hover:bg-muted focus:bg-muted rounded px-2 py-1 transition-colors"
         />
         <Pencil
           class="size-3 ml-1 text-muted-foreground opacity-0 group-hover:opacity-60 transition-opacity"
@@ -716,7 +708,7 @@
       style="margin-left: {leftSidebarOpen ? '0' : '-460px'};"
     >
       <div
-        class="w-[460px] h-full flex shrink-0 bg-card border-r border-border/60 shadow-sm relative"
+        class="w-115 h-full flex shrink-0 bg-card border-r border-border/60 shadow-sm relative"
       >
         <!-- Sidebar toggle tab -->
         <button
@@ -733,7 +725,7 @@
 
         <!-- ─── Presets Column ─── -->
         <aside
-          class="w-[200px] shrink-0 h-full flex flex-col border-r border-border/60 relative overflow-hidden"
+          class="w-50 shrink-0 h-full flex flex-col border-r border-border/60 relative overflow-hidden"
         >
           <NoiseOverlay intensity="light" />
           <div class="app-sidebar__glow" aria-hidden="true"></div>
@@ -846,7 +838,7 @@
         </aside>
 
         <!-- ─── Elements Column ─── -->
-        <aside class="w-[260px] shrink-0 h-full flex flex-col bg-muted/5">
+        <aside class="w-65 shrink-0 h-full flex flex-col bg-muted/5">
           <div class="p-4 pb-3 shrink-0 border-b border-border/60">
             <p class="builder-label">Add Elements</p>
             <!-- Category tabs -->
@@ -976,6 +968,7 @@
       >
         <div
           class="canvas-page-sheet"
+          role="application"
           style="width: {viewport === 'Mobile'
             ? '375px'
             : viewport === 'Tablet'
@@ -1032,6 +1025,7 @@
           style="position: absolute; inset: 0; z-index: 50; cursor: {isPanning
             ? 'grabbing'
             : 'grab'};"
+          role="application"
           onmousedown={handleViewportMouseDown}
         ></div>
       {/if}
@@ -1112,7 +1106,7 @@
       style="margin-right: {rightSidebarOpen ? '0' : '-320px'};"
     >
       <div
-        class="w-[320px] h-full flex flex-col shrink-0 bg-card border-l border-border/60 shadow-sm relative overflow-visible"
+        class="w-80 h-full flex flex-col shrink-0 bg-card border-l border-border/60 shadow-sm relative overflow-visible"
       >
         <!-- Toggle tab -->
         <button
@@ -1575,7 +1569,7 @@
 <!-- Preview Overlay -->
 {#if previewOpen}
   <div
-    class="fixed inset-0 z-[100] bg-background/80 backdrop-blur-sm flex flex-col"
+    class="fixed inset-0 z-100 bg-background/80 backdrop-blur-sm flex flex-col"
   >
     <!-- Preview Header -->
     <div
@@ -1750,11 +1744,11 @@
             <textarea
               id="seo-desc"
               placeholder="Brief description for search engines"
-              class="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              class="flex min-h-20 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             ></textarea>
           </div>
           <div class="space-y-2 pt-2">
-            <label class="text-sm font-medium">Social Share Image</label>
+            <span class="text-sm font-medium">Social Share Image</span>
             <div
               class="mt-1 flex justify-center rounded-lg border border-dashed border-border/60 px-6 py-10 hover:bg-muted/30 transition-colors cursor-pointer"
             >
@@ -1783,7 +1777,7 @@
             <textarea
               id="head-code"
               placeholder="<!-- Add meta tags, fonts, etc. -->"
-              class="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-mono focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              class="flex min-h-30 w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-mono focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             ></textarea>
           </div>
           <div class="space-y-2">
@@ -1793,7 +1787,7 @@
             <textarea
               id="body-code"
               placeholder="<!-- Add scripts, widgets, etc. -->"
-              class="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-mono focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              class="flex min-h-30 w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-mono focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             ></textarea>
           </div>
         </div>
@@ -1874,17 +1868,17 @@
 <!-- Shortcuts Modal -->
 {#if showShortcuts}
   <div
-    class="fixed inset-0 z-[200] bg-background/80 backdrop-blur-sm flex items-center justify-center p-4"
-    onclick={() => (showShortcuts = false)}
+    class="fixed inset-0 z-200 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4"
+    onclick={(event) =>
+      event.target === event.currentTarget && (showShortcuts = false)}
     onkeydown={(e) => e.key === "Escape" && (showShortcuts = false)}
     role="dialog"
     aria-modal="true"
     aria-label="Keyboard Shortcuts"
+    tabindex="-1"
   >
     <div
       class="bg-card w-full max-w-2xl rounded-xl border border-border/60 shadow-2xl overflow-hidden flex flex-col"
-      onclick={(e) => e.stopPropagation()}
-      onkeydown={(e) => e.stopPropagation()}
       role="document"
     >
       <div
@@ -2101,24 +2095,6 @@
     background: var(--muted);
     color: var(--foreground);
     border-color: var(--border);
-  }
-
-  .builder-action {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    border-radius: 0.5rem;
-    padding: 0.45rem 0.8rem;
-    font-size: 0.8rem;
-    font-weight: 500;
-    border: 1px solid var(--border);
-    color: var(--foreground);
-    background: var(--card);
-    transition: all 0.15s;
-  }
-  .builder-action:hover {
-    background: var(--muted);
-    transform: translateY(-1px);
   }
 
   .builder-publish {
@@ -2661,10 +2637,6 @@
     width: 90%;
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
     text-align: center;
-  }
-  .preset-confirm-icon {
-    font-size: 40px;
-    margin-bottom: 12px;
   }
   .preset-confirm-title {
     font-size: 18px;

@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { Handle, Position } from '@xyflow/svelte';
-  import { Send, Database } from '@lucide/svelte';
+  import { Handle, Position } from "@xyflow/svelte";
+  import { Send, Database } from "@lucide/svelte";
 
   let { data, selected } = $props<{
-    data: { 
+    data: {
       label: string;
       description?: string;
       iconType?: string;
@@ -13,11 +13,15 @@
   }>();
 
   // Determine accent color class from iconType
-  const isSet = data.iconType === 'set' || data.iconType === 'database';
+  let isSet = $derived(data.iconType === "set" || data.iconType === "database");
 </script>
 
 <div class="studio-node" class:selected>
-  <Handle type="target" position={Position.Left} class="studio-handle studio-handle-in" />
+  <Handle
+    type="target"
+    position={Position.Left}
+    class="studio-handle studio-handle-in"
+  />
 
   <div class="node-header">
     <div class="node-icon-box" class:icon-pink={isSet} class:icon-blue={!isSet}>
@@ -29,7 +33,7 @@
     </div>
     <div class="node-status-dot"></div>
   </div>
-  
+
   <div class="node-body">
     <h3 class="node-title">{data.label}</h3>
     {#if data.description}
@@ -44,7 +48,11 @@
     </div>
   </div>
 
-  <Handle type="source" position={Position.Right} class="studio-handle studio-handle-out" />
+  <Handle
+    type="source"
+    position={Position.Right}
+    class="studio-handle studio-handle-out"
+  />
 </div>
 
 <style>
@@ -57,7 +65,9 @@
     border-radius: 12px;
     padding: 12px;
     box-shadow: 0 4px 12px color-mix(in srgb, var(--foreground) 8%, transparent);
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition:
+      border-color 0.2s,
+      box-shadow 0.2s;
     cursor: grab;
   }
 
@@ -85,8 +95,12 @@
     justify-content: center;
   }
 
-  .icon-blue { background: #3b82f6; }
-  .icon-pink { background: #ec4899; }
+  .icon-blue {
+    background: #3b82f6;
+  }
+  .icon-pink {
+    background: #ec4899;
+  }
 
   .node-status-dot {
     width: 16px;
@@ -127,7 +141,9 @@
     font-weight: 500;
     color: var(--foreground);
   }
-  .check-icon { color: var(--primary); }
+  .check-icon {
+    color: var(--primary);
+  }
 
   :global(.studio-handle) {
     width: 10px;

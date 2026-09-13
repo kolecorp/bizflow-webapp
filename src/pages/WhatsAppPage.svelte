@@ -343,7 +343,7 @@
               <button
                 type="button"
                 disabled={bizPhone.replace(/\D/g, "").length < 7}
-                on:click={() => (bizStep = 2)}
+                onclick={() => (bizStep = 2)}
                 class="btn-app-primary w-full disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 Continue <ArrowRight class="h-4 w-4" />
@@ -374,8 +374,8 @@
                     inputmode="numeric"
                     maxlength="1"
                     value={digit}
-                    on:input={(e) => bizOtpInput(i, e.currentTarget.value)}
-                    on:keydown={(e) => bizOtpKeydown(i, e)}
+                    oninput={(e) => bizOtpInput(i, e.currentTarget.value)}
+                    onkeydown={(e) => bizOtpKeydown(i, e)}
                     class="h-12 w-12 rounded-xl border border-border bg-background text-center text-lg font-bold text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition font-mono"
                   />
                 {/each}
@@ -383,14 +383,14 @@
               <div class="flex gap-3">
                 <button
                   type="button"
-                  on:click={() => (bizStep = 1)}
+                  onclick={() => (bizStep = 1)}
                   class="btn-app-secondary flex-1"
                   ><ArrowLeft class="h-4 w-4" /> Back</button
                 >
                 <button
                   type="button"
                   disabled={bizOtp.some((d) => !d) || bizVerifying}
-                  on:click={bizVerifyOtp}
+                  onclick={bizVerifyOtp}
                   class="btn-app-primary flex-1 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {#if bizVerifying}<Loader2 class="h-4 w-4 animate-spin" /> Verifying…{:else}Verify
@@ -488,13 +488,13 @@
               <div class="flex gap-3">
                 <button
                   type="button"
-                  on:click={() => (bizStep = 2)}
+                  onclick={() => (bizStep = 2)}
                   class="btn-app-secondary flex-1"
                   ><ArrowLeft class="h-4 w-4" /> Back</button
                 >
                 <button
                   type="button"
-                  on:click={() => (bizStep = 4)}
+                  onclick={() => (bizStep = 4)}
                   class="btn-app-primary flex-1"
                   >Continue <ArrowRight class="h-4 w-4" /></button
                 >
@@ -545,7 +545,7 @@
               </div>
               <button
                 type="button"
-                on:click={bizComplete}
+                onclick={bizComplete}
                 class="btn-app-primary w-full"
                 ><Sparkles class="h-4 w-4" /> Go to dashboard</button
               >
@@ -695,7 +695,7 @@
               {#each models as model}
                 <button
                   type="button"
-                  on:click={() => (selectedModel = model.id)}
+                  onclick={() => (selectedModel = model.id)}
                   class={`flex items-start gap-3 rounded-xl border p-4 text-left transition ${selectedModel === model.id ? "border-primary bg-primary/5 ring-1 ring-primary/20" : "border-border/60 hover:border-primary/40 hover:bg-muted/20"}`}
                 >
                   <span
@@ -830,15 +830,12 @@
               {#each workflows as workflow, i}
                 <button
                   type="button"
-                  on:click={() => toggleWorkflow(i)}
+                  onclick={() => toggleWorkflow(i)}
                   class="flex w-full items-center gap-3 rounded-xl border border-border/60 p-3 text-left transition hover:bg-muted/20"
                 >
                   <span
                     class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"
-                    ><svelte:component
-                      this={workflow.icon}
-                      class="h-4 w-4"
-                    /></span
+                    ><workflow.icon class="h-4 w-4" /></span
                   >
                   <span class="min-w-0 flex-1"
                     ><span class="block text-sm font-medium text-foreground"
@@ -860,7 +857,7 @@
           </div>
 
           <div
-            class="surface-panel flex min-h-[390px] flex-col overflow-hidden p-0"
+            class="surface-panel flex min-h-97.5 flex-col overflow-hidden p-0"
           >
             <div
               class="flex items-center justify-between border-b border-border/60 px-6 py-4"
@@ -894,7 +891,10 @@
             </div>
             <form
               class="flex gap-2 border-t border-border/60 p-4"
-              on:submit|preventDefault={sendTestMessage}
+              onsubmit={(event) => {
+                event.preventDefault();
+                sendTestMessage();
+              }}
             >
               <input
                 bind:value={testMessage}
@@ -961,7 +961,7 @@
             </p>
             <button
               type="button"
-              on:click={saveBotSettings}
+              onclick={saveBotSettings}
               class="btn-app-primary text-sm"
               ><Sparkles class="h-4 w-4" /> Save agent settings</button
             >
@@ -980,7 +980,7 @@
           >
           <button
             type="button"
-            on:click={() => disconnectExtension("whatsapp-business")}
+            onclick={() => disconnectExtension("whatsapp-business")}
             class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-red-500 hover:bg-red-500/10 transition"
             ><Unplug class="h-4 w-4" /> Disconnect WhatsApp</button
           >
@@ -1099,7 +1099,7 @@
             <button
               type="button"
               disabled={!custBusinessName.trim()}
-              on:click={() => (custStep = 2)}
+              onclick={() => (custStep = 2)}
               class="btn-app-primary w-full disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Continue <ArrowRight class="h-4 w-4" />
@@ -1191,13 +1191,13 @@
             <div class="flex gap-3">
               <button
                 type="button"
-                on:click={() => (custStep = 1)}
+                onclick={() => (custStep = 1)}
                 class="btn-app-secondary flex-1"
                 ><ArrowLeft class="h-4 w-4" /> Back</button
               >
               <button
                 type="button"
-                on:click={() => (custStep = 3)}
+                onclick={() => (custStep = 3)}
                 class="btn-app-primary flex-1"
                 >Continue <ArrowRight class="h-4 w-4" /></button
               >
@@ -1245,7 +1245,7 @@
             </div>
             <button
               type="button"
-              on:click={custComplete}
+              onclick={custComplete}
               class="btn-app-primary w-full"
               ><Sparkles class="h-4 w-4" /> Go to dashboard</button
             >
@@ -1403,7 +1403,7 @@
       <div class="flex justify-end">
         <button
           type="button"
-          on:click={() => disconnectExtension("whatsapp-customers")}
+          onclick={() => disconnectExtension("whatsapp-customers")}
           class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-red-500 hover:bg-red-500/10 transition"
         >
           <Unplug class="h-4 w-4" /> Disconnect Customer Channel

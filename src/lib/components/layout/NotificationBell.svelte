@@ -1,7 +1,18 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import { notificationItems, notificationUnreadCount, markRead, markAllRead } from "$lib/stores/notifications";
-  import { Bell, CheckCheck, FileUp, MessageSquare, Ticket } from "@lucide/svelte";
+  import {
+    notificationItems,
+    notificationUnreadCount,
+    markRead,
+    markAllRead,
+  } from "$lib/stores/notifications";
+  import {
+    Bell,
+    CheckCheck,
+    FileUp,
+    MessageSquare,
+    Ticket,
+  } from "@lucide/svelte";
   import type { NotificationCategory } from "$lib/types/communications";
 
   let open = false;
@@ -42,11 +53,14 @@
 
 <svelte:window on:click={closePanel} />
 
-<div class="relative" on:click|stopPropagation>
+<div class="relative">
   <button
     type="button"
     aria-label="Notifications"
-    on:click|stopPropagation={togglePanel}
+    onclick={(event) => {
+      event.stopPropagation();
+      togglePanel();
+    }}
     class="relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border bg-background text-foreground transition hover:bg-muted"
   >
     <Bell class="h-4 w-4" />
@@ -63,12 +77,14 @@
     <div
       class="absolute right-0 top-11 z-50 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-border bg-popover shadow-xl"
     >
-      <div class="flex items-center justify-between border-b border-border px-4 py-3">
+      <div
+        class="flex items-center justify-between border-b border-border px-4 py-3"
+      >
         <p class="text-sm font-semibold text-foreground">Notifications</p>
         {#if $notificationUnreadCount > 0}
           <button
             type="button"
-            on:click={handleMarkAllRead}
+            onclick={handleMarkAllRead}
             class="inline-flex items-center gap-1 text-xs text-primary hover:underline"
           >
             <CheckCheck class="h-3.5 w-3.5" />
@@ -87,7 +103,7 @@
             {@const Icon = categoryIcon(notification.category)}
             <button
               type="button"
-              on:click={() => handleOpen(notification)}
+              onclick={() => handleOpen(notification)}
               class={`flex w-full items-start gap-3 border-b border-border/60 px-4 py-3 text-left transition hover:bg-muted/60 ${
                 notification.read ? "opacity-70" : "bg-primary/5"
               }`}
@@ -106,13 +122,16 @@
                 <Icon class="h-3.5 w-3.5" />
               </div>
               <div class="min-w-0 flex-1">
-                <p class="text-sm font-medium text-foreground">{notification.title}</p>
+                <p class="text-sm font-medium text-foreground">
+                  {notification.title}
+                </p>
                 <p class="mt-0.5 text-xs text-muted-foreground line-clamp-2">
                   {notification.message}
                 </p>
               </div>
               {#if !notification.read}
-                <span class="mt-1 h-2 w-2 shrink-0 rounded-full bg-primary"></span>
+                <span class="mt-1 h-2 w-2 shrink-0 rounded-full bg-primary"
+                ></span>
               {/if}
             </button>
           {/each}

@@ -36,7 +36,7 @@
   let message = $state("");
   let isProcessing = $state(false);
   let confirmationError = $state("");
-  let fileInput: HTMLInputElement;
+  let fileInput = $state<HTMLInputElement>();
 
   // Derive variables found in message
   let detectedVariables = $derived(

@@ -1,13 +1,23 @@
 <script lang="ts">
-  import { WandSparkles, X, Sparkles, CheckCircle2, ArrowUp, Paperclip, Image as ImageIcon, Link, Zap } from "@lucide/svelte";
+  import {
+    WandSparkles,
+    X,
+    Sparkles,
+    CheckCircle2,
+    ArrowUp,
+    Paperclip,
+    Image as ImageIcon,
+    Link,
+    Zap,
+  } from "@lucide/svelte";
   import { PRESETS, type CanvasElement } from "$lib/types/builder";
   import { onDestroy } from "svelte";
   import { fade, scale } from "svelte/transition";
 
-  let { 
+  let {
     onClose,
-    onGenerate
-  }: { 
+    onGenerate,
+  }: {
     onClose: () => void;
     onGenerate: (elements: CanvasElement[]) => void;
   } = $props();
@@ -17,22 +27,44 @@
   let progressStep = $state(0);
 
   let simTimeout: ReturnType<typeof setTimeout> | null = null;
-  onDestroy(() => { if (simTimeout) clearTimeout(simTimeout); });
+  onDestroy(() => {
+    if (simTimeout) clearTimeout(simTimeout);
+  });
 
   const steps = [
     "Analyzing your requirements…",
     "Selecting optimal layout…",
     "Drafting persuasive copy…",
     "Configuring conversion elements…",
-    "Finalizing design schema…"
+    "Finalizing design schema…",
   ];
 
   const quickPrompts = [
-    { label: "SaaS Waitlist", icon: "🚀", text: "A clean SaaS waitlist page with a hero, feature grid, and an email opt-in form at the bottom." },
-    { label: "Webinar Page", icon: "🎙️", text: "A webinar registration page with a countdown timer, host bio, and bullet points of what they'll learn." },
-    { label: "Product Launch", icon: "⚡", text: "A high-converting product launch page with hero, social proof, features, and a bold CTA." },
-    { label: "Lead Magnet", icon: "🎁", text: "A lead magnet landing page offering a free guide in exchange for an email address." },
-    { label: "Agency Portfolio", icon: "✨", text: "A sleek agency portfolio page showcasing case studies, testimonials, and a contact form." },
+    {
+      label: "SaaS Waitlist",
+      icon: "🚀",
+      text: "A clean SaaS waitlist page with a hero, feature grid, and an email opt-in form at the bottom.",
+    },
+    {
+      label: "Webinar Page",
+      icon: "🎙️",
+      text: "A webinar registration page with a countdown timer, host bio, and bullet points of what they'll learn.",
+    },
+    {
+      label: "Product Launch",
+      icon: "⚡",
+      text: "A high-converting product launch page with hero, social proof, features, and a bold CTA.",
+    },
+    {
+      label: "Lead Magnet",
+      icon: "🎁",
+      text: "A lead magnet landing page offering a free guide in exchange for an email address.",
+    },
+    {
+      label: "Agency Portfolio",
+      icon: "✨",
+      text: "A sleek agency portfolio page showcasing case studies, testimonials, and a contact form.",
+    },
   ];
 
   function startGeneration() {
@@ -54,16 +86,19 @@
 
   function finishGeneration() {
     status = "success";
-    const mockResult = PRESETS[Math.floor(Math.random() * PRESETS.length)].build();
-    simTimeout = setTimeout(() => { onGenerate(mockResult); }, 1200);
+    const mockResult =
+      PRESETS[Math.floor(Math.random() * PRESETS.length)].build();
+    simTimeout = setTimeout(() => {
+      onGenerate(mockResult);
+    }, 1200);
   }
 
   function handleKeydown(e: KeyboardEvent) {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       startGeneration();
     }
-    if (e.key === 'Escape') onClose();
+    if (e.key === "Escape") onClose();
   }
 </script>
 
@@ -73,22 +108,20 @@
 <div
   class="ai-backdrop"
   transition:fade={{ duration: 200 }}
-  onclick={status === 'idle' ? onClose : undefined}
+  onclick={(event) =>
+    status === "idle" && event.target === event.currentTarget && onClose()}
   role="presentation"
 >
   <!-- Modal -->
-  <!-- svelte-ignore a11y_click_events_have_key_events -->
-  <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
   <div
     class="ai-modal"
-    onclick={(e) => e.stopPropagation()}
     role="dialog"
     aria-modal="true"
     aria-label="AI Design Generator"
+    tabindex="-1"
     transition:scale={{ start: 0.95, duration: 300 }}
   >
-
-    {#if status === 'idle'}
+    {#if status === "idle"}
       <!-- ─── IDLE STATE ─── -->
       <div class="ai-header">
         <div class="ai-header-icon">
@@ -98,7 +131,12 @@
           <h2>AI Design Generator</h2>
           <p>Describe your page and let AI build it instantly.</p>
         </div>
-        <button type="button" class="ai-close" onclick={onClose} aria-label="Close">
+        <button
+          type="button"
+          class="ai-close"
+          onclick={onClose}
+          aria-label="Close"
+        >
           <X class="size-4" />
         </button>
       </div>
@@ -115,10 +153,18 @@
             ></textarea>
             <div class="ai-textarea-footer">
               <div class="ai-attachments">
-                <button type="button" title="Attach image" class="ai-attach-btn">
+                <button
+                  type="button"
+                  title="Attach image"
+                  class="ai-attach-btn"
+                >
                   <ImageIcon class="size-3.5" />
                 </button>
-                <button type="button" title="Add URL context" class="ai-attach-btn">
+                <button
+                  type="button"
+                  title="Add URL context"
+                  class="ai-attach-btn"
+                >
                   <Link class="size-3.5" />
                 </button>
                 <span class="ai-engine-label">
@@ -148,7 +194,7 @@
                 <button
                   type="button"
                   class="ai-chip"
-                  onclick={() => prompt = qp.text}
+                  onclick={() => (prompt = qp.text)}
                 >
                   <span class="ai-chip-icon">{qp.icon}</span>
                   {qp.label}
@@ -158,8 +204,7 @@
           </div>
         {/if}
       </div>
-
-    {:else if status === 'generating'}
+    {:else if status === "generating"}
       <!-- ─── GENERATING STATE ─── -->
       <div class="ai-state-body">
         <div class="ai-generating">
@@ -172,7 +217,13 @@
             <h3>Building your page</h3>
             <div class="ai-steps">
               {#each steps as step, i}
-                <div class="ai-step {i < progressStep ? 'done' : i === progressStep ? 'active' : 'pending'}">
+                <div
+                  class="ai-step {i < progressStep
+                    ? 'done'
+                    : i === progressStep
+                      ? 'active'
+                      : 'pending'}"
+                >
                   <div class="ai-step-dot"></div>
                   <span>{step}</span>
                 </div>
@@ -181,8 +232,7 @@
           </div>
         </div>
       </div>
-
-    {:else if status === 'success'}
+    {:else if status === "success"}
       <!-- ─── SUCCESS STATE ─── -->
       <div class="ai-state-body">
         <div class="ai-success">
@@ -194,7 +244,6 @@
         </div>
       </div>
     {/if}
-
   </div>
 </div>
 
@@ -218,15 +267,21 @@
     border-radius: 20px;
     overflow: hidden;
     box-shadow:
-      0 0 0 1px rgba(255,255,255,0.04) inset,
+      0 0 0 1px rgba(255, 255, 255, 0.04) inset,
       0 24px 48px rgba(0, 0, 0, 0.25),
-      0 4px 12px rgba(0,0,0,0.1);
+      0 4px 12px rgba(0, 0, 0, 0.1);
     animation: ai-in 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   @keyframes ai-in {
-    from { opacity: 0; transform: scale(0.97) translateY(8px); }
-    to   { opacity: 1; transform: scale(1) translateY(0); }
+    from {
+      opacity: 0;
+      transform: scale(0.97) translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
   }
 
   /* ─── Header ─── */
@@ -246,7 +301,11 @@
     width: 36px;
     height: 36px;
     border-radius: 10px;
-    background: linear-gradient(135deg, hsl(var(--primary) / 0.2), hsl(var(--primary) / 0.1));
+    background: linear-gradient(
+      135deg,
+      hsl(var(--primary) / 0.2),
+      hsl(var(--primary) / 0.1)
+    );
     border: 1px solid hsl(var(--primary) / 0.2);
     color: var(--primary);
     flex-shrink: 0;
@@ -482,17 +541,20 @@
     animation-direction: reverse;
   }
   @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-  .ai-orb-icon {
-    color: var(--primary);
-    animation: pulse 2s ease-in-out infinite;
-    position: relative;
-    z-index: 1;
+    to {
+      transform: rotate(360deg);
+    }
   }
   @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50%       { opacity: 0.6; transform: scale(0.9); }
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.6;
+      transform: scale(0.9);
+    }
   }
 
   .ai-gen-text {
@@ -526,22 +588,40 @@
     flex-shrink: 0;
     transition: all 0.3s;
   }
-  .ai-step.pending { color: var(--muted-foreground); opacity: 0.5; }
-  .ai-step.pending .ai-step-dot { background: var(--muted-foreground); opacity: 0.3; }
+  .ai-step.pending {
+    color: var(--muted-foreground);
+    opacity: 0.5;
+  }
+  .ai-step.pending .ai-step-dot {
+    background: var(--muted-foreground);
+    opacity: 0.3;
+  }
 
-  .ai-step.active { color: var(--primary); font-weight: 600; }
+  .ai-step.active {
+    color: var(--primary);
+    font-weight: 600;
+  }
   .ai-step.active .ai-step-dot {
     background: var(--primary);
     box-shadow: 0 0 0 3px hsl(var(--primary) / 0.2);
     animation: dot-pulse 1s ease-in-out infinite;
   }
   @keyframes dot-pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.4); }
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.4);
+    }
   }
 
-  .ai-step.done { color: #10b981; }
-  .ai-step.done .ai-step-dot { background: #10b981; }
+  .ai-step.done {
+    color: #10b981;
+  }
+  .ai-step.done .ai-step-dot {
+    background: #10b981;
+  }
 
   /* Success */
   .ai-success {
@@ -553,8 +633,14 @@
     animation: success-in 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   }
   @keyframes success-in {
-    from { opacity: 0; transform: scale(0.8); }
-    to   { opacity: 1; transform: scale(1); }
+    from {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
   }
   .ai-success-icon {
     width: 72px;

@@ -173,7 +173,7 @@
         </h3>
         <button
           type="button"
-          on:click={() => goto("/transactions")}
+          onclick={() => goto("/transactions")}
           class="rounded-md px-2 py-1 text-xs font-semibold text-primary transition hover:bg-primary/10"
         >
           View all
@@ -208,7 +208,7 @@
             </p>
             <button
               type="button"
-              on:click={() => modals.openNewTransaction()}
+              onclick={() => modals.openNewTransaction()}
               class="mt-4 rounded-md px-2 py-1 text-xs font-semibold text-primary transition hover:bg-primary/10"
             >
               + New transaction
@@ -236,7 +236,7 @@
           {#each $notificationItems.slice(0, 3) as notif}
             <button
               type="button"
-              on:click={() => {
+              onclick={() => {
                 markRead(notif.id);
                 if (notif.href) goto(notif.href);
               }}

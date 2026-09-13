@@ -1525,7 +1525,7 @@
 
             <!-- Command type -->
             <div class="as-field">
-              <label class="as-field__label">Command Type</label>
+              <div class="as-field__label">Command Type</div>
               <div class="as-radio-group">
                 <label
                   class="as-radio-item"
@@ -1574,7 +1574,7 @@
 
             <!-- Access control -->
             <div class="as-field">
-              <label class="as-field__label">Access Control</label>
+              <div class="as-field__label">Access Control</div>
               <div class="as-select-wrap">
                 <select class="as-select" aria-label="Access control">
                   <option>Everyone</option>
@@ -1589,6 +1589,7 @@
             <div class="as-toggle-row">
               <span>Enable this command</span>
               <button
+                aria-label="Enable this command"
                 class="as-toggle"
                 class:on={activeCommand.enabled}
                 role="switch"
@@ -1604,7 +1605,12 @@
 
             <div class="as-toggle-row">
               <span>Send typing action</span>
-              <button class="as-toggle" role="switch" aria-checked="false">
+              <button
+                class="as-toggle"
+                role="switch"
+                aria-label="Send typing action"
+                aria-checked="false"
+              >
                 <span class="as-toggle__thumb"></span>
               </button>
             </div>
@@ -2074,16 +2080,6 @@
     background: color-mix(in srgb, var(--primary) 12%, transparent);
   }
 
-  .as-leftnav__item.as-sidebar-toggle {
-    color: var(--muted-foreground);
-    background: transparent;
-  }
-
-  .as-leftnav__item.as-sidebar-toggle:hover {
-    color: var(--foreground);
-    background: var(--muted);
-  }
-
   .as-leftnav__spacer {
     flex: 1;
   }
@@ -2148,11 +2144,6 @@
     text-align: center;
     padding: 24px;
     color: var(--muted-foreground);
-  }
-  .as-placeholder__close {
-    position: absolute;
-    top: 10px;
-    right: 10px;
   }
   .as-placeholder p {
     font-size: 14px;
@@ -2643,10 +2634,6 @@
   .as-canvas-toggle:hover {
     color: var(--foreground);
     background: var(--muted);
-  }
-
-  .as-canvas-toggle--left {
-    left: 14px;
   }
 
   .as-canvas-toggle--right {

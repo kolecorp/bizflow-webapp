@@ -464,10 +464,7 @@
             {#each services as service}<div
                 class="rounded-xl border border-border/60 p-4"
               >
-                <svelte:component
-                  this={service.icon}
-                  class="h-5 w-5 text-primary"
-                />
+                <service.icon class="h-5 w-5 text-primary" />
                 <p class="mt-4 text-sm font-semibold">{service.label}</p>
                 <p class="mt-1 text-xs text-muted-foreground">
                   {service.detail}

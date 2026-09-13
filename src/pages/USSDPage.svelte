@@ -28,9 +28,11 @@
   let shortCode = $state("");
   let apiKey = $state("");
   let provider = $state("Africa's Talking");
-  let activeTab = $state<"overview" | "menus" | "settings">(
-    initialTab as "overview" | "menus" | "settings",
-  );
+  let activeTab = $state<"overview" | "menus" | "settings">("overview");
+
+  $effect(() => {
+    activeTab = initialTab as "overview" | "menus" | "settings";
+  });
 
   let menuModalOpen = $state(false);
 

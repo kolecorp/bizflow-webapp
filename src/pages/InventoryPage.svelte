@@ -327,12 +327,13 @@
       </div>
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div class="space-y-2">
-          <label
+          <label for="inventory-adjust-item"
             class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
           >
             Item
           </label>
           <select
+            id="inventory-adjust-item"
             bind:value={selectedItemId}
             class="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm"
           >
@@ -343,12 +344,13 @@
           </select>
         </div>
         <div class="space-y-2">
-          <label
+          <label for="inventory-adjust-type"
             class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
           >
             Type
           </label>
           <select
+            id="inventory-adjust-type"
             bind:value={adjustType}
             class="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm"
           >
@@ -358,25 +360,27 @@
           </select>
         </div>
         <div class="space-y-2">
-          <label
+          <label for="inventory-adjust-quantity"
             class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
           >
             Quantity
           </label>
           <input
             type="number"
+            id="inventory-adjust-quantity"
             bind:value={adjustQty}
             placeholder="0"
             class="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm"
           />
         </div>
         <div class="space-y-2">
-          <label
+          <label for="inventory-adjust-reason"
             class="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
           >
             Reason
           </label>
           <input
+            id="inventory-adjust-reason"
             type="text"
             bind:value={adjustReason}
             placeholder="e.g. Weekly count"

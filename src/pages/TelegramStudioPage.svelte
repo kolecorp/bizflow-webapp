@@ -85,6 +85,41 @@
     edges?: any[];
   };
 
+  type SupportedActionType =
+    | "reply"
+    | "vtu_airtime"
+    | "vtu_data"
+    | "vtu_pin"
+    | "vtu_status"
+    | "http_request"
+    | "ai";
+
+  function normalizeActionType(value?: string | null): SupportedActionType {
+    const legacyValues = new Set(["none", "custom_flow"]);
+    if (!value || legacyValues.has(value)) return "reply";
+
+    if (
+      value === "reply" ||
+      value === "vtu_airtime" ||
+      value === "vtu_data" ||
+      value === "vtu_pin" ||
+      value === "vtu_status" ||
+      value === "http_request" ||
+      value === "ai"
+    ) {
+      return value;
+    }
+
+    return "reply";
+  }
+
+  function sanitizeCommandRows(rows: CommandMapping[]) {
+    return rows.map((row) => ({
+      ...row,
+      actionType: normalizeActionType(row.actionType),
+    }));
+  }
+
   type TelegramView = "overview" | "commands" | "setup" | "guide";
 
   const api =

@@ -122,10 +122,7 @@
             type="button"
             onclick={() => modals.openSettings(setting.key)}
             class={`flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium transition ${activeSection === setting.key ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
-            ><svelte:component
-              this={setting.icon}
-              class="h-4 w-4"
-            />{setting.title}</button
+            ><setting.icon class="h-4 w-4" />{setting.title}</button
           >
         {/each}
       </nav>

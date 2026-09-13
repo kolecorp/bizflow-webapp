@@ -146,11 +146,12 @@
     role="presentation"
     onclick={(event) => event.target === event.currentTarget && (open = false)}
   >
-    <section
+    <div
       class="flex h-full w-full max-w-110 flex-col overflow-hidden border-l border-border bg-popover text-popover-foreground sm:max-w-110"
       role="dialog"
       aria-modal="true"
       aria-label="Bizzy workspace"
+      tabindex="-1"
     >
       <header
         class="flex items-center justify-between border-b border-border/60 px-5 py-4"
@@ -241,7 +242,6 @@
               >{mode === "agent" ? ">" : "?"}</span
             ><input
               bind:value={command}
-              autofocus
               placeholder={mode === "agent"
                 ? "Tell Bizzy what to do..."
                 : "Ask Bizzy a question..."}
@@ -322,6 +322,6 @@
           ><Check class="h-3.5 w-3.5" /> Clear</button
         >
       </footer>
-    </section>
+    </div>
   </div>
 {/if}

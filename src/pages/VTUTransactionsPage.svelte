@@ -202,11 +202,14 @@
     role="presentation"
     onclick={(event) => event.target === event.currentTarget && closeDetails()}
   >
-    <section
+    <div
       class="surface-panel w-full max-w-lg p-6 shadow-2xl"
       role="dialog"
       aria-modal="true"
       aria-labelledby="vtu-transaction-title"
+      tabindex="-1"
+      onclick={(event) => event.stopPropagation()}
+      onkeydown={(event) => event.stopPropagation()}
     >
       <div
         class="flex items-start justify-between gap-4 border-b border-border/60 pb-4"
@@ -288,6 +291,6 @@
             <dd class="mt-1 font-mono text-xs">{selected.providerReference}</dd>
           </div>{/if}
       </dl>
-    </section>
+    </div>
   </div>
 {/if}

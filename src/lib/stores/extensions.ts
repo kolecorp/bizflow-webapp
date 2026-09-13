@@ -50,6 +50,7 @@ export interface Extension {
   }[];
   serverRendered?: boolean;
   subscribed?: boolean;
+  alwaysAvailable?: boolean;
   price?: string;
   expiresAt?: string;
 }
@@ -214,6 +215,7 @@ const defaultExtensions: Extension[] = [
     category: "operations",
     infographic: "/wallet_infographics.png",
     serverRendered: true,
+    alwaysAvailable: true,
     navItems: [
       {
         label: "Wallet & Payments",
@@ -417,6 +419,23 @@ export const extensions = writable<Extension[]>([...defaultExtensions]);
 export const staffAccessMap = writable<Record<string, string[]>>({}); // extensionId -> array of userIds with access
 export const installedExtensionIds = writable<string[]>([]);
 export const extensionsLoaded = writable(false);
+let extensionSyncVersion = 0;
+
+function resetExtensionState() {
+  staffAccessMap.set({});
+  extensions.set(
+    defaultExtensions.map((extension) => ({
+      ...extension,
+      status: extension.alwaysAvailable ? "active" : "inactive",
+      subscribed: extension.alwaysAvailable === true,
+    })),
+  );
+  installedExtensionIds.set(
+    defaultExtensions
+      .filter((extension) => extension.alwaysAvailable)
+      .map((extension) => extension.id),
+  );
+}
 
 function getAuthHeader(): Record<string, string> {
   if (typeof window === "undefined") return {};
@@ -426,7 +445,10 @@ function getAuthHeader(): Record<string, string> {
 
 /** Sync extensions and access from the API */
 export async function syncExtensions(user: AuthUser | null) {
+  const syncVersion = ++extensionSyncVersion;
+
   if (!user || typeof window === "undefined") {
+    resetExtensionState();
     extensionsLoaded.set(true);
     return;
   }
@@ -446,8 +468,12 @@ export async function syncExtensions(user: AuthUser | null) {
     }).finally(() => window.clearTimeout(timeout));
     handleUnauthorized(res);
 
+    if (syncVersion !== extensionSyncVersion) return;
+
     if (res.ok) {
       const data = await res.json();
+
+      if (syncVersion !== extensionSyncVersion) return;
 
       // data format depends on endpoint.
       // If /extensions (OWNER/ADMIN): returns full list with isInstalled boolean (and staffAccess if I added it)
@@ -470,8 +496,8 @@ export async function syncExtensions(user: AuthUser | null) {
             return {
               ...baseExt,
               status:
-                isInstalled || baseExt.price === "Free" ? "active" : "inactive",
-              subscribed: isInstalled || baseExt.price === "Free",
+                isInstalled || baseExt.alwaysAvailable ? "active" : "inactive",
+              subscribed: isInstalled || baseExt.alwaysAvailable === true,
             };
           } else {
             // Staff only sees what is returned by /extensions/me
@@ -489,11 +515,23 @@ export async function syncExtensions(user: AuthUser | null) {
           .filter((item: any) => item && item.isInstalled === true)
           .map((item: any) => item.extension)
           .filter((id: unknown): id is string => typeof id === "string");
-        installedExtensionIds.set(installed);
+        installedExtensionIds.set(
+          Array.from(
+            new Set([
+              ...installed,
+              ...defaultExtensions
+                .filter((extension) => extension.alwaysAvailable)
+                .map((extension) => extension.id),
+            ]),
+          ),
+        );
       }
+    } else {
+      resetExtensionState();
     }
   } catch (error) {
     console.error("Failed to sync extensions", error);
+    resetExtensionState();
   } finally {
     extensionsLoaded.set(true);
   }

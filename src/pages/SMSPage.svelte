@@ -28,9 +28,11 @@
   let provider = $state("Termii");
   let senderId = $state("Bizflow");
   let apiKey = $state("");
-  let activeTab = $state<"overview" | "templates" | "settings">(
-    initialTab as "overview" | "templates" | "settings",
-  );
+  let activeTab = $state<"overview" | "templates" | "settings">("overview");
+
+  $effect(() => {
+    activeTab = initialTab as "overview" | "templates" | "settings";
+  });
 
   let sendModalOpen = $state(false);
   let templateModalOpen = $state(false);

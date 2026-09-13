@@ -316,7 +316,7 @@
       <div class="flex justify-end border-t border-border/60 pt-2">
         <button
           type="button"
-          on:click={() => disconnectExtension("whatsapp-business")}
+          onclick={() => disconnectExtension("whatsapp-business")}
           class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-red-500 hover:bg-red-500/10"
           ><Unplug class="h-4 w-4" /> Disconnect business WhatsApp</button
         >
