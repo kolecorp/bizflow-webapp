@@ -1022,19 +1022,21 @@
     <section class="surface-panel p-6 sm:p-8">
       <div class="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <a
-            href={`/automation-studio?extension=telegram&botId=${encodeURIComponent(setup.id)}`}
-          >
-            Bot setup Add automation
-            <h2 class="mt-2 font-heading text-2xl font-bold">
-              Connect a Telegram bot
-            </h2>
-            <p class="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-              Create a new Telegram project or connect another bot to this
-              business. Each bot keeps its own commands and workflow
-              assignments.
-            </p>
-          </a>
+          <h2 class="mt-2 font-heading text-2xl font-bold">
+            Connect a Telegram bot
+          </h2>
+          <p class="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+            Create a new Telegram project or connect another bot to this
+            business. Each bot keeps its own commands and workflow assignments.
+          </p>
+          {#if setup}
+            <a
+              class="btn-app-secondary mt-4 inline-flex text-xs"
+              href={`/automation-studio?extension=telegram&botId=${encodeURIComponent(setup.id)}`}
+            >
+              Open automation studio <ArrowRight class="h-4 w-4" />
+            </a>
+          {/if}
         </div>
         <button
           type="button"

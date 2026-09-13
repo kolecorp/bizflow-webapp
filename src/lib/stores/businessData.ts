@@ -130,6 +130,10 @@ function createBusinessStore() {
     return operationalLoad;
   }
 
+  function mutateOperationalData(path: string, init: RequestInit = {}) {
+    return api(path, init).then(() => syncOperationalData());
+  }
+
   const todayTransactions = derived(transactions, ($tx) =>
     $tx.filter((t) => t.date === today),
   );
@@ -154,7 +158,7 @@ function createBusinessStore() {
       id: `tx-${Date.now()}`,
       time,
     };
-    void api("/transactions", {
+    void mutateOperationalData("/transactions", {
       method: "POST",
       body: JSON.stringify({
         serviceId: get(services).find(
@@ -164,7 +168,7 @@ function createBusinessStore() {
         amount: input.amount,
         description: input.description,
       }),
-    }).then(() => syncOperationalData());
+    });
     return tx;
   }
 
@@ -173,9 +177,10 @@ function createBusinessStore() {
       ...input,
       id: `service-${Date.now()}`,
     };
-    void api("/services", { method: "POST", body: JSON.stringify(input) }).then(
-      () => syncOperationalData(),
-    );
+    void mutateOperationalData("/services", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
     return service;
   }
 
@@ -183,33 +188,31 @@ function createBusinessStore() {
     id: string,
     changes: Partial<Omit<ServiceCatalogItem, "id">>,
   ) {
-    void api(`/services/${id}`, {
+    void mutateOperationalData(`/services/${id}`, {
       method: "PATCH",
       body: JSON.stringify(changes),
-    }).then(() => syncOperationalData());
+    });
   }
 
   function toggleService(id: string) {
     const service = get(services).find((item) => item.id === id);
     if (service)
-      void api(`/services/${id}`, {
+      void mutateOperationalData(`/services/${id}`, {
         method: "PATCH",
         body: JSON.stringify({ active: !service.active }),
-      }).then(() => syncOperationalData());
+      });
   }
 
   function deleteService(id: string) {
-    void api(`/services/${id}`, { method: "DELETE" }).then(() =>
-      syncOperationalData(),
-    );
+    void mutateOperationalData(`/services/${id}`, { method: "DELETE" });
   }
 
   function addInventoryItem(input: Omit<InventoryItem, "id">) {
     const item: InventoryItem = { ...input, id: `inventory-${Date.now()}` };
-    void api("/inventory", {
+    void mutateOperationalData("/inventory", {
       method: "POST",
       body: JSON.stringify(input),
-    }).then(() => syncOperationalData());
+    });
     return item;
   }
 
@@ -217,22 +220,20 @@ function createBusinessStore() {
     id: string,
     changes: Partial<Omit<InventoryItem, "id">>,
   ) {
-    void api(`/inventory/${id}`, {
+    void mutateOperationalData(`/inventory/${id}`, {
       method: "PATCH",
       body: JSON.stringify(changes),
-    }).then(() => syncOperationalData());
+    });
   }
 
   function deleteInventoryItem(id: string) {
-    void api(`/inventory/${id}`, { method: "DELETE" }).then(() =>
-      syncOperationalData(),
-    );
+    void mutateOperationalData(`/inventory/${id}`, { method: "DELETE" });
   }
 
   function deleteTransaction(id: string) {
-    void api(`/transactions/${id}`, { method: "DELETE" }).then(() =>
-      syncOperationalData(),
-    );
+    void mutateOperationalData(`/transactions/${id}`, {
+      method: "DELETE",
+    });
   }
 
   function adjustStock(
@@ -249,10 +250,10 @@ function createBusinessStore() {
       hour12: true,
     });
 
-    void api(`/inventory/${itemId}/adjust`, {
+    void mutateOperationalData(`/inventory/${itemId}/adjust`, {
       method: "POST",
       body: JSON.stringify({ type, quantity, reason }),
-    }).then(() => syncOperationalData());
+    });
     inventory.update((items) => {
       const found = items.find((i) => i.id === itemId);
       const itemName = found?.name ?? "Unknown";

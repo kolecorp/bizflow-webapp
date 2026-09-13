@@ -318,7 +318,8 @@
   }
 
   async function saveLocalMappings() {
-    if (!setup) return;
+    if (!setup || saving) return;
+    saving = true;
     try {
       const payload = (await request(
         `/integrations/telegram/update/${setup.id}`,
@@ -344,6 +345,8 @@
           ? error.message
           : "Unable to update local command mappings",
       );
+    } finally {
+      saving = false;
     }
   }
 
@@ -590,6 +593,7 @@
       <button
         type="button"
         class="cs-save-btn"
+        disabled={saving}
         onclick={() => void saveLocalMappings()}
       >
         <Save class="size-3.5" /> Deploy
@@ -862,11 +866,13 @@
                 <label class="cs-field">
                   <span>Action Type</span>
                   <select bind:value={activeCommand.actionType}>
+                    <option value="reply">Reply message</option>
                     <option value="http_request"
                       >HTTP Request (External API)</option
                     >
-                    <option value="custom_flow">Custom Flow (Internal)</option>
-                    <option value="none">None</option>
+                    <option value="vtu_airtime">VTU airtime</option>
+                    <option value="vtu_data">VTU data</option>
+                    <option value="ai">AI processing</option>
                   </select>
                 </label>
                 {#if activeCommand.actionType === "http_request"}

@@ -35,8 +35,8 @@
   ];
 
   function getDestination(input: string): [string, string] | null {
-    if (input.includes("transaction"))
-      return ["/transactions", "Opening Transactions"];
+    if (input.includes("vtu") && input.includes("transaction"))
+      return ["/extensions/vtu/transactions", "Opening VTU Transactions"];
     if (
       input.includes("vtu") &&
       (input.includes("pricing") || input.includes("rules"))
@@ -47,8 +47,8 @@
       (input.includes("purchase") || input.includes("buy"))
     )
       return ["/extensions/vtu/purchase", "Opening New VTU Purchase"];
-    if (input.includes("vtu") && input.includes("transaction"))
-      return ["/extensions/vtu/transactions", "Opening VTU Transactions"];
+    if (input.includes("transaction"))
+      return ["/transactions", "Opening Transactions"];
     if (
       input.includes("vtu") &&
       (input.includes("provider") || input.includes("setup"))

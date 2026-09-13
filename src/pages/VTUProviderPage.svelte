@@ -135,6 +135,7 @@
     try {
       const endpointMap: Record<string, unknown> = {};
       for (const endpoint of endpoints) {
+        if (!endpoint.enabled) continue;
         endpointMap[endpoint.key] = {
           method: endpoint.method,
           path: endpoint.path,

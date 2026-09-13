@@ -44,8 +44,8 @@
     { label: "Data", detail: "Bundles and plans", icon: Zap },
     { label: "Bills", detail: "Electricity and cable", icon: PlugZap },
   ];
-  async function load() {
-    loading = true;
+  async function load(silent = false) {
+    if (!silent) loading = true;
     error = "";
     try {
       const headers = { Authorization: `Bearer ${$authStore.accessToken}` };
@@ -113,7 +113,7 @@
     void load();
     const poll = window.setInterval(() => {
       if (transactions.some((transaction) => transaction.status === "PENDING"))
-        void load();
+        void load(true);
     }, 15000);
     return () => window.clearInterval(poll);
   });

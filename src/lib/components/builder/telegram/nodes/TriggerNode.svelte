@@ -1,11 +1,14 @@
 <script lang="ts">
-  import { Handle, Position } from '@xyflow/svelte';
-  import { Zap } from '@lucide/svelte';
+  import { Handle, Position } from "@xyflow/svelte";
+  import { Zap } from "@lucide/svelte";
 
-  let { data, selected } = $props<{
+  let {
+    data,
+    selected,
+  }: {
     data: { command?: string; description?: string };
     selected?: boolean;
-  }>();
+  } = $props();
 </script>
 
 <div class="studio-node studio-node--trigger" class:selected>
@@ -15,7 +18,7 @@
   <div class="studio-node__body">
     <span class="studio-node__label">TRIGGER</span>
     <strong class="studio-node__title">Telegram message</strong>
-    <span class="studio-node__meta">{data.command || 'Any message'}</span>
+    <span class="studio-node__meta">{data.command || "Any message"}</span>
   </div>
   <Handle type="source" position={Position.Right} class="studio-handle" />
 </div>

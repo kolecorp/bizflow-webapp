@@ -503,7 +503,8 @@
               `/${row.command.replace(/^\//, "")}` === requestedCommand,
           )
         : -1;
-      activeCommandIndex = requestedIndex;
+      activeCommandIndex =
+        requestedIndex >= 0 ? requestedIndex : commandRows.length > 0 ? 0 : -1;
       if (requestedIndex >= 0) {
         catalogOpen = true;
         inspectorOpen = true;
@@ -703,6 +704,7 @@
       },
     };
     activeCommand.nodes = [...(activeCommand.nodes ?? []), newNode];
+    workflowSaved = false;
     toast.success(`Added ${nodeLabel} node`);
   }
 

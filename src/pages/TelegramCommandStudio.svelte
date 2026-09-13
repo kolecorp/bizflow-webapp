@@ -653,9 +653,7 @@
                     value="http_request">HTTP request</option
                   ><option value="vtu_airtime">VTU airtime</option><option
                     value="vtu_data">VTU data</option
-                  ><option value="ai">AI processing</option><option
-                    value="custom_flow">Internal workflow</option
-                  ><option value="none">No action</option></select
+                  ><option value="ai">AI processing</option></select
                 ></label
               >
               {#if activeCommand.actionType === "http_request"}
@@ -725,7 +723,7 @@
                   rows="5"
                   placeholder="Write the message your customer receives..."
                 ></textarea><small
-                  >Use {{ name }} or {{ user_id }} to insert values.</small
+                  >Use &#123;&#123; name &#125;&#125; or &#123;&#123; user_id &#125;&#125; to insert values.</small
                 ></label
               >
             </section>

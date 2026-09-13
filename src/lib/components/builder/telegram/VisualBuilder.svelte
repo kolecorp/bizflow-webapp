@@ -18,11 +18,11 @@
     nodes = $bindable([]),
     edges = $bindable([]),
     onNodeClick,
-  } = $props<{
+  }: {
     nodes: any[];
     edges: any[];
     onNodeClick?: (node: any) => void;
-  }>();
+  } = $props();
 
   const nodeTypes = {
     trigger: TriggerNode,

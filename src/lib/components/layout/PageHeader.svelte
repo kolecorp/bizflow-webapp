@@ -24,9 +24,7 @@
       ></div>
     </div>
   {/if}
-  <div
-    class={`relative z-10 ${infographic ? "max-w-[68%] sm:max-w-[60%]" : ""}`}
-  >
+  <div class={`relative z-10 ${infographic ? "sm:max-w-[60%]" : ""}`}>
     {#if eyebrow}
       <p
         class="text-[10px] font-semibold uppercase tracking-[0.2em] text-primary"

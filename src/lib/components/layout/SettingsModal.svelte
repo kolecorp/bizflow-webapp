@@ -16,6 +16,14 @@
   import { authStore, loadCurrentUser } from "$lib/stores/auth";
   import { toast } from "svelte-sonner";
 
+  const notificationPreferencesKey = "bizflow-notification-preferences";
+  const savedNotificationPreferences =
+    typeof window === "undefined"
+      ? {}
+      : JSON.parse(
+          window.localStorage.getItem(notificationPreferencesKey) ?? "{}",
+        );
+
   let open = $derived($modals.settings);
   let activeSection = $derived($modals.settingsSection);
   let density = $state("Comfortable");
@@ -26,9 +34,9 @@
   let saving = $state(false);
   let currentPassword = $state("");
   let newPassword = $state("");
-  let notifySales = $state(true);
-  let notifyStock = $state(true);
-  let notifyTeam = $state(true);
+  let notifySales = $state(savedNotificationPreferences.notifySales ?? true);
+  let notifyStock = $state(savedNotificationPreferences.notifyStock ?? true);
+  let notifyTeam = $state(savedNotificationPreferences.notifyTeam ?? true);
   function handleOpenChange(value: boolean) {
     if (!value) modals.closeSettings();
   }
@@ -89,7 +97,7 @@
   function saveNotifications() {
     if (typeof window !== "undefined") {
       window.localStorage.setItem(
-        "bizflow-notification-preferences",
+        notificationPreferencesKey,
         JSON.stringify({ notifySales, notifyStock, notifyTeam }),
       );
     }

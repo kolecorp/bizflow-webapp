@@ -487,7 +487,7 @@ export async function completeOnboarding(
     });
     await loadCurrentUser(refreshed.accessToken);
   } else {
-    await loadCurrentUser(accessToken);
+    throw new Error("Onboarding completed without a refreshed session token.");
   }
   return get(authStore);
 }

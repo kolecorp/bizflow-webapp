@@ -68,7 +68,7 @@
   >
     <a
       href="/extensions/vtu"
-      class="rounded-lg bg-primary/10 px-3 py-2 text-xs font-semibold text-primary"
+      class="rounded-lg px-3 py-2 text-xs font-semibold text-muted-foreground hover:bg-muted"
       >Overview</a
     >
     <a

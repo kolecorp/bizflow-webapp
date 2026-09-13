@@ -32,8 +32,9 @@
   let loading = $state(true);
   let error = $state("");
   let selected = $state<Row | null>(null);
-  async function load() {
-    loading = true;
+  async function load(silent = false) {
+    error = "";
+    if (!silent) loading = true;
     try {
       const response = await fetch(`${api}/vtu/transactions`, {
         credentials: "include",
@@ -107,7 +108,7 @@
   onMount(() => {
     void load();
     const poll = window.setInterval(() => {
-      if (rows.some((row) => row.status === "PENDING")) void load();
+      if (rows.some((row) => row.status === "PENDING")) void load(true);
     }, 15000);
     return () => window.clearInterval(poll);
   });

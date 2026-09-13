@@ -8,15 +8,9 @@
   type Props = Omit<HTMLInputAttributes, "type"> & {
     value?: string;
     class?: string;
-    type?: "text" | "password" | "email" | "number" | "search" | "tel" | "url";
   };
 
-  let {
-    value = $bindable(),
-    class: className,
-    type: _type,
-    ...restProps
-  }: Props = $props();
+  let { value = $bindable(), class: className, ...restProps }: Props = $props();
 
   let showPassword = $state(false);
 
